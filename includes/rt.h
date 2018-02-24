@@ -12,14 +12,14 @@
 # define WIN_WIDTH 1280
 # define WIN_HEIGHT 720
 
-// typedef struct			s_sdl_context
-// {
-// 	SDL_Window 			*win;
-// 	SDL_Renderer		*rend;
-// 	SDL_Surface			*surf;
-// 	SDL_Texture			*tex;
-// 	unsigned char		*data;
-// }						t_sdl_context;
+typedef struct			s_sdl_context
+{
+	SDL_Window 			*win;
+	SDL_Renderer		*rend;
+	SDL_Surface			*surf;
+	SDL_Texture			*tex;
+	unsigned char		*data;
+}						t_sdl_context;
 
 typedef struct			s_cl_context
 {
@@ -43,5 +43,11 @@ typedef struct			s_sphere
 	cl_float3			color;
 	cl_float3			emi;
 }						t_sphere;
+
+typedef struct			s_light
+{
+	cl_float3			pos;
+	cl_float3			emi;
+}						t_light;
 
 #endif

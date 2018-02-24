@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-// #include <SDL/SDL.h>
-// #include <SDL/SDL_timer.h>
-// #include <SDL/SDL_image.h>
+#include <SDL2/SDL.h>
+// #include <SDL2/SDL_timer.h>
+// #include <SDL2/SDL_image.h>
 
 #include "rt.h"
  
@@ -14,52 +14,52 @@
  
 #define MAX_SOURCE_SIZE (0x100000)
 
-// void	sdl_cleanup(t_sdl_context *sdl_context)
-// {
-// 	if (sdl_context->win)
-// 		SDL_DestroyWindow(sdl_context->win);
+void	sdl_cleanup(t_sdl_context *sdl_context)
+{
+	if (sdl_context->win)
+		SDL_DestroyWindow(sdl_context->win);
 
-// 	if (sdl_context->rend)
-// 		SDL_DestroyRenderer(sdl_context->rend);
+	if (sdl_context->rend)
+		SDL_DestroyRenderer(sdl_context->rend);
 
-// 	free(sdl_context->data);
+	free(sdl_context->data);
 
-// 	SDL_Quit();
-// 	printf("[+] SDL resources freed\n");
-// }
+	SDL_Quit();
+	printf("[+] SDL resources freed\n");
+}
 
-// void	init_sdl(t_sdl_context *sdl_context)
-// {
-// 	Uint32 render_flags;
+void	init_sdl(t_sdl_context *sdl_context)
+{
+	Uint32 render_flags;
 
-// 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
-// 	{
-// 		printf("SDL Init error: %s\n", SDL_GetError());
-// 		exit(-1);
-// 	}
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
+	{
+		printf("SDL Init error: %s\n", SDL_GetError());
+		exit(-1);
+	}
 
-// 	sdl_context->win = SDL_CreateWindow("rt-dev", SDL_WINDOWPOS_CENTERED,
-// 		SDL_WINDOWPOS_CENTERED, WIN_WIDTH, WIN_HEIGHT, 0);
-// 	if (!sdl_context->win)
-// 	{
-// 		printf("[-] Error creating window: %s\n", SDL_GetError());
-// 		sdl_cleanup(sdl_context);
-// 		exit(-1);
-// 	}
+	sdl_context->win = SDL_CreateWindow("rt-dev", SDL_WINDOWPOS_CENTERED,
+		SDL_WINDOWPOS_CENTERED, WIN_WIDTH, WIN_HEIGHT, 0);
+	if (!sdl_context->win)
+	{
+		printf("[-] Error creating window: %s\n", SDL_GetError());
+		sdl_cleanup(sdl_context);
+		exit(-1);
+	}
 
-// 	render_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
-// 	sdl_context->rend = SDL_CreateRenderer(sdl_context->win, -1, render_flags);
-// 	if (!sdl_context->rend)
-// 	{
-// 		printf("[-] Error creating renderer: %s\n", SDL_GetError());
-// 		sdl_cleanup(sdl_context);
-// 		exit(-1);
-// 	}
+	render_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
+	sdl_context->rend = SDL_CreateRenderer(sdl_context->win, -1, render_flags);
+	if (!sdl_context->rend)
+	{
+		printf("[-] Error creating renderer: %s\n", SDL_GetError());
+		sdl_cleanup(sdl_context);
+		exit(-1);
+	}
 
-// 	sdl_context->data = (unsigned char*)malloc(4 * WIN_WIDTH * WIN_HEIGHT);
+	sdl_context->data = (unsigned char*)malloc(4 * WIN_WIDTH * WIN_HEIGHT);
 
-// 	printf("[+] SDL Init success\n");
-// }
+	printf("[+] SDL Init success\n");
+}
 
 void	load_kernel(t_cl_context *cl_context)
 {
@@ -191,9 +191,9 @@ void	init_scene(t_sphere *cpu_spheres)
 	cpu_spheres[0].color.x = 0.75f;
 	cpu_spheres[0].color.y = 0.25f;
 	cpu_spheres[0].color.z = 0.25f;
-	cpu_spheres[0].emi.x = 0.0f;
-	cpu_spheres[0].emi.y = 0.0f;
-	cpu_spheres[0].emi.z = 0.0f;
+	cpu_spheres[0].emi.x = 0.1f;
+	cpu_spheres[0].emi.y = 0.2f;
+	cpu_spheres[0].emi.z = 0.3f;
 
 	// right wall
 	cpu_spheres[1].radius = 200.0f;
@@ -203,9 +203,9 @@ void	init_scene(t_sphere *cpu_spheres)
 	cpu_spheres[1].color.x = 0.25f;
 	cpu_spheres[1].color.y = 0.25f;
 	cpu_spheres[1].color.z = 0.75f;
-	cpu_spheres[1].emi.x = 0.0f;
-	cpu_spheres[1].emi.y = 0.0f;
-	cpu_spheres[1].emi.z = 0.0f;
+	cpu_spheres[1].emi.x = 0.1f;
+	cpu_spheres[1].emi.y = 0.2f;
+	cpu_spheres[1].emi.z = 0.3f;
 
 	// floor
 	cpu_spheres[2].radius = 200.0f;
@@ -280,56 +280,75 @@ void	init_scene(t_sphere *cpu_spheres)
 	cpu_spheres[6].emi.z = 0.0f;
 
 	// lightsource
-	cpu_spheres[7].radius = 0.25f;
+	cpu_spheres[7].radius = 0.05f;
 	cpu_spheres[7].pos.x = 0.0f;
-	cpu_spheres[7].pos.y = 0.6f;
+	cpu_spheres[7].pos.y = 0.3f;
 	cpu_spheres[7].pos.z = 0.5f;
-	cpu_spheres[7].color.x = 0.0f;
-	cpu_spheres[7].color.y = 0.0f;
-	cpu_spheres[7].color.z = 0.0f;
-	cpu_spheres[7].emi.x = 9.0f;
-	cpu_spheres[7].emi.y = 10.0f;
-	cpu_spheres[7].emi.z = 11.0f;
+	cpu_spheres[7].color.x = 0.7f;
+	cpu_spheres[7].color.y = 0.2f;
+	cpu_spheres[7].color.z = 0.4f;
+	cpu_spheres[7].emi.x = 0.75f;
+	cpu_spheres[7].emi.y = 0.75f;
+	cpu_spheres[7].emi.z = 0.75f;
 }
 
 int		main(void)
 {
 	t_cl_context cl_context;
-	// t_sdl_context sdl_context;
+	t_sdl_context sdl_context;
 
 	int im_width = WIN_WIDTH;
 	int im_height = WIN_HEIGHT;
 
 	cl_mem pixels_buf = NULL;
 	cl_mem spheres_buf = NULL;
+	cl_mem lights_buf = NULL;
 	cl_int ret;
  
 	cl_float3 *pixels;
 	pixels = (cl_float3*)malloc(im_width * im_height * sizeof(cl_float3));
  
 	init_cl(&cl_context);
-	// init_sdl(&sdl_context);
+	init_sdl(&sdl_context);
 
-	// initialise scene
+	// ------------ OBJECTS -------------------------
 	const int sphere_count = 8;
 	t_sphere cpu_spheres[sphere_count];
 	init_scene(cpu_spheres);
 
 	pixels_buf = clCreateBuffer(cl_context.context, CL_MEM_WRITE_ONLY,
 		im_width * im_height * sizeof(cl_float3), NULL, &ret);
-	spheres_buf = clCreateBuffer(cl_context.context, CL_MEM_READ_WRITE,
+	spheres_buf = clCreateBuffer(cl_context.context, CL_MEM_READ_ONLY,
 		sphere_count * sizeof(t_sphere), NULL, &ret);
-	// spheres_buf = clCreateBuffer(cl_context.context, CL_MEM_READ_ONLY,
-	// 	sphere_count * sizeof(t_sphere), NULL, &ret);
 
+	// white shperes (objects) array to the device
 	ret = clEnqueueWriteBuffer(cl_context.command_queue, spheres_buf, CL_TRUE, 0,
 		sphere_count * sizeof(t_sphere), &cpu_spheres, 0, NULL, NULL);
 
+	// ------------ LIGHTS -------------------------
+	const int num_lights = 1;
+	t_light cpu_lights[num_lights];
+	cpu_lights[0].pos.x = 0.2f;
+	cpu_lights[0].pos.y = 0.2f;
+	cpu_lights[0].pos.z = 0.7f;
+	cpu_lights[0].emi.x = 1.0f;
+	cpu_lights[0].emi.y = 1.0f;
+	cpu_lights[0].emi.z = 1.0f;
+
+	lights_buf = clCreateBuffer(cl_context.context, CL_MEM_READ_ONLY,
+		num_lights * sizeof(t_light), NULL, &ret);
+
+	// white lights array to the device
+	ret = clEnqueueWriteBuffer(cl_context.command_queue, lights_buf, CL_TRUE, 0,
+		num_lights * sizeof(t_light), &cpu_lights, 0, NULL, NULL);
+
 	ret = clSetKernelArg(cl_context.kernel, 0, sizeof(cl_mem), (void *)&spheres_buf);
 	ret = clSetKernelArg(cl_context.kernel, 1, sizeof(int), (void *)&sphere_count);
-	ret = clSetKernelArg(cl_context.kernel, 2, sizeof(cl_mem), (void *)&pixels_buf);
-	ret = clSetKernelArg(cl_context.kernel, 3, sizeof(int), (void *)&im_width);
-	ret = clSetKernelArg(cl_context.kernel, 4, sizeof(int), (void *)&im_height);
+	ret = clSetKernelArg(cl_context.kernel, 2, sizeof(cl_mem), (void *)&lights_buf);
+	ret = clSetKernelArg(cl_context.kernel, 3, sizeof(int), (void *)&num_lights);
+	ret = clSetKernelArg(cl_context.kernel, 4, sizeof(cl_mem), (void *)&pixels_buf);
+	ret = clSetKernelArg(cl_context.kernel, 5, sizeof(int), (void *)&im_width);
+	ret = clSetKernelArg(cl_context.kernel, 6, sizeof(int), (void *)&im_height);
  
 	size_t global_item_size = im_width * im_height;
 	size_t local_item_size = 64;
@@ -342,47 +361,39 @@ int		main(void)
 	ret = clEnqueueReadBuffer(cl_context.command_queue, pixels_buf, CL_TRUE, 0,
 		im_width * im_height * sizeof(cl_float3), pixels, 0, NULL, NULL);
 
-	save_image(pixels);
+	// save_image(pixels);
 
-	// printf("sizeof float: %lu\n", sizeof(float));
-	// printf("sizeof cl_float: %lu\n", sizeof(cl_float));
-	// printf("sizeof cl_float2: %lu\n", sizeof(cl_float2));
-	// printf("sizeof cl_float3: %lu\n", sizeof(cl_float3));
-	// printf("sizeof cl_float4: %lu\n", sizeof(cl_float4));
+	for (int i = 0; i < im_width * im_height; i++)
+	{
+		sdl_context.data[i * 4] = to_uchar(pixels[i].s[0]);
+		sdl_context.data[i * 4 + 1] = to_uchar(pixels[i].s[1]);
+		sdl_context.data[i * 4 + 2] = to_uchar(pixels[i].s[2]);
+		sdl_context.data[i * 4 + 3] = 1;
+	}
 
-	// for (int i = 0; i < im_width * im_height; i++)
-	// {
-	// 	sdl_context.data[i * 4] = to_uchar(pixels[i].s[0]);
-	// 	sdl_context.data[i * 4 + 1] = to_uchar(pixels[i].s[1]);
-	// 	sdl_context.data[i * 4 + 2] = to_uchar(pixels[i].s[2]);
-	// 	sdl_context.data[i * 4 + 3] = 1;
-	// }
+	sdl_context.surf = SDL_CreateRGBSurfaceFrom(sdl_context.data,
+		im_width, im_height, 32, im_width * 4, 0, 0, 0, 0);
+	sdl_context.tex = SDL_CreateTextureFromSurface(sdl_context.rend, sdl_context.surf);
 
-	// sdl_context.surf = SDL_CreateRGBSurfaceFrom(sdl_context.data,
-	// 	im_width, im_height, 32, im_width * 4, 0, 0, 0, 0);
-	// sdl_context.tex = SDL_CreateTextureFromSurface(sdl_context.rend, sdl_context.surf);
-
-	// int to_close = 0;
+	int to_close = 0;
 	
-	// while (!to_close)
-	// {
-	// 	SDL_Event event;
-	// 	while (SDL_PollEvent(&event))
-	// 	{
-	// 		if (event.type == SDL_QUIT)
-	// 			to_close = 1;
-	// 	}
-	// 	SDL_RenderClear(sdl_context.rend);
-	// 	SDL_RenderCopy(sdl_context.rend, sdl_context.tex, NULL, NULL);
-	// 	SDL_RenderPresent(sdl_context.rend);
+	while (!to_close)
+	{
+		SDL_Event event;
+		while (SDL_PollEvent(&event))
+		{
+			if (event.type == SDL_QUIT)
+				to_close = 1;
+		}
+		SDL_RenderClear(sdl_context.rend);
+		SDL_RenderCopy(sdl_context.rend, sdl_context.tex, NULL, NULL);
+		SDL_RenderPresent(sdl_context.rend);
+	}
 
-	// 	// SDL_Delay(1000 / 60);
-	// }
+	SDL_FreeSurface(sdl_context.surf);
+	SDL_DestroyTexture(sdl_context.tex);
 
-	// SDL_FreeSurface(sdl_context.surf);
-	// SDL_DestroyTexture(sdl_context.tex);
-
-	// sdl_cleanup(&sdl_context);
+	sdl_cleanup(&sdl_context);
 
 	ret = clReleaseMemObject(pixels_buf);
 	cl_cleanup(&cl_context);

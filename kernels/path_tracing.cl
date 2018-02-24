@@ -1,7 +1,7 @@
 /* required to compensate for limited float precision */
 __constant float EPSILON = 0.00003f;
 __constant float PI = 3.14159265359f;
-__constant int SAMPLES = 1000;
+__constant int SAMPLES = 500;
 __constant int NUM_BOUNCES = 9;
 
 
@@ -19,9 +19,24 @@ typedef struct	s_sphere
 	float3 emission;
 }				t_sphere;
 
+typedef struct	s_light
+{
+	float3 pos;
+	float3 emission;
+}				t_light;
+// -----------------------------------------------------------------------------------------------------------------
 
-static float get_random(unsigned int *seed0, unsigned int *seed1) {
+static float get_random(unsigned int *seed0, unsigned int *seed1);
+t_ray create_cam_ray(const int x_coord, const int y_coord, const int width, const int height);
+float intersect_sphere(const t_sphere *sphere, const t_ray *ray);
+bool intersect_scene(__constant t_sphere *spheres, const t_ray *ray, float *t, int *sphere_id, const int sphere_count);
+float3 apply_direct_light(__constant t_sphere *spheres, const int sphere_count, const t_ray *camray, __constant t_light *light);
+float3 trace_path(__constant t_sphere *spheres, const t_ray *camray, const int sphere_count, const int *seed0, const int *seed1);
+float3 get_direct_light(__constant t_sphere *spheres, const t_ray *camray, const int sphere_count, __constant t_light *light);
 
+
+static float get_random(unsigned int *seed0, unsigned int *seed1)
+{
 	/* hash the seeds using bitwise AND operations and bitshifts */
 	*seed0 = 36969 * ((*seed0) & 65535) + ((*seed0) >> 16);  
 	*seed1 = 18000 * ((*seed1) & 65535) + ((*seed1) >> 16);
@@ -112,7 +127,7 @@ bool intersect_scene(__constant t_sphere *spheres, const t_ray *ray, float *t, i
 /* each ray hitting a surface will be reflected in a random direction (by randomly sampling the hemisphere above the hitpoint) */
 /* small optimisation: diffuse ray directions are calculated using cosine weighted importance sampling */
 
-float3 trace(__constant t_sphere *spheres, const t_ray *camray, const int sphere_count, const int *seed0, const int *seed1)
+float3 trace_path(__constant t_sphere *spheres, const t_ray *camray, const int sphere_count, const int *seed0, const int *seed1)
 {
 	t_ray ray = *camray;
 
@@ -138,7 +153,7 @@ float3 trace(__constant t_sphere *spheres, const t_ray *camray, const int sphere
 		float3 normal = normalize(hitpoint - hitsphere.pos); 
 		float3 normal_facing = dot(normal, ray.dir) < 0.0f ? normal : normal * (-1.0f);
 
-		/* compute two random numbers to pick a random point on the hemisphere above the hitpoint*/
+		/* compute two random numbers to pick a random point on the hemisphere above the hitpoint */
 		float rand1 = 2.0f * PI * get_random(seed0, seed1);
 		float rand2 = get_random(seed0, seed1);
 		float rand2s = sqrt(rand2);
@@ -168,7 +183,54 @@ float3 trace(__constant t_sphere *spheres, const t_ray *camray, const int sphere
 	return accum_color;
 }
 
+float3 get_direct_light(__constant t_sphere *spheres, const t_ray *camray, const int sphere_count, __constant t_light *light)
+{
+	t_ray ray = *camray;
+
+	float3 accum_color = (float3)(0.0f, 0.0f, 0.0f);
+
+	float t = 1e20f;   /* distance to intersection */
+	int hitsphere_id = 0; /* index of intersected sphere */
+
+	/* if ray misses scene, return background colour */
+	if (!intersect_scene(spheres, &ray, &t, &hitsphere_id, sphere_count))
+		return (float3)(0.0f, 0.0f, 0.0f);
+
+	/* else, we've got a hit! Fetch the closest hit sphere */
+	t_sphere hitsphere = spheres[hitsphere_id]; /* version with local copy of sphere */
+	t_light local_light = *light;
+
+	/* compute the hitpoint using the ray equation */
+	float3 hitpoint = ray.origin + ray.dir * t;
+	
+	/* compute the surface normal and flip it if necessary to face the incoming ray */
+	float3 normal = normalize(hitpoint - hitsphere.pos); 
+	float3 normal_facing = dot(normal, ray.dir) < 0.0f ? normal : normal * (-1.0f);
+	// float3 normal_facing = normal;
+
+	/* add a very small offset to the hitpoint to prevent self intersection */
+	ray.origin = hitpoint + normal_facing * EPSILON;
+	// ray.dir = normalize(spheres[7].pos - ray.origin);
+	ray.dir = normalize(local_light.pos - ray.origin);
+
+	// float dist_to_light = fast_length(spheres[7].pos - ray.origin);
+	float dist_to_light = sqrt(dot(local_light.pos - ray.origin, local_light.pos - ray.origin));
+
+	if (!intersect_scene(spheres, &ray, &t, &hitsphere_id, sphere_count) || t > dist_to_light)
+	{
+		float cosine_factor = dot(normal, ray.dir);
+		if (cosine_factor < 0)
+	 		cosine_factor = 0;
+
+	 	accum_color = cosine_factor * local_light.emission * hitsphere.color;
+
+		return accum_color;
+	}
+ 	return (float3)(0.0f, 0.0f, 0.0f);
+}
+
 __kernel void render_kernel(__constant t_sphere *spheres, const int sphere_count,
+							__constant t_light *lights, const int num_lights,
 							__global float3 *output, const int width, const int height)
 {
 	/* the unique global id of the work item for the current pixel */
@@ -188,8 +250,16 @@ __kernel void render_kernel(__constant t_sphere *spheres, const int sphere_count
 	float3 finalcolor = (float3)(0.0f, 0.0f, 0.0f);
 	float invSamples = 1.0f / SAMPLES;
 
+	// for (int i = 0; i < num_lights; i++)
+	// {
+	// 	finalcolor += apply_direct_light(spheres, sphere_count, &camray, &lights[i]);
+	// }
+
+	finalcolor = get_direct_light(spheres, &camray, sphere_count, &lights[0]);	
+
+	// ----------- PATH TRACING! -----------
 	for (int i = 0; i < SAMPLES; i++)
-		finalcolor += trace(spheres, &camray, sphere_count, &seed0, &seed1) * invSamples;
+		finalcolor += trace_path(spheres, &camray, sphere_count, &seed0, &seed1) * invSamples;
 
 	/* store the pixelcolour in the output buffer */
 	output[work_item_id] = finalcolor;

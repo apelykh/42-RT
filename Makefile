@@ -19,7 +19,7 @@ all: $(NAME)
 	
 $(NAME): $(OBJ)
 	# @ $(CC) $(OBJ) -lOpenCL -lSDL2 -lSDL2_image -lm -o $@
-	@ $(CC) $(OBJ) -framework Opencl -lm -o $@
+	@ $(CC) $(OBJ) -framework opencl -framework SDL2 -lm -o $@
 	@ echo "[+] [$(NAME)] compiled"
 
 .c.o: $(SRC)
