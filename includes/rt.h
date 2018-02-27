@@ -3,14 +3,20 @@
 
 # define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 
+# include <SDL2/SDL.h>
+# include <SDL2/SDL_timer.h>
+# include <SDL2/SDL_image.h>
+
 # ifdef __APPLE__
 # include <OpenCL/opencl.h>
 # else
 # include <CL/cl.h>
 # endif
 
-# define WIN_WIDTH 1280
-# define WIN_HEIGHT 720
+# define WIN_WIDTH 1600
+# define WIN_HEIGHT 900
+
+# define MAX_SOURCE_SIZE (0x100000)
 
 typedef struct			s_sdl_context
 {
@@ -33,21 +39,33 @@ typedef struct			s_cl_context
 
 // dummy variables are required for memory alignment
 // float3 is considered as float4 by OpenCL
-typedef struct			s_sphere
+typedef struct			s_object
 {
 	cl_float			radius;
-	cl_float			dummy1;   
-	cl_float			dummy2;
-	cl_float			dummy3;
 	cl_float3			pos;
 	cl_float3			color;
 	cl_float3			emi;
-}						t_sphere;
+	cl_float			diffuse;
+	cl_float			specular;
+	cl_float			spec_exp;
+}						t_object;
 
 typedef struct			s_light
 {
 	cl_float3			pos;
 	cl_float3			emi;
 }						t_light;
+
+cl_float3	init_vec3(cl_float x, cl_float y, cl_float z);
+void		init_objects(t_object *cpu_spheres);
+
+void	init_sdl(t_sdl_context *sdl_context);
+void	sdl_cleanup(t_sdl_context *sdl_context);
+
+void	init_cl(t_cl_context *cl_context);
+void	cl_cleanup(t_cl_context *cl_context);
+
+void	save_image(cl_float3 *pixels);
+int		to_uchar(float x);
 
 #endif

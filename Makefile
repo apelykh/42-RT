@@ -1,12 +1,14 @@
-# Apple: gcc -o hello hello.c -framework opencl
-
-FLAGS = -Wall -Wextra
+FLAGS = -Wall -Wextra -Werror
 CC = gcc $(FLAGS)
 NAME = rt
 # LIB_DIR = libft/
 # LIB = $(addprefix $(LIB_DIR), libft.a)
 SRC_DIR = src/
 SRC_FILES = main.c \
+			init_scene.c \
+			cl_utils.c \
+			sdl_utils.c \
+			utils.c \
 
 SRC = $(addprefix $(SRC_DIR), $(SRC_FILES))
 OBJ = $(SRC:.c=.o)
@@ -18,8 +20,8 @@ INCLUDE_DIR = includes
 all: $(NAME)
 	
 $(NAME): $(OBJ)
-	# @ $(CC) $(OBJ) -lOpenCL -lSDL2 -lSDL2_image -lm -o $@
-	@ $(CC) $(OBJ) -framework opencl -framework SDL2 -lm -o $@
+	@ $(CC) $(OBJ) -lOpenCL -lSDL2 -lm -o $@
+	# @ $(CC) $(OBJ) -framework opencl -framework SDL2 -lm -o $@
 	@ echo "[+] [$(NAME)] compiled"
 
 .c.o: $(SRC)
