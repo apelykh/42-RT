@@ -6,6 +6,8 @@ NAME = rt
 SRC_DIR = src/
 SRC_FILES = main.c \
 			init_scene.c \
+			scene1.c \
+			scene2.c \
 			cl_utils.c \
 			sdl_utils.c \
 			utils.c \

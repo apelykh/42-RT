@@ -1,5 +1,6 @@
 /* required to compensate for limited float precision */
-__constant float EPSILON = 0.00003f;
+// __constant float EPSILON = 0.00003f;
+__constant float EPSILON = 0.0003f;
 __constant float PI = 3.14159265359f;
 __constant int SAMPLES = 500;
 __constant int NUM_BOUNCES = 7;
@@ -44,12 +45,16 @@ typedef struct	s_light
 	float3 pos;
 	float3 emission;
 }				t_light;
-// -----------------------------------------------------------------------------------------------------------------
+
+typedef struct	s_camera
+{
+	float3		pos;
+}				t_camera;
+
 
 static float get_random(unsigned int *seed0, unsigned int *seed1);
 static float zero_clamp(float x);
-t_ray create_cam_ray(float3 camera_pos, const int x_coord, const int y_coord, const int width, const int height);
-float3 apply_direct_light(__constant t_object *spheres, const int sphere_count, const t_ray *camray, __constant t_light *light);
+t_ray create_cam_ray(__constant t_camera *camera, const int x_coord, const int y_coord, const int width, const int height);
 float3 trace_path(__constant t_object *spheres, const t_ray *camray, const int sphere_count, const int *seed0, const int *seed1);
 float3 get_direct_light(__constant t_object *spheres, const t_ray *camray, const int sphere_count, __constant t_light *lights, const int num_lights);
 
@@ -58,7 +63,8 @@ float	intersect_sphere(const t_object *obj, const t_ray *ray);
 float	intersect_plane(const t_object *obj, const t_ray *ray);
 float	intersect_cylinder(const t_object *obj, const t_ray *ray);
 float	intersect_cone(const t_object *obj, const t_ray *ray);
-bool	intersect_scene(__constant t_object *objects, const int num_objects, const t_ray *ray, float *t, int *object_id);
+bool	intersect_scene(__constant t_object *objects, const int num_objects,
+					const t_ray *ray, float3 *normal, float *t, int *object_id);
 
 // ---------------------------- Object normals --------------------------------
 float3	normal_sphere(const t_object *obj, const t_ray *ray, float dist);
@@ -69,7 +75,6 @@ float3	normal_cone(const t_object *obj, const t_ray *ray, float dist);
 float3		hitpoint_calc(const t_ray *ray, float dist);
 t_matrix	init_transform_matrix(float3 camera_pos);
 float3		mult_matr_vec(t_matrix m, float3 v);
-
 
 
 t_matrix		init_transform_matrix(float3 camera_pos)
@@ -143,46 +148,8 @@ float3 hitpoint_calc(const t_ray *ray, float dist)
 	return ray->origin + ray->dir * dist;
 }
 
-// t_ray create_cam_ray(float3 camera_pos, const int x_coord, const int y_coord, const int width, const int height)
-// {
-// 	/* convert int in range [0 - width] to float in range [0-1] */
-// 	float fx = (float)x_coord / (float)width;
-// 	/* convert int in range [0 - height] to float in range [0-1] */
-// 	float fy = (float)y_coord / (float)height;
-
-// 	/* calculate aspect ratio */
-// 	float aspect_ratio = (float)(width) / (float)(height);
-// 	float fx2 = (fx - 0.5f) * aspect_ratio;
-// 	float fy2 = fy - 0.5f;
-
-// 	/* determine position of pixel on screen */
-// 	float3 pixel_pos = (float3)(fx2, -fy2, 0.0f);
-
-// 	/* create camera ray*/
-// 	t_ray ray;
-// 	/* fixed camera position */
-// 	ray.origin = camera_pos;
-// 	/* vector from camera to pixel on screen */
-// 	ray.dir = normalize(pixel_pos - ray.origin);
-
-// 	return ray;
-// }
-
-// float imageAspectRatio = imageWidth / imageHeight; // assuming width > height
-// float Px = (2 * ((x + 0.5) / imageWidth) - 1) * 1.43f * imageAspectRatio;
-// float Py = (1 - 2 * ((y + 0.5) / imageHeight) * 1.43f;
-// Vec3f rayOrigin = Point3(0, 0, 0);
-// Matrix44f cameraToWorld;
-// cameraToWorld.set(...); // set matrix
-// Vec3f rayOriginWorld, rayPWorld;
-
-// cameraToWorld.multVectMatrix(rayOrigin, rayOriginWorld);
-// cameraToWorld.multVectMatrix(Vec3f(Px, Py, -1), rayPWorld);
-
-// Vec3f rayDirection = rayPWorld - rayOriginWorld;
-// rayDirection.normalize(); // it's a direction so don't forget to normalize
-
-t_ray create_cam_ray(float3 camera_pos, const int x, const int y, const int width, const int height)
+t_ray create_cam_ray(__constant t_camera *camera, const int x, const int y,
+						const int width, const int height)
 {
 	float aspect_ratio = (float)(width) / (float)(height);
 
@@ -191,7 +158,7 @@ t_ray create_cam_ray(float3 camera_pos, const int x, const int y, const int widt
 
 	float3 origin = (float3)(0.0f, 0.0f, 0.0f);
 
-	t_matrix cam2world = init_transform_matrix(camera_pos);
+	t_matrix cam2world = init_transform_matrix(camera->pos);
 
 	float3 origin_world, pixel_pos_world;
 	origin_world = mult_matr_vec(cam2world, origin);
@@ -204,18 +171,23 @@ t_ray create_cam_ray(float3 camera_pos, const int x, const int y, const int widt
 	return ray;
 }
 
-float intersect_sphere(const t_object *obj, const t_ray *ray) /* version using local copy of sphere */
+/* version using local copy of sphere */
+float intersect_sphere(const t_object *obj, const t_ray *ray)
 {
 	float3 ray_to_center = obj->pos - ray->origin;
 	float b = dot(ray_to_center, ray->dir);
 	float c = dot(ray_to_center, ray_to_center) - obj->radius * obj->radius;
 	float disc = b * b - c;
 
-	if (disc < 0.0f) return 0.0f;
-	else disc = sqrt(disc);
+	if (disc < 0.0f)
+		return 0.0f;
+	else
+		disc = sqrt(disc);
 
-	if ((b - disc) > EPSILON) return b - disc;
-	if ((b + disc) > EPSILON) return b + disc;
+	if ((b - disc) > EPSILON)
+		return b - disc;
+	if ((b + disc) > EPSILON)
+		return b + disc;
 
 	return 0.0f;
 }
@@ -262,11 +234,15 @@ float intersect_cylinder(const t_object *obj, const t_ray *ray)
 	float c = dot(x, x) - x_v * x_v - (obj->radius * obj->radius);
 	float disc = b * b - a * c;
 
-	if (disc < 0.0f) return 0.0f;
-	else disc = sqrt(disc);
+	if (disc < 0.0f)
+		return 0.0f;
+	else
+		disc = sqrt(disc);
 
-	if ((b - disc) / a > EPSILON) return (b - disc) / a;
-	if ((b + disc) / a > EPSILON) return (b + disc) / a;
+	if ((b - disc) / a > EPSILON)
+		return (b - disc) / a;
+	if ((b + disc) / a > EPSILON)
+		return (b + disc) / a;
 
 	return 0.0f;
 }
@@ -292,11 +268,15 @@ float intersect_cone(const t_object *obj, const t_ray *ray)
 	float c = dot(x, x) - (1.0f + k_k) * x_v * x_v;
 	float disc = b * b - a * c;
 
-	if (disc < 0.0f) return 0.0f;
-	else disc = sqrt(disc);
+	if (disc < 0.0f)
+		return 0.0f;
+	else
+		disc = sqrt(disc);
 
-	if ((b - disc) / a > EPSILON) return (b - disc) / a;
-	if ((b + disc) / a > EPSILON) return (b + disc) / a;
+	if ((b - disc) / a > EPSILON)
+		return (b - disc) / a;
+	if ((b + disc) / a > EPSILON)
+		return (b + disc) / a;
 
 	return 0.0f;
 }
@@ -313,35 +293,36 @@ float3 normal_cone(const t_object *obj, const t_ray *ray, float dist)
 	return normal;
 }
 
-float3 find_normal(const t_object *obj, const t_ray *ray, float dist)
-{
-	float3 normal = (float3)(0.0f, 0.0f, 0.0f);
+// float3 find_normal(const t_object *obj, const t_ray *ray, float dist)
+// {
+// 	float3 normal = (float3)(0.0f, 0.0f, 0.0f);
 
-	switch(obj->type)
-	{
-		case PLANE :
-			normal = normal_plane(obj, ray);
-			break;
-		case SPHERE :
-			normal = normal_sphere(obj, ray, dist);
-			break;
-		case CYLINDER :
-			normal = normal_cylinder(obj, ray, dist);
-			break;
-		case CONE :
-			normal = normal_cone(obj, ray, dist);
-			break;
-	}
+// 	switch(obj->type)
+// 	{
+// 		case PLANE :
+// 			normal = normal_plane(obj, ray);
+// 			break;
+// 		case SPHERE :
+// 			normal = normal_sphere(obj, ray, dist);
+// 			break;
+// 		case CYLINDER :
+// 			normal = normal_cylinder(obj, ray, dist);
+// 			break;
+// 		case CONE :
+// 			normal = normal_cone(obj, ray, dist);
+// 			break;
+// 	}
+// 	return normal;
+// }
 
-	return normal;
-}
-
-bool intersect_scene(__constant t_object *objects, const int num_objects, const t_ray *ray, float *t, int *object_id)
+bool intersect_scene(__constant t_object *objects, const int num_objects,
+					const t_ray *ray, float3 *normal, float *t, int *object_id)
 {
 	/* initialise t to a very large number, 
 	so t will be guaranteed to be smaller
 	when a hit with the scene occurs */
 	float inf = 1e20f;
+	float3 loc_normal = (float3)(0.0f, 0.0f, 0.0f);
 	*t = inf;
 
 	/* check if the ray intersects each object in the scene */
@@ -355,21 +336,26 @@ bool intersect_scene(__constant t_object *objects, const int num_objects, const 
 		{
 			case PLANE :
 				hitdistance = intersect_plane(&obj, ray);
+				loc_normal = normal_plane(&obj, ray);
 				break;
 			case SPHERE :
 				hitdistance = intersect_sphere(&obj, ray);
+				loc_normal = normal_sphere(&obj, ray, hitdistance);
 				break;
 			case CYLINDER :
 				hitdistance = intersect_cylinder(&obj, ray);
+				loc_normal = normal_cylinder(&obj, ray, hitdistance);
 				break;
 			case CONE :
 				hitdistance = intersect_cone(&obj, ray);
+				loc_normal = normal_cone(&obj, ray, hitdistance);
 				break;
 		}
 		/* keep track of the closest intersection and hitobject found so far */
 		if (hitdistance != 0.0f && hitdistance < *t)
 		{
 			*t = hitdistance;
+			*normal = loc_normal;
 			*object_id = i;
 		}
 	}
@@ -389,6 +375,7 @@ float3 trace_path(__constant t_object *spheres, const t_ray *camray, const int s
 
 	float3 accum_color = (float3)(0.0f, 0.0f, 0.0f);
 	float3 mask = (float3)(1.0f, 1.0f, 1.0f);
+	float3 normal_facing = (float3)(0.0f, 0.0f, 0.0f);
 
 	for (int bounces = 0; bounces < NUM_BOUNCES; bounces++)
 	{
@@ -396,7 +383,7 @@ float3 trace_path(__constant t_object *spheres, const t_ray *camray, const int s
 		int hitobject_id = 0; /* index of intersected sphere */
 
 		/* if ray misses scene, return background colour */
-		if (!intersect_scene(spheres, sphere_count, &ray, &t, &hitobject_id))
+		if (!intersect_scene(spheres, sphere_count, &ray, &normal_facing, &t, &hitobject_id))
 			return accum_color += mask * (float3)(0.15f, 0.15f, 0.25f);
 
 		/* else, we've got a hit! Fetch the closest hit sphere */
@@ -406,7 +393,7 @@ float3 trace_path(__constant t_object *spheres, const t_ray *camray, const int s
 		float3 hitpoint = ray.origin + ray.dir * t;
 		
 		/* compute the surface normal and flip it if necessary to face the incoming ray */
-		float3 normal_facing = find_normal(&hitobject, &ray, t);
+		// float3 normal_facing = find_normal(&hitobject, &ray, t);
 
 		/* compute two random numbers to pick a random point on the hemisphere above the hitpoint */
 		float rand1 = 2.0f * PI * get_random(seed0, seed1);
@@ -448,11 +435,14 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 	float3 diffuse = (float3)(0.0f, 0.0f, 0.0f);
 	float3 specular = (float3)(0.0f, 0.0f, 0.0f);
 
+	float3 normal = (float3)(0.0f, 0.0f, 0.0f);
+	float3 dummy_normal;
+
 	float t = 1e20f;   /* distance to intersection */
 	int hitobject_id = 0; /* index of intersected sphere */
 
 	/* if ray misses scene, return background colour */
-	if (!intersect_scene(objects, sphere_count, &ray, &t, &hitobject_id))
+	if (!intersect_scene(objects, sphere_count, &ray, &normal, &t, &hitobject_id))
 		return bg_color;
 
 	/* else, we've got a hit! Fetch the closest hit sphere */
@@ -462,7 +452,7 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 	float3 hitpoint = hitpoint_calc(&ray, t);
 	
 	/* compute the surface normal and flip it if necessary to face the incoming ray */
-	float3 normal = find_normal(&hitobject, &ray, t);
+	// normal = find_normal(&hitobject, &ray, t);
 
 	/* add a very small offset to the hitpoint to prevent self intersection */
 	ray.origin = hitpoint + normal * EPSILON;
@@ -473,7 +463,7 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 		ray.dir = fast_normalize(lights[i].pos - ray.origin);
 		dist_to_light = fast_length(lights[i].pos - ray.origin);
 
-		if (intersect_scene(objects, sphere_count, &ray, &t, &hitobject_id) && t < dist_to_light)
+		if (intersect_scene(objects, sphere_count, &ray, &dummy_normal, &t, &hitobject_id) && t < dist_to_light)
 			continue;
 
 		float intensity = zero_clamp(dot(normal, ray.dir));
@@ -501,9 +491,10 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 	return hit_color;
 }
 
-__kernel void main(__constant t_object *objects, const int sphere_count,
-							__constant t_light *lights, const int num_lights,
-							__global float3 *output, const int width, const int height)
+__kernel void render_scene(__constant t_object *objects, const int sphere_count,
+					__constant t_light *lights, const int num_lights,
+					__global float3 *output, const int width, const int height,
+					__constant t_camera *camera)
 {
 	/* the unique global id of the work item for the current pixel */
 	unsigned int work_item_id = get_global_id(0);
@@ -516,10 +507,7 @@ __kernel void main(__constant t_object *objects, const int sphere_count,
 	// unsigned int seed0 = x_coord;
 	// unsigned int seed1 = y_coord;
 
-
-	float3 camera_pos = (float3)(0.0f, 0.5f, 3.0f);
-
-	t_ray camray = create_cam_ray(camera_pos, x_coord, y_coord, width, height);
+	t_ray camray = create_cam_ray(camera, x_coord, y_coord, width, height);
 
 	/* add the light contribution of each sample and average over all samples*/
 	// float invSamples = 1.0f / SAMPLES;

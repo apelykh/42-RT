@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include "rt.h"
 
-
 static void	load_kernel(t_cl_context *cl_context)
 {
 	char filename[] = "./kernels/rt.cl";
@@ -73,11 +72,75 @@ void	init_cl(t_cl_context *cl_context)
 	    exit(EXIT_FAILURE);
 	}
 
-	cl_context->kernel = clCreateKernel(cl_context->program, "main", &ret);
+	cl_context->kernel = clCreateKernel(cl_context->program, "render_scene", &ret);
+}
+
+void	alloc_cl_buffers(t_cl_context *cl_context, t_scene *scene)
+{
+	cl_int ret;
+
+	cl_context->pixels_buf = clCreateBuffer(cl_context->context,
+		CL_MEM_WRITE_ONLY,
+		scene->im_width * scene->im_height * sizeof(cl_float3), NULL, &ret);
+
+	cl_context->objects_buf = clCreateBuffer(cl_context->context,
+		CL_MEM_READ_ONLY, scene->num_objects * sizeof(t_object), NULL, &ret);
+
+	cl_context->lights_buf = clCreateBuffer(cl_context->context,
+		CL_MEM_READ_ONLY, scene->num_lights * sizeof(t_light), NULL, &ret);
+
+	cl_context->cam_buf = clCreateBuffer(cl_context->context, CL_MEM_READ_ONLY,
+		sizeof(t_camera), NULL, &ret);
+
+	// white objects array to the device
+	ret = clEnqueueWriteBuffer(cl_context->command_queue,
+		cl_context->objects_buf, CL_TRUE, 0,
+		scene->num_objects * sizeof(t_object), scene->objects, 0, NULL, NULL);
+
+	// white lights array to the device
+	ret = clEnqueueWriteBuffer(cl_context->command_queue,
+		cl_context->lights_buf, CL_TRUE, 0,
+		scene->num_lights * sizeof(t_light), scene->lights, 0, NULL, NULL);
+
+	ret = clEnqueueWriteBuffer(cl_context->command_queue, cl_context->cam_buf,
+		CL_TRUE, 0, sizeof(t_camera), scene->cam, 0, NULL, NULL);
+
+	if (ret != CL_SUCCESS)
+		exit(-1);
+}
+
+void	set_kernel_args(t_cl_context *cl_context, t_scene *scene)
+{
+	cl_int ret;
+
+	ret = clSetKernelArg(cl_context->kernel, 0, sizeof(cl_mem),
+		(void*)&cl_context->objects_buf);
+	ret = clSetKernelArg(cl_context->kernel, 1, sizeof(cl_int),
+		(void*)&scene->num_objects);
+	ret = clSetKernelArg(cl_context->kernel, 2, sizeof(cl_mem),
+		(void*)&cl_context->lights_buf);
+	ret = clSetKernelArg(cl_context->kernel, 3, sizeof(cl_int),
+		(void*)&scene->num_lights);
+	ret = clSetKernelArg(cl_context->kernel, 4, sizeof(cl_mem),
+		(void*)&cl_context->pixels_buf);
+	ret = clSetKernelArg(cl_context->kernel, 5, sizeof(cl_int),
+		(void*)&scene->im_width);
+	ret = clSetKernelArg(cl_context->kernel, 6, sizeof(cl_int),
+		(void*)&scene->im_height);
+	ret = clSetKernelArg(cl_context->kernel, 7, sizeof(cl_mem),
+		(void*)&cl_context->cam_buf);
+
+	if (ret != CL_SUCCESS)
+		exit(-1);
 }
 
 void	cl_cleanup(t_cl_context *cl_context)
 {
+	clReleaseMemObject(cl_context->pixels_buf);
+	clReleaseMemObject(cl_context->objects_buf);
+	clReleaseMemObject(cl_context->lights_buf);
+	clReleaseMemObject(cl_context->cam_buf);
+
 	clFlush(cl_context->command_queue);
 	clFinish(cl_context->command_queue);
 	clReleaseKernel(cl_context->kernel);

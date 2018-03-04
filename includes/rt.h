@@ -18,6 +18,11 @@
 
 # define MAX_SOURCE_SIZE (0x100000)
 
+# define PLANE		0
+# define SPHERE		1
+# define CYLINDER	2
+# define CONE		3
+
 typedef struct			s_sdl_context
 {
 	SDL_Window 			*win;
@@ -35,6 +40,10 @@ typedef struct			s_cl_context
 	char				*kernel_src;
 	size_t				src_size;
 	cl_kernel			kernel;
+	cl_mem				pixels_buf;
+	cl_mem				objects_buf;
+	cl_mem				lights_buf;
+	cl_mem				cam_buf;
 }						t_cl_context;
 
 // dummy variables are required for memory alignment
@@ -62,13 +71,34 @@ typedef struct			s_light
 	cl_float3			emi;
 }						t_light;
 
+typedef struct			s_camera
+{
+	cl_float3			pos;
+}						t_camera;
+
+typedef struct			s_scene
+{
+	t_camera			*cam;
+	t_object 			*objects;
+	cl_int				num_objects;
+	t_light				*lights;
+	cl_int				num_lights;
+	cl_int				im_width;
+	cl_int				im_height;
+}						t_scene;
+
 cl_float3	init_vec3(cl_float x, cl_float y, cl_float z);
-void		init_objects(t_object *cpu_spheres);
+cl_float3	init_norm_vec3(cl_float x, cl_float y, cl_float z);
+
+void	init_scene1(t_scene *scene);
+void	init_scene2(t_scene *scene);
 
 void	init_sdl(t_sdl_context *sdl_context);
 void	sdl_cleanup(t_sdl_context *sdl_context);
 
 void	init_cl(t_cl_context *cl_context);
+void	alloc_cl_buffers(t_cl_context *cl_context, t_scene *scene);
+void	set_kernel_args(t_cl_context *cl_context, t_scene *scene);
 void	cl_cleanup(t_cl_context *cl_context);
 
 void	save_image(cl_float3 *pixels);
