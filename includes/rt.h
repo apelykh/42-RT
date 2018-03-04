@@ -41,13 +41,19 @@ typedef struct			s_cl_context
 // float3 is considered as float4 by OpenCL
 typedef struct			s_object
 {
+	cl_int				type;
 	cl_float			radius;
+	cl_float			radius2;
+	cl_float			k;
 	cl_float3			pos;
+	cl_float3			dir;
 	cl_float3			color;
 	cl_float3			emi;
 	cl_float			diffuse;
 	cl_float			specular;
 	cl_float			spec_exp;
+	// cl_float			dummy1;
+	// cl_float			dummy2;
 }						t_object;
 
 typedef struct			s_light

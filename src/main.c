@@ -23,7 +23,7 @@ int		main(void)
 	init_sdl(&sdl_context);
 
 	// ------------ OBJECTS -------------------------
-	const int num_objs = 3;
+	const int num_objs = 5;
 	t_object cpu_objects[num_objs];
 	init_objects(cpu_objects);
 
@@ -39,11 +39,11 @@ int		main(void)
 	// ------------ LIGHTS -------------------------
 	const int num_lights = 2;
 	t_light cpu_lights[num_lights];
-	cpu_lights[0].pos = init_vec3(-1.0f, 1.2f, 0.8f);
-	cpu_lights[0].emi = init_vec3(0.8f, 0.8f, 0.8f);
+	cpu_lights[0].pos = init_vec3(1.0f, 0.6f, 1.0f);
+	cpu_lights[0].emi = init_vec3(0.7f, 0.7f, 0.7f);
 
-	cpu_lights[1].pos = init_vec3(-0.3f, 0.5f, -0.1f);
-	cpu_lights[1].emi = init_vec3(0.9f, 0.9f, 0.9f);
+	cpu_lights[1].pos = init_vec3(3.0f, 5.0f, -7.0f);
+	cpu_lights[1].emi = init_vec3(0.8f, 0.8f, 0.8f);
 
 	// cpu_lights[2].pos = init_vec3(0.2f, 0.1f, 0.5f);
 	// cpu_lights[2].emi = init_vec3(0.9f, 0.9f, 0.9f);
@@ -74,7 +74,7 @@ int		main(void)
 	ret = clEnqueueReadBuffer(cl_context.command_queue, pixels_buf, CL_TRUE, 0,
 		im_width * im_height * sizeof(cl_float3), pixels, 0, NULL, NULL);
 
-	save_image(pixels);
+	// save_image(pixels);
 
 	// ---------- SDL part ----------------------------
 	for (int i = 0; i < im_width * im_height; i++)
