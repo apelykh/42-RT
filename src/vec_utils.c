@@ -1,6 +1,6 @@
 #include "rt.h"
 
-static cl_float	vec_dot(cl_float3 a, cl_float3 b)
+static cl_float		vec_dot(cl_float3 a, cl_float3 b)
 {
 	return ((a.x * b.x) + (a.y * b.y) + (a.z * b.z));
 }
@@ -17,6 +17,11 @@ static cl_float3	vec_norm(cl_float3 a)
 		a.z /= len;
 	}
 	return (a);
+}
+
+cl_float3	add_vec3(cl_float3 a, cl_float3 b)
+{
+	return init_vec3(a.x + b.x, a.y + b.y, a.z + b.z);
 }
 
 cl_float3	init_vec3(cl_float x, cl_float y, cl_float z)

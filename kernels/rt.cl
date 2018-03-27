@@ -66,6 +66,8 @@ typedef struct	s_camera
 	float3		loc;
 	float3		rot;
 	float		fov;
+	mat4		trans_matrix;
+	mat4		rot_matrix;
 }				t_camera;
 
 
@@ -425,11 +427,13 @@ t_ray create_cam_ray(__constant t_camera *camera, const int x, const int y,
 	t_ray ray;
 	ray.origin = (float3)(0.f, 0.f, 0.f);
 	ray.dir = normalize(pixel);
-	mat4 tra = mat_translate(camera->loc);
-	mat4 rot = mat_rotx(camera->rot.x);
-	rot = mat_mult_mat(mat_roty(camera->rot.y), rot);
-	rot = mat_mult_mat(mat_rotz(camera->rot.z), rot);
-	mat4 txx = mat_mult_mat(tra, rot);
+
+	// mat4 tra = mat_translate(camera->loc);
+	// mat4 rot = mat_rotx(camera->rot.x);
+
+	// rot = mat_mult_mat(mat_roty(camera->rot.y), rot);
+	// rot = mat_mult_mat(mat_rotz(camera->rot.z), rot);
+	mat4 txx = mat_mult_mat(camera->trans_matrix, camera->rot_matrix);
 	
 	ray.origin = mat_mult_vec(txx, (float4)(ray.origin, 1.0f)).xyz;
 	ray.dir = fast_normalize(mat_mult_vec(txx, (float4)(ray.dir, 0.0f)).xyz);

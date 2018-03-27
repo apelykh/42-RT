@@ -1,5 +1,19 @@
 #include "rt.h"
 
+void	set_cam_transl_matrix(t_camera *cam)
+{
+	cam->trans_matrix = mat_translate(cam->loc);
+}
+
+void	set_cam_rot_matrix(t_camera *cam)
+{
+	mat4	rotation_matrix;
+
+	rotation_matrix = mat_rotx(cam->rot.x);
+	rotation_matrix = mat_mult_mat(mat_roty(cam->rot.y), rotation_matrix);
+	cam->rot_matrix = mat_mult_mat(mat_rotz(cam->rot.z), rotation_matrix);
+}
+
 void	obj_transform_mats(t_object *obj)
 {
 	mat4 tra;

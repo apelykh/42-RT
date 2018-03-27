@@ -5,7 +5,7 @@ NAME = rt
 # LIB = $(addprefix $(LIB_DIR), libft.a)
 SRC_DIR = src/
 SRC_FILES = main.c \
-			init_scene.c \
+			vec_utils.c \
 			scene1.c \
 			matrix.c \
 			cl_utils.c \

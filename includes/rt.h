@@ -13,8 +13,8 @@
 # include <CL/cl.h>
 # endif
 
-# define WIN_WIDTH 1600
-# define WIN_HEIGHT 1200
+# define WIN_WIDTH 1280
+# define WIN_HEIGHT 768
 
 # define MAX_SOURCE_SIZE (0x100000)
 
@@ -87,6 +87,8 @@ typedef struct			s_camera
 	cl_float3			loc;
 	cl_float3			rot;
 	cl_float			fov;
+	mat4				trans_matrix;
+	mat4				rot_matrix;
 }						t_camera;
 
 typedef struct			s_scene
@@ -101,6 +103,7 @@ typedef struct			s_scene
 }						t_scene;
 
 cl_float3	init_vec3(cl_float x, cl_float y, cl_float z);
+cl_float3	add_vec3(cl_float3 a, cl_float3 b);
 cl_float3	init_norm_vec3(cl_float x, cl_float y, cl_float z);
 cl_float4	init_vec4(cl_float x, cl_float y, cl_float z, cl_float w);
 
@@ -130,6 +133,9 @@ mat4		mat_invert_(mat4 m, cl_float det);
 mat4		mat_transpose(mat4 m);
 mat4		mat_mult_mat(mat4 a, mat4 b);
 cl_float4	mat_mult_vec(mat4 m, cl_float4 v);
+void	set_cam_transl_matrix(t_camera *cam);
+void	set_cam_rot_matrix(t_camera *cam);
+
 
 
 

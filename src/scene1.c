@@ -5,8 +5,11 @@ static void	init_cam(t_scene *scene)
 {
 	scene->cam = (t_camera*)malloc(sizeof(t_camera));
 	scene->cam->loc = init_vec3(0.0f, 1.0f, 10.f);
-	scene->cam->rot = init_vec3(0.f, 0.f, 45.f);
+	scene->cam->rot = init_vec3(0.f, 0.f, 0.f);
 	scene->cam->fov = 45.f;
+
+	set_cam_transl_matrix(scene->cam);
+	set_cam_rot_matrix(scene->cam);
 }
 
 static void	init_lights(t_scene *scene)
@@ -18,14 +21,6 @@ static void	init_lights(t_scene *scene)
 	scene->lights[1].loc = init_vec3(3.0f, 5.0f, -7.0f);
 	scene->lights[1].emi = init_vec3(0.5f, 0.5f, 0.5f);
 }
-
-// static void	init_lights(t_scene *scene)
-// {
-// 	scene->num_lights = 1;
-// 	scene->lights = (t_light*)malloc(sizeof(t_light) * scene->num_lights);
-// 	scene->lights[0].pos = init_vec3(0.0f, 2.75f, 2.75f);
-// 	scene->lights[0].emi = init_vec3(1.0f, 1.0f, 1.0f);
-// }
 
 void	init_scene1(t_scene *scene)
 {
