@@ -20,16 +20,20 @@ int		main(void)
 	init_sdl(&sdl_context);
 
 	init_scene1(&scene);
+	// printf("%f %f %f %f\n", scene.objects[1].w2l.s0, scene.objects[1].w2l.s1, scene.objects[1].w2l.s2, scene.objects[1].w2l.s3);
+	// printf("%f %f %f %f\n", scene.objects[1].w2l.s4, scene.objects[1].w2l.s5, scene.objects[1].w2l.s6, scene.objects[1].w2l.s7);
+	// printf("%f %f %f %f\n", scene.objects[1].w2l.s8, scene.objects[1].w2l.s9, scene.objects[1].w2l.sA, scene.objects[1].w2l.sB);
+	// printf("%f %f %f %f\n", scene.objects[1].w2l.sC, scene.objects[1].w2l.sD, scene.objects[1].w2l.sE, scene.objects[1].w2l.sF);
 
 	alloc_cl_buffers(&cl_context, &scene);
 	set_kernel_args(&cl_context, &scene);
  
 	size_t global_item_size = scene.im_width * scene.im_height;
-	size_t local_item_size = 64;
+	// size_t local_item_size = 64;
 			
 	/* Execute OpenCL kernel as data parallel */
 	ret = clEnqueueNDRangeKernel(cl_context.command_queue, cl_context.kernel, 1, NULL, 
-		&global_item_size, &local_item_size, 0, NULL, NULL);
+		&global_item_size, NULL, 0, NULL, NULL);
  
 	/* Transfer result to host */
 	ret = clEnqueueReadBuffer(cl_context.command_queue, cl_context.pixels_buf, CL_TRUE, 0,
@@ -38,7 +42,7 @@ int		main(void)
 	if (ret != CL_SUCCESS)
 		exit(-1);
 
-	save_image(pixels);
+	// save_image(pixels);
 
 	// ---------- SDL part ----------------------------
 	for (int i = 0; i < scene.im_width * scene.im_height; i++)
@@ -60,8 +64,15 @@ int		main(void)
 		SDL_Event event;
 		while (SDL_PollEvent(&event))
 		{
-			if (event.type == SDL_QUIT)
-				to_close = 1;
+			switch (event.type)
+			{
+				case SDL_QUIT:	to_close = 1; break;
+				case SDL_KEYDOWN:
+					switch (event.key.keysym.sym)
+					{
+						case SDLK_ESCAPE: to_close = 1; break;
+					}
+			}
 		}
 		SDL_RenderClear(sdl_context.rend);
 		SDL_RenderCopy(sdl_context.rend, sdl_context.tex, NULL, NULL);
