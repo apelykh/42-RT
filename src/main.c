@@ -184,64 +184,64 @@ void	save_image(cl_float3 *pixels)
 void	init_scene(t_sphere *cpu_spheres)
 {
 	// left wall
-	cpu_spheres[0].radius = 200.0f;
-	cpu_spheres[0].pos.x = -200.6f;
-	cpu_spheres[0].pos.y = 0.0f;
-	cpu_spheres[0].pos.z = 0.0f;
-	cpu_spheres[0].color.x = 0.75f;
-	cpu_spheres[0].color.y = 0.25f;
-	cpu_spheres[0].color.z = 0.25f;
-	cpu_spheres[0].emi.x = 0.1f;
-	cpu_spheres[0].emi.y = 0.2f;
-	cpu_spheres[0].emi.z = 0.3f;
+	// cpu_spheres[0].radius = 200.0f;
+	// cpu_spheres[0].pos.x = -200.6f;
+	// cpu_spheres[0].pos.y = 0.0f;
+	// cpu_spheres[0].pos.z = 0.0f;
+	// cpu_spheres[0].color.x = 0.75f;
+	// cpu_spheres[0].color.y = 0.25f;
+	// cpu_spheres[0].color.z = 0.25f;
+	// cpu_spheres[0].emi.x = 0.0f;
+	// cpu_spheres[0].emi.y = 0.0f;
+	// cpu_spheres[0].emi.z = 0.0f;
 
 	// right wall
-	cpu_spheres[1].radius = 200.0f;
-	cpu_spheres[1].pos.x = 200.6f;
-	cpu_spheres[1].pos.y = 0.0f;
-	cpu_spheres[1].pos.z = 0.0f;
-	cpu_spheres[1].color.x = 0.25f;
-	cpu_spheres[1].color.y = 0.25f;
-	cpu_spheres[1].color.z = 0.75f;
-	cpu_spheres[1].emi.x = 0.1f;
-	cpu_spheres[1].emi.y = 0.2f;
-	cpu_spheres[1].emi.z = 0.3f;
+	// cpu_spheres[1].radius = 200.0f;
+	// cpu_spheres[1].pos.x = 200.6f;
+	// cpu_spheres[1].pos.y = 0.0f;
+	// cpu_spheres[1].pos.z = 0.0f;
+	// cpu_spheres[1].color.x = 0.25f;
+	// cpu_spheres[1].color.y = 0.25f;
+	// cpu_spheres[1].color.z = 0.75f;
+	// cpu_spheres[1].emi.x = 0.0f;
+	// cpu_spheres[1].emi.y = 0.0f;
+	// cpu_spheres[1].emi.z = 0.0f;
 
 	// floor
+	cpu_spheres[0].radius = 200.0f;
+	cpu_spheres[0].pos.x = 0.0f;
+	cpu_spheres[0].pos.y = -200.4f;
+	cpu_spheres[0].pos.z = 0.0f;
+	cpu_spheres[0].color.x = 0.9f;
+	cpu_spheres[0].color.y = 0.8f;
+	cpu_spheres[0].color.z = 0.7f;
+	cpu_spheres[0].emi.x = 0.0f;
+	cpu_spheres[0].emi.y = 0.0f;
+	cpu_spheres[0].emi.z = 0.0f;
+
+	// ceiling
+	cpu_spheres[1].radius = 200.0f;
+	cpu_spheres[1].pos.x = 0.0f;
+	cpu_spheres[1].pos.y = 200.4f;
+	cpu_spheres[1].pos.z = 0.0f;
+	cpu_spheres[1].color.x = 0.9f;
+	cpu_spheres[1].color.y = 0.8f;
+	cpu_spheres[1].color.z = 0.7f;
+	cpu_spheres[1].emi.x = 0.0f;
+	cpu_spheres[1].emi.y = 0.0f;
+	cpu_spheres[1].emi.z = 0.0f;
+
+	// back wall
 	cpu_spheres[2].radius = 200.0f;
 	cpu_spheres[2].pos.x = 0.0f;
-	cpu_spheres[2].pos.y = -200.4f;
-	cpu_spheres[2].pos.z = 0.0f;
+	cpu_spheres[2].pos.y = 0.0f;
+	cpu_spheres[2].pos.z = -201.0f;
 	cpu_spheres[2].color.x = 0.9f;
 	cpu_spheres[2].color.y = 0.8f;
 	cpu_spheres[2].color.z = 0.7f;
 	cpu_spheres[2].emi.x = 0.0f;
 	cpu_spheres[2].emi.y = 0.0f;
 	cpu_spheres[2].emi.z = 0.0f;
-
-	// ceiling
-	cpu_spheres[3].radius = 200.0f;
-	cpu_spheres[3].pos.x = 0.0f;
-	cpu_spheres[3].pos.y = 200.4f;
-	cpu_spheres[3].pos.z = 0.0f;
-	cpu_spheres[3].color.x = 0.9f;
-	cpu_spheres[3].color.y = 0.8f;
-	cpu_spheres[3].color.z = 0.7f;
-	cpu_spheres[3].emi.x = 0.0f;
-	cpu_spheres[3].emi.y = 0.0f;
-	cpu_spheres[3].emi.z = 0.0f;
-
-	// back wall
-	cpu_spheres[4].radius = 200.0f;
-	cpu_spheres[4].pos.x = 0.0f;
-	cpu_spheres[4].pos.y = 0.0f;
-	cpu_spheres[4].pos.z = -200.4f;
-	cpu_spheres[4].color.x = 0.9f;
-	cpu_spheres[4].color.y = 0.8f;
-	cpu_spheres[4].color.z = 0.7f;
-	cpu_spheres[4].emi.x = 0.0f;
-	cpu_spheres[4].emi.y = 0.0f;
-	cpu_spheres[4].emi.z = 0.0f;
 
 	// // front wall 
 	// cpu_spheres[5].radius = 200.0f;
@@ -256,40 +256,40 @@ void	init_scene(t_sphere *cpu_spheres)
 	// cpu_spheres[5].emi.z = 0.0f;
 
 	// left sphere
-	cpu_spheres[5].radius = 0.16f;
-	cpu_spheres[5].pos.x = -0.25f;
-	cpu_spheres[5].pos.y = -0.24f;
-	cpu_spheres[5].pos.z = -0.1f;
-	cpu_spheres[5].color.x = 0.5f;
-	cpu_spheres[5].color.y = 0.6f;
-	cpu_spheres[5].color.z = 0.7f;
-	cpu_spheres[5].emi.x = 0.0f;
-	cpu_spheres[5].emi.y = 0.0f;
-	cpu_spheres[5].emi.z = 0.0f;
+	cpu_spheres[3].radius = 0.16f;
+	cpu_spheres[3].pos.x = -0.25f;
+	cpu_spheres[3].pos.y = -0.24f;
+	cpu_spheres[3].pos.z = -0.1f;
+	cpu_spheres[3].color.x = 0.5f;
+	cpu_spheres[3].color.y = 0.6f;
+	cpu_spheres[3].color.z = 0.7f;
+	cpu_spheres[3].emi.x = 0.0f;
+	cpu_spheres[3].emi.y = 0.0f;
+	cpu_spheres[3].emi.z = 0.0f;
 
 	// right sphere
-	cpu_spheres[6].radius = 0.16f;
-	cpu_spheres[6].pos.x = 0.25f;
-	cpu_spheres[6].pos.y = -0.35f;
-	cpu_spheres[6].pos.z = 0.1f;
-	cpu_spheres[6].color.x = 0.5f;
-	cpu_spheres[6].color.y = 0.6f;
-	cpu_spheres[6].color.z = 0.7f;
-	cpu_spheres[6].emi.x = 0.0f;
-	cpu_spheres[6].emi.y = 0.0f;
-	cpu_spheres[6].emi.z = 0.0f;
+	cpu_spheres[4].radius = 0.16f;
+	cpu_spheres[4].pos.x = 0.25f;
+	cpu_spheres[4].pos.y = -0.35f;
+	cpu_spheres[4].pos.z = 0.1f;
+	cpu_spheres[4].color.x = 0.5f;
+	cpu_spheres[4].color.y = 0.6f;
+	cpu_spheres[4].color.z = 0.7f;
+	cpu_spheres[4].emi.x = 0.0f;
+	cpu_spheres[4].emi.y = 0.0f;
+	cpu_spheres[4].emi.z = 0.0f;
 
 	// lightsource
-	cpu_spheres[7].radius = 0.05f;
-	cpu_spheres[7].pos.x = 0.0f;
-	cpu_spheres[7].pos.y = 0.3f;
-	cpu_spheres[7].pos.z = 0.5f;
-	cpu_spheres[7].color.x = 0.7f;
-	cpu_spheres[7].color.y = 0.2f;
-	cpu_spheres[7].color.z = 0.4f;
-	cpu_spheres[7].emi.x = 0.75f;
-	cpu_spheres[7].emi.y = 0.75f;
-	cpu_spheres[7].emi.z = 0.75f;
+	cpu_spheres[5].radius = 0.08f;
+	cpu_spheres[5].pos.x = 0.0f;
+	cpu_spheres[5].pos.y = 0.25f;
+	cpu_spheres[5].pos.z = 0.5f;
+	cpu_spheres[5].color.x = 0.7f;
+	cpu_spheres[5].color.y = 0.2f;
+	cpu_spheres[5].color.z = 0.4f;
+	cpu_spheres[5].emi.x = 0.75f;
+	cpu_spheres[5].emi.y = 0.75f;
+	cpu_spheres[5].emi.z = 0.75f;
 }
 
 int		main(void)
@@ -312,7 +312,7 @@ int		main(void)
 	init_sdl(&sdl_context);
 
 	// ------------ OBJECTS -------------------------
-	const int sphere_count = 8;
+	const int sphere_count = 6;
 	t_sphere cpu_spheres[sphere_count];
 	init_scene(cpu_spheres);
 
@@ -328,12 +328,20 @@ int		main(void)
 	// ------------ LIGHTS -------------------------
 	const int num_lights = 1;
 	t_light cpu_lights[num_lights];
+
 	cpu_lights[0].pos.x = 0.2f;
 	cpu_lights[0].pos.y = 0.2f;
-	cpu_lights[0].pos.z = 0.7f;
-	cpu_lights[0].emi.x = 1.0f;
-	cpu_lights[0].emi.y = 1.0f;
-	cpu_lights[0].emi.z = 1.0f;
+	cpu_lights[0].pos.z = 0.0f;
+	cpu_lights[0].emi.x = 0.8f;
+	cpu_lights[0].emi.y = 0.8f;
+	cpu_lights[0].emi.z = 0.8f;
+
+	cpu_lights[1].pos.x = 0.2f;
+	cpu_lights[1].pos.y = 0.2f;
+	cpu_lights[1].pos.z = 0.4f;
+	cpu_lights[1].emi.x = 0.8f;
+	cpu_lights[1].emi.y = 0.8f;
+	cpu_lights[1].emi.z = 0.8f;
 
 	lights_buf = clCreateBuffer(cl_context.context, CL_MEM_READ_ONLY,
 		num_lights * sizeof(t_light), NULL, &ret);
@@ -361,7 +369,7 @@ int		main(void)
 	ret = clEnqueueReadBuffer(cl_context.command_queue, pixels_buf, CL_TRUE, 0,
 		im_width * im_height * sizeof(cl_float3), pixels, 0, NULL, NULL);
 
-	// save_image(pixels);
+	save_image(pixels);
 
 	for (int i = 0; i < im_width * im_height; i++)
 	{
