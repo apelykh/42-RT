@@ -3,14 +3,30 @@
 
 # define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 
+# include <SDL2/SDL.h>
+// # include <SDL2/SDL_timer.h>
+// # include <SDL2/SDL_image.h>
+
 # ifdef __APPLE__
 # include <OpenCL/opencl.h>
 # else
 # include <CL/cl.h>
 # endif
 
-# define WIN_WIDTH 1280
-# define WIN_HEIGHT 720
+# define WIN_WIDTH 1600
+# define WIN_HEIGHT 1200
+
+# define MAX_SOURCE_SIZE (0x100000)
+
+# define PLANE		0
+# define SPHERE		1
+# define CYLINDER	2
+# define CONE		3
+# define BOX		4
+# define MERGE		5
+# define XSECT		6
+# define MINUS		7
+# define CLIP		8
 
 typedef struct			s_sdl_context
 {
@@ -29,25 +45,92 @@ typedef struct			s_cl_context
 	char				*kernel_src;
 	size_t				src_size;
 	cl_kernel			kernel;
+	cl_mem				pixels_buf;
+	cl_mem				objects_buf;
+	cl_mem				lights_buf;
+	cl_mem				cam_buf;
 }						t_cl_context;
+
+typedef cl_float16 mat4;
 
 // dummy variables are required for memory alignment
 // float3 is considered as float4 by OpenCL
-typedef struct			s_sphere
+typedef struct			s_object
 {
-	cl_float			radius;
-	cl_float			dummy1;   
-	cl_float			dummy2;
-	cl_float			dummy3;
-	cl_float3			pos;
+	cl_int				id;
+	// cl_int				inherits_from;
+	cl_int				type;
+	// cl_int2				operand;
+	cl_bool				capped;
+	cl_float3			loc;
+	cl_float3			rot;
+	cl_float3			sca;
 	cl_float3			color;
 	cl_float3			emi;
-}						t_sphere;
+	cl_float			diffuse;
+	cl_float			specular;
+	cl_float			spec_exp;
+	mat4 				from_local;
+	mat4 				to_local;
+	// cl_float			dummy1;
+	// cl_float			dummy2;
+}						t_object;
 
 typedef struct			s_light
 {
-	cl_float3			pos;
+	cl_float3			loc;
 	cl_float3			emi;
 }						t_light;
+
+typedef struct			s_camera
+{
+	cl_float3			loc;
+	cl_float3			rot;
+	cl_float			fov;
+}						t_camera;
+
+typedef struct			s_scene
+{
+	t_camera			*cam;
+	t_object 			*objects;
+	cl_int				num_objects;
+	t_light				*lights;
+	cl_int				num_lights;
+	cl_int				im_width;
+	cl_int				im_height;
+}						t_scene;
+
+cl_float3	init_vec3(cl_float x, cl_float y, cl_float z);
+cl_float3	init_norm_vec3(cl_float x, cl_float y, cl_float z);
+cl_float4	init_vec4(cl_float x, cl_float y, cl_float z, cl_float w);
+
+void	init_scene1(t_scene *scene);
+void	init_scene2(t_scene *scene);
+
+void	init_sdl(t_sdl_context *sdl_context);
+void	sdl_cleanup(t_sdl_context *sdl_context);
+
+void	init_cl(t_cl_context *cl_context);
+void	alloc_cl_buffers(t_cl_context *cl_context, t_scene *scene);
+void	set_kernel_args(t_cl_context *cl_context, t_scene *scene);
+void	cl_cleanup(t_cl_context *cl_context);
+
+void	save_image(cl_float3 *pixels);
+int		to_uchar(float x);
+
+//matrix funcs
+void		obj_transform_mats(t_object *obj);
+mat4		mat_translate(cl_float3 v);
+mat4		mat_scale(cl_float3 s);
+mat4		mat_rotx(cl_float angle);
+mat4		mat_roty(cl_float angle);
+mat4		mat_rotz(cl_float angle);
+mat4		mat_invert(mat4 m);
+mat4		mat_invert_(mat4 m, cl_float det);
+mat4		mat_transpose(mat4 m);
+mat4		mat_mult_mat(mat4 a, mat4 b);
+cl_float4	mat_mult_vec(mat4 m, cl_float4 v);
+
+
 
 #endif
