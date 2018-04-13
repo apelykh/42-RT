@@ -26,9 +26,8 @@ void	init_cl(t_cl_context *cl_context)
 	cl_uint			num_devices;
 	cl_int			ret;
 
-	ret = clGetPlatformIDs(1, &platform_id, &num_platforms);	
+	ret = clGetPlatformIDs(1, &platform_id, &num_platforms);
 	ret = clGetDeviceIDs(platform_id, CL_DEVICE_TYPE_GPU, 1, &device_id, &num_devices);
- 
 	cl_context->context = clCreateContext(NULL, 1, &device_id, NULL, NULL, &ret);
 	cl_context->command_queue = clCreateCommandQueue(cl_context->context, device_id, 0, &ret);
 
@@ -81,7 +80,7 @@ void	alloc_cl_buffers(t_cl_context *cl_context, t_scene *scene)
 
 	cl_context->pixels_buf = clCreateBuffer(cl_context->context,
 		CL_MEM_WRITE_ONLY,
-		scene->im_width * scene->im_height * sizeof(cl_float3), NULL, &ret);
+		scene->im_width * scene->im_height * sizeof(cl_uchar4), NULL, &ret);
 
 	cl_context->objects_buf = clCreateBuffer(cl_context->context,
 		CL_MEM_READ_ONLY, scene->num_objects * sizeof(t_object), NULL, &ret);
@@ -92,12 +91,10 @@ void	alloc_cl_buffers(t_cl_context *cl_context, t_scene *scene)
 	cl_context->cam_buf = clCreateBuffer(cl_context->context, CL_MEM_READ_ONLY,
 		sizeof(t_camera), NULL, &ret);
 
-	// white objects array to the device
 	ret = clEnqueueWriteBuffer(cl_context->command_queue,
 		cl_context->objects_buf, CL_TRUE, 0,
 		scene->num_objects * sizeof(t_object), scene->objects, 0, NULL, NULL);
 
-	// white lights array to the device
 	ret = clEnqueueWriteBuffer(cl_context->command_queue,
 		cl_context->lights_buf, CL_TRUE, 0,
 		scene->num_lights * sizeof(t_light), scene->lights, 0, NULL, NULL);

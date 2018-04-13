@@ -10,7 +10,7 @@ void	init_sdl(t_sdl_context *sdl_context)
 		exit(-1);
 	}
 
-	sdl_context->win = SDL_CreateWindow("rt-dev", SDL_WINDOWPOS_CENTERED,
+	sdl_context->win = SDL_CreateWindow("RT", SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED, WIN_WIDTH, WIN_HEIGHT, 0);
 	if (!sdl_context->win)
 	{
@@ -27,10 +27,7 @@ void	init_sdl(t_sdl_context *sdl_context)
 		sdl_cleanup(sdl_context);
 		exit(-1);
 	}
-
-	sdl_context->data = (unsigned char*)malloc(4 * WIN_WIDTH * WIN_HEIGHT);
-
-	printf("[+] SDL Init success\n");
+	sdl_context->pixels = (cl_uchar4*)malloc(WIN_WIDTH * WIN_HEIGHT * sizeof(cl_uchar4));
 }
 
 void	sdl_cleanup(t_sdl_context *sdl_context)
@@ -41,8 +38,7 @@ void	sdl_cleanup(t_sdl_context *sdl_context)
 	if (sdl_context->rend)
 		SDL_DestroyRenderer(sdl_context->rend);
 
-	free(sdl_context->data);
-
+	free(sdl_context->pixels);
+	sdl_context->pixels = NULL;
 	SDL_Quit();
-	printf("[+] SDL resources freed\n");
 }

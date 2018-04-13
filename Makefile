@@ -1,13 +1,13 @@
 FLAGS = -Wall -Wextra -Werror
 CC = gcc $(FLAGS)
-NAME = rt
+NAME = RT
 # LIB_DIR = libft/
 # LIB = $(addprefix $(LIB_DIR), libft.a)
 SRC_DIR = src/
 SRC_FILES = main.c \
-			init_scene.c \
+			vec_utils.c \
 			scene1.c \
-			scene2.c \
+			matrix.c \
 			cl_utils.c \
 			sdl_utils.c \
 			utils.c \
@@ -23,6 +23,7 @@ all: $(NAME)
 	
 $(NAME): $(OBJ)
 	@ $(CC) $(OBJ) -lOpenCL -lSDL2 -lm -o $@
+	# @ $(CC) $(OBJ) -framework opencl -L/Users/mdubrovs/.brew/Cellar/sdl2/2.0.8/lib -lSDL2 -lm -o $@
 	# @ $(CC) $(OBJ) -framework opencl -framework SDL2 -lm -o $@
 	@ echo "[+] [$(NAME)] compiled"
 
