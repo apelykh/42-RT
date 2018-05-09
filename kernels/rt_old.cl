@@ -18,11 +18,6 @@ __constant int NUM_BOUNCES = 7;
 # define DIFFERENCE		7
 # define CLIPPING		8
 
-// # define AMBIENT		0
-// # define POINT			1
-// # define PARALLEL		2
-// # define SPOT			3
-
 typedef struct	s_ray
 {
 	float3 origin;
@@ -74,9 +69,8 @@ typedef struct	s_object
 
 typedef struct	s_light
 {
-	// int		type;
-	float3	location;
-	float3	emission;
+	float3 location;
+	float3 emission;
 }				t_light;
 
 typedef struct	s_camera
@@ -92,8 +86,8 @@ typedef struct	s_camera
 static float get_random(unsigned int *seed0, unsigned int *seed1);
 static float zero_clamp(float x);
 t_ray create_cam_ray(__constant t_camera *camera, const int x_coord, const int y_coord, const int width, const int height);
-float3 trace_path(__constant t_object *spheres, const t_ray *camray, const int object_count, const int *seed0, const int *seed1);
-float3 get_direct_light(__constant t_object *spheres, const t_ray *camray, const int object_count, __constant t_light *lights, const int num_lights);
+float3 trace_path(__constant t_object *spheres, const t_ray *camray, const int sphere_count, const int *seed0, const int *seed1);
+float3 get_direct_light(__constant t_object *spheres, const t_ray *camray, const int sphere_count, __constant t_light *lights, const int num_lights);
 
 // -------------------------- Object intersections ----------------------------
 bool	intersect_sphere(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit);
@@ -106,13 +100,12 @@ bool	intersect_union(__constant t_object *objects, int id, const t_ray *ray, boo
 bool	intersect_intersection(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit);
 bool 	intersect_difference(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit);
 bool	intersect_clipping(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit);
-bool 	intersect_bocal(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit);
 
 bool	intersect_scene(__constant t_object *objects, const int num_objects, const t_ray *ray, float3 *normal,
 							float *t, int *object_id, bool quick);
 
-float3 get_diffuse_light(__constant t_object *objects, const int num_objects, float3 hitpoint, int h_id, float3 normal,
-						 __constant t_light *lights, const int num_lights);
+// float3	get_diffuse_light(__constant t_object *objects, const int num_objects, float3 hitpoint, int h_id, float3 normal,
+// 						 __constant t_light *lights, const int num_lights);
 
 
 float3	hitpoint_calc(const t_ray *ray, float dist);
@@ -129,9 +122,9 @@ mat4	mat_transpose(mat4 m);
 mat4	mat_mult_mat(mat4 a, mat4 b);
 void	hitpoints_init(t_hitpoints* hit);
 void	hitpoints_sort(t_hitpoints* hit);
-t_ray	ray2local(const t_ray *r, __constant t_object *o);
+t_ray	ray2local(const t_ray *r, const t_object *o);
 
-t_ray ray2local(const t_ray *r, __constant t_object *o)
+t_ray ray2local(const t_ray *r, const t_object *o)
 {
 	t_ray ray;
 
@@ -385,9 +378,9 @@ t_ray create_cam_ray(__constant t_camera *camera, const int x, const int y,
 bool intersect_plane(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit)
 {
 	// is there point copying object to local memory? we only access is 4-6 times
-	// const t_object obj = objects[id];
+	const t_object obj = objects[id];
 	// converting ray to object's local coord system
-	t_ray ray_local = ray2local(ray, &objects[id]);
+	t_ray ray_local = ray2local(ray, &obj);
 	
 	// check if array of points has space for new addition
 	if ((MAX_POINTS - hit->num_elements) < 1)
@@ -404,7 +397,7 @@ bool intersect_plane(__constant t_object *objects, int id, const t_ray *ray, boo
 	if (pt.dist <= 0)											
 		return false;
 
-	pt.obj_id = id;
+	pt.obj_id = obj.id;
 	pt.pos = ray_local.origin + ray_local.dir * pt.dist;
 	// "inside" determines 'type' of intersection. if we enter 'volume' of primitive inside is TRUE, if we exit - FALSE
 	// since plane doesn't have volume we choose intersection from one side (top) as 'entrance' and opposite - 'exit'
@@ -415,11 +408,11 @@ bool intersect_plane(__constant t_object *objects, int id, const t_ray *ray, boo
 	if (!quick)
 	{
 		pt.normal = dot(pt.normal, ray_local.dir) < 0.0f ? pt.normal : -pt.normal;
-		pt.normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(pt.normal, 0.0f)).xyz;
+		pt.normal = mat_mult_vec(mat_transpose(obj.to_local), (float4)(pt.normal, 0.0f)).xyz;
 		pt.normal = fast_normalize(pt.normal);
 	}
 	// coverting point to ray coord system
-	pt.pos = mat_mult_vec(objects[id].from_local, (float4)(pt.pos, 1.0f)).xyz;
+	pt.pos = mat_mult_vec(obj.from_local, (float4)(pt.pos, 1.0f)).xyz;
 	// distance to point in ray coord system		
 	pt.dist = length(pt.pos - ray->origin);
 	// point is written into array of points intersected by current ray
@@ -429,8 +422,8 @@ bool intersect_plane(__constant t_object *objects, int id, const t_ray *ray, boo
 
 bool intersect_sphere(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit)
 {
-	// const t_object obj = objects[id];
-	t_ray ray_local = ray2local(ray, &objects[id]);
+	const t_object obj = objects[id];
+	t_ray ray_local = ray2local(ray, &obj);
 
 	if ((MAX_POINTS - hit->num_elements) < 2)
 		return false;
@@ -453,7 +446,7 @@ bool intersect_sphere(__constant t_object *objects, int id, const t_ray *ray, bo
 	// first intersection is valid
 	if (pt[0].dist > 0.0f)
 	{
-		pt[0].obj_id = objects[id].id;
+		pt[0].obj_id = obj.id;
 		pt[0].pos = ray_local.origin + ray_local.dir * pt[0].dist;
 		pt[0].normal = pt[0].pos;
 		pt[0].inside = (dot(ray_local.dir, pt[0].normal) <= 0.f) ? true : false; 
@@ -461,27 +454,27 @@ bool intersect_sphere(__constant t_object *objects, int id, const t_ray *ray, bo
 		{
 			// inverting normal in case it 'looks' in 'same' direction as ray ('same' term is used very loosly here)
 			pt[0].normal = dot(pt[0].normal, ray_local.dir) < 0.0f ? pt[0].normal : -pt[0].normal;
-			pt[0].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(pt[0].normal, 0.0f)).xyz;
+			pt[0].normal = mat_mult_vec(mat_transpose(obj.to_local), (float4)(pt[0].normal, 0.0f)).xyz;
 			pt[0].normal = fast_normalize(pt[0].normal);
 		}
-		pt[0].pos = mat_mult_vec(objects[id].from_local, (float4)(pt[0].pos, 1.0f)).xyz;
+		pt[0].pos = mat_mult_vec(obj.from_local, (float4)(pt[0].pos, 1.0f)).xyz;
 		pt[0].dist = length(pt[0].pos - ray->origin);
 		hit->pt[hit->num_elements++] = pt[0];
 	}
 	// second intersection is valid
 	if (pt[1].dist > 0.0f)
 	{
-		pt[1].obj_id = objects[id].id;
+		pt[1].obj_id = obj.id;
 		pt[1].pos = ray_local.origin + ray_local.dir * pt[1].dist;
 		pt[1].normal = pt[1].pos;
 		pt[1].inside = (dot(ray_local.dir, pt[1].normal) <= 0.f) ? true : false; 
 		if (!quick)
 		{	
 			pt[1].normal = dot(pt[1].normal, ray_local.dir) < 0.0f ? pt[1].normal : -pt[1].normal;
-			pt[1].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(pt[1].normal, 0.0f)).xyz;
+			pt[1].normal = mat_mult_vec(mat_transpose(obj.to_local), (float4)(pt[1].normal, 0.0f)).xyz;
 			pt[1].normal = fast_normalize(pt[1].normal);
 		}
-		pt[1].pos = mat_mult_vec(objects[id].from_local, (float4)(pt[1].pos, 1.0f)).xyz;
+		pt[1].pos = mat_mult_vec(obj.from_local, (float4)(pt[1].pos, 1.0f)).xyz;
 		pt[1].dist = length(pt[1].pos - ray->origin);
 		hit->pt[hit->num_elements++] = pt[1];
 	}
@@ -490,8 +483,8 @@ bool intersect_sphere(__constant t_object *objects, int id, const t_ray *ray, bo
 
 bool intersect_cylinder(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit)
 {
-	// const t_object obj = objects[id];
-	t_ray ray_local = ray2local(ray, &objects[id]);
+	const t_object obj = objects[id];
+	t_ray ray_local = ray2local(ray, &obj);
 
 	if ((MAX_POINTS - hit->num_elements) < 2)
 		return false;
@@ -505,7 +498,7 @@ bool intersect_cylinder(__constant t_object *objects, int id, const t_ray *ray, 
 
 	if (disc < 0.0f || a == 0.0f)															
 	{
-		if (objects[id].capped && ray_local.dir.y != 0.0f)
+		if (obj.capped && ray_local.dir.y != 0.0f)
 		{
 			pt[0].dist = (-0.5f - ray_local.origin.y) / ray_local.dir.y;
 			pt[1].dist = (0.5f - ray_local.origin.y) / ray_local.dir.y;
@@ -532,7 +525,7 @@ bool intersect_cylinder(__constant t_object *objects, int id, const t_ray *ray, 
 		pt[0].normal = (float3)(pt[0].pos.x, 0.0f, pt[0].pos.z);
 		pt[1].normal = (float3)(pt[1].pos.x, 0.0f, pt[1].pos.z);
 
-		if (objects[id].capped)
+		if (obj.capped)
 		{
 			float m0, m1;
 			m0 = ray_local.origin.y + ray_local.dir.y * pt[0].dist;
@@ -587,31 +580,31 @@ bool intersect_cylinder(__constant t_object *objects, int id, const t_ray *ray, 
 		return false;
 	if (pt[0].dist > 0.0f)
 	{
-		pt[0].obj_id = objects[id].id;
+		pt[0].obj_id = obj.id;
 		pt[0].pos = ray_local.origin + ray_local.dir * pt[0].dist;
 		pt[0].inside = (dot(ray_local.dir, pt[0].normal) < 0) ? true : false; 
 		if (!quick)
 		{
 			pt[0].normal = dot(pt[0].normal, ray_local.dir) < 0.0f ? pt[0].normal : -pt[0].normal;
-			pt[0].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(pt[0].normal, 0.0f)).xyz;
+			pt[0].normal = mat_mult_vec(mat_transpose(obj.to_local), (float4)(pt[0].normal, 0.0f)).xyz;
 			pt[0].normal = fast_normalize(pt[0].normal);
 		}
-		pt[0].pos = mat_mult_vec(objects[id].from_local, (float4)(pt[0].pos, 1.0f)).xyz;
+		pt[0].pos = mat_mult_vec(obj.from_local, (float4)(pt[0].pos, 1.0f)).xyz;
 		pt[0].dist = length(pt[0].pos - ray->origin);
 		hit->pt[hit->num_elements++] = pt[0];
 	}
 	if (pt[1].dist > 0.0f)
 	{
-		pt[1].obj_id = objects[id].id;
+		pt[1].obj_id = obj.id;
 		pt[1].pos = ray_local.origin + ray_local.dir * pt[1].dist;
 		pt[1].inside = (dot(ray_local.dir, pt[1].normal) < 0) ? true : false; 
 		if (!quick)
 		{
 			pt[1].normal = dot(pt[1].normal, ray_local.dir) < 0.0f ? pt[1].normal : -pt[1].normal;
-			pt[1].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(pt[1].normal, 0.0f)).xyz;
+			pt[1].normal = mat_mult_vec(mat_transpose(obj.to_local), (float4)(pt[1].normal, 0.0f)).xyz;
 			pt[1].normal = fast_normalize(pt[1].normal);
 		}
-		pt[1].pos = mat_mult_vec(objects[id].from_local, (float4)(pt[1].pos, 1.0f)).xyz;
+		pt[1].pos = mat_mult_vec(obj.from_local, (float4)(pt[1].pos, 1.0f)).xyz;
 		pt[1].dist = length(pt[1].pos - ray->origin);
 		hit->pt[hit->num_elements++] = pt[1];
 	}
@@ -620,8 +613,8 @@ bool intersect_cylinder(__constant t_object *objects, int id, const t_ray *ray, 
 
 bool intersect_cone(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit) // CLEAN UP CODE!
 {
-	// const t_object obj = objects[id];
-	t_ray ray_local = ray2local(ray, &objects[id]);
+	const t_object obj = objects[id];
+	t_ray ray_local = ray2local(ray, &obj);
 	
 	if ((MAX_POINTS - hit->num_elements) < 2)
 		return false;
@@ -646,7 +639,7 @@ bool intersect_cone(__constant t_object *objects, int id, const t_ray *ray, bool
 	pt[0].normal = pt[0].pos - (float3)(0.f, m0 * (1 + k_k), 0.f);
 	pt[1].normal = pt[1].pos - (float3)(0.f, m1 * (1 + k_k), 0.f);
 	
-	if (objects[id].capped)
+	if (obj.capped)
 	{
 		if (ray_local.dir.y != 0.0f)
 		{
@@ -680,31 +673,31 @@ bool intersect_cone(__constant t_object *objects, int id, const t_ray *ray, bool
 		return false;
 	if (pt[0].dist > 0)
 	{
-		pt[0].obj_id = objects[id].id;
+		pt[0].obj_id = obj.id;
 		pt[0].pos = ray_local.origin + ray_local.dir * pt[0].dist;
 		pt[0].inside = (dot(ray_local.dir, pt[0].normal) <= 0) ? true : false;
 		if (!quick)
 		{
 			pt[0].normal = dot(pt[0].normal, ray_local.dir) < 0.0f ? pt[0].normal : -pt[0].normal;
-			pt[0].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(pt[0].normal, 0.0f)).xyz;
+			pt[0].normal = mat_mult_vec(mat_transpose(obj.to_local), (float4)(pt[0].normal, 0.0f)).xyz;
 			pt[0].normal = fast_normalize(pt[0].normal);
 		}
-		pt[0].pos = mat_mult_vec(objects[id].from_local, (float4)(pt[0].pos, 1.0f)).xyz;
+		pt[0].pos = mat_mult_vec(obj.from_local, (float4)(pt[0].pos, 1.0f)).xyz;
 		pt[0].dist = length(pt[0].pos - ray->origin);
 		hit->pt[hit->num_elements++] = pt[0];
 	}
 	if (pt[1].dist > 0)
 	{
-		pt[1].obj_id = objects[id].id;
+		pt[1].obj_id = obj.id;
 		pt[1].pos = ray_local.origin + ray_local.dir * pt[1].dist;
 		pt[1].inside = (dot(ray_local.dir, pt[1].normal) <= 0) ? true : false;
 		if (!quick)
 		{
 			pt[1].normal = dot(pt[1].normal, ray_local.dir) < 0.0f ? pt[1].normal : -pt[1].normal;
-			pt[1].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(pt[1].normal, 0.0f)).xyz;
+			pt[1].normal = mat_mult_vec(mat_transpose(obj.to_local), (float4)(pt[1].normal, 0.0f)).xyz;
 			pt[1].normal = fast_normalize(pt[1].normal);
 		}
-		pt[1].pos = mat_mult_vec(objects[id].from_local, (float4)(pt[1].pos, 1.0f)).xyz;
+		pt[1].pos = mat_mult_vec(obj.from_local, (float4)(pt[1].pos, 1.0f)).xyz;
 		pt[1].dist = length(pt[1].pos - ray->origin);
 		hit->pt[hit->num_elements++] = pt[1];
 	}
@@ -714,8 +707,8 @@ bool intersect_cone(__constant t_object *objects, int id, const t_ray *ray, bool
 
 bool intersect_box(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit)
 {
-	// const t_object obj = objects[id];
-	t_ray ray_local = ray2local(ray, &objects[id]);
+	const t_object obj = objects[id];
+	t_ray ray_local = ray2local(ray, &obj);
 
 	if ((MAX_POINTS - hit->num_elements) < 2)
 		return false;
@@ -756,7 +749,7 @@ bool intersect_box(__constant t_object *objects, int id, const t_ray *ray, bool 
 	float bias = 1.0001f;
 	if (pt[0].dist > 0.0f)
 	{
-		pt[0].obj_id = objects[id].id;
+		pt[0].obj_id = obj.id;
 		pt[0].pos = ray_local.origin + ray_local.dir * pt[0].dist;
 		// trick to finding AABB (axis aligned bounding box) normal vector used from here
 		// http://blog.johnnovak.net/2016/10/22/the-nim-raytracer-project-part-4-calculating-box-normals/
@@ -769,16 +762,16 @@ bool intersect_box(__constant t_object *objects, int id, const t_ray *ray, bool 
 																				
 		{
 			pt[0].normal = dot(pt[0].normal, ray_local.dir) < 0.0f ? pt[0].normal : -pt[0].normal;
-			pt[0].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(pt[0].normal, 0.0f)).xyz;
+			pt[0].normal = mat_mult_vec(mat_transpose(obj.to_local), (float4)(pt[0].normal, 0.0f)).xyz;
 			pt[0].normal = fast_normalize(pt[0].normal);
 		}
-		pt[0].pos = mat_mult_vec(objects[id].from_local, (float4)(pt[0].pos, 1.0f)).xyz;
+		pt[0].pos = mat_mult_vec(obj.from_local, (float4)(pt[0].pos, 1.0f)).xyz;
 		pt[0].dist = length(pt[0].pos - ray->origin);
 		hit->pt[hit->num_elements++] = pt[0];
 	}
 	if (pt[1].dist > 0.0f)
 	{
-		pt[1].obj_id = objects[id].id;
+		pt[1].obj_id = obj.id;
 		pt[1].pos = ray_local.origin + ray_local.dir * pt[1].dist;
 		pt[1].normal = pt[1].pos;
 		pt[1].normal.x = (int)(pt[1].normal.x / fabs(d.x) * bias);
@@ -788,10 +781,10 @@ bool intersect_box(__constant t_object *objects, int id, const t_ray *ray, bool 
 		if (!quick)
 		{
 			pt[1].normal = dot(pt[1].normal, ray_local.dir) < 0.0f ? pt[1].normal : -pt[1].normal;
-			pt[1].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(pt[1].normal, 0.0f)).xyz;
+			pt[1].normal = mat_mult_vec(mat_transpose(obj.to_local), (float4)(pt[1].normal, 0.0f)).xyz;
 			pt[1].normal = fast_normalize(pt[1].normal);
 		}
-		pt[1].pos = mat_mult_vec(objects[id].from_local, (float4)(pt[1].pos, 1.0f)).xyz;
+		pt[1].pos = mat_mult_vec(obj.from_local, (float4)(pt[1].pos, 1.0f)).xyz;
 		pt[1].dist = length(pt[1].pos - ray->origin);
 		hit->pt[hit->num_elements++] = pt[1];
 	}
@@ -800,45 +793,63 @@ bool intersect_box(__constant t_object *objects, int id, const t_ray *ray, bool 
 
 bool intersect_union(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit)
 {	
-	// const t_object obj = objects[id];
-	t_ray ray_local = ray2local(ray, &objects[id]);
+	const t_object obj = objects[id];
+	t_ray ray_local = ray2local(ray, &obj);
 	bool hit_x, hit_y = false;
 
-	switch(objects[objects[id].operand.x].type)
+	switch(objects[obj.operand.x].type)
 	{
 		case PLANE :
-			hit_x = intersect_plane(objects, objects[id].operand.x, &ray_local, quick, hit);
+			hit_x = intersect_plane(objects, obj.operand.x, &ray_local, quick, hit);
 			break;
 		case SPHERE :
-			hit_x = intersect_sphere(objects, objects[id].operand.x, &ray_local, quick, hit);
+			hit_x = intersect_sphere(objects, obj.operand.x, &ray_local, quick, hit);
 			break;
 		case CYLINDER :
-			hit_x = intersect_cylinder(objects, objects[id].operand.x, &ray_local, quick, hit);
+			hit_x = intersect_cylinder(objects, obj.operand.x, &ray_local, quick, hit);
 			break;
 		case CONE :
-			hit_x = intersect_cone(objects, objects[id].operand.x, &ray_local, quick, hit);
+			hit_x = intersect_cone(objects, obj.operand.x, &ray_local, quick, hit);
 			break;
 		case BOX :
-			hit_x = intersect_box(objects, objects[id].operand.x, &ray_local, quick, hit);
+			hit_x = intersect_box(objects, obj.operand.x, &ray_local, quick, hit);
 			break;
+		// case UNION :
+		// 	hit_x = intersect_union(objects, obj.operand.x, &ray_local, quick, hit);
+		// 	break;
+		// case DIFFERENCE :
+		// 	hit_x = intersect_difference(objects, obj.operand.x, &ray_local, quick, hit);
+		// 	break;
+		// case INTERSECTION :
+		// 	hit_x = intersect_intersection(objects, obj.operand.x, &ray_local, quick, hit);
+		// 	break;
 	}
-	switch(objects[objects[id].operand.y].type)
+	switch(objects[obj.operand.y].type)
 	{
 		case PLANE :
-			hit_y = intersect_plane(objects, objects[id].operand.y, &ray_local, quick, hit);
+			hit_y = intersect_plane(objects, obj.operand.y, &ray_local, quick, hit);
 			break;
 		case SPHERE :
-			hit_y = intersect_sphere(objects, objects[id].operand.y, &ray_local, quick, hit);
+			hit_y = intersect_sphere(objects, obj.operand.y, &ray_local, quick, hit);
 			break;
 		case CYLINDER :
-			hit_y = intersect_cylinder(objects, objects[id].operand.y, &ray_local, quick, hit);
+			hit_y = intersect_cylinder(objects, obj.operand.y, &ray_local, quick, hit);
 			break;
 		case CONE :
-			hit_y = intersect_cone(objects, objects[id].operand.y, &ray_local, quick, hit);
+			hit_y = intersect_cone(objects, obj.operand.y, &ray_local, quick, hit);
 			break;
 		case BOX :
-			hit_y = intersect_box(objects, objects[id].operand.y, &ray_local, quick, hit);
+			hit_y = intersect_box(objects, obj.operand.y, &ray_local, quick, hit);
 			break;
+		// case UNION :
+		// 	hit_y = intersect_union(objects, obj.operand.y, &ray_local, quick, hit);
+		// 	break;
+		// case DIFFERENCE :
+		// 	hit_y = intersect_difference(objects, obj.operand.y, &ray_local, quick, hit);
+		// 	break;
+		// case INTERSECTION :
+		// 	hit_y = intersect_intersection(objects, obj.operand.y, &ray_local, quick, hit);
+		// 	break;
 	}
 	if (!hit_x && !hit_y)
 		return false;
@@ -849,7 +860,7 @@ bool intersect_union(__constant t_object *objects, int id, const t_ray *ray, boo
 		for (int i = 0; i < hit->num_elements; i++)
 		// for (int i = 0; i < MAX_POINTS; i++)
 		{
-			if (hit->pt[i].obj_id == objects[id].operand.x)
+			if (hit->pt[i].obj_id == obj.operand.x)
 			{
 				// determining the initial state before first intersection with first object (whether ray was out of object or inside)
 				state_x = !hit->pt[i].inside;
@@ -862,7 +873,7 @@ bool intersect_union(__constant t_object *objects, int id, const t_ray *ray, boo
 		for (int i = 0; i < hit->num_elements; i++)
 		// for (int i = 0; i < MAX_POINTS; i++)
 		{
-			if (hit->pt[i].obj_id == objects[id].operand.y)
+			if (hit->pt[i].obj_id == obj.operand.y)
 			{
 				// determining the initial state before first intersection with second object (whether ray was out of object or inside)
 				state_y = !hit->pt[i].inside;
@@ -874,40 +885,40 @@ bool intersect_union(__constant t_object *objects, int id, const t_ray *ray, boo
 	// for (int i = 0; i < MAX_POINTS; i++)
 	for (int i = 0; i < hit->num_elements; i++)
 	{
-		if (hit->pt[i].obj_id == objects[id].operand.x)
+		if (hit->pt[i].obj_id == obj.operand.x)
 		{
 			state_x = hit->pt[i].inside;
 			if (!state_y)
 			{
-				hit->pt[i].obj_id = objects[id].id;
+				hit->pt[i].obj_id = obj.id;
 				// hit->pt[i].inside = state_x ? true : false;
 				if (!quick)
 				{
 					// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
-					hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
+					hit->pt[i].normal = mat_mult_vec(mat_transpose(obj.to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
 					hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
 				}
-				hit->pt[i].pos = mat_mult_vec(objects[id].from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
+				hit->pt[i].pos = mat_mult_vec(obj.from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
 				hit->pt[i].dist = length(hit->pt[i].pos - ray->origin);
 			}
 			else
 				hit->pt[i].obj_id = -1;
 			
 		}
-		else if (hit->pt[i].obj_id == objects[id].operand.y)
+		else if (hit->pt[i].obj_id == obj.operand.y)
 		{
 			state_y = hit->pt[i].inside;
 			if (!state_x)
 			{
-				hit->pt[i].obj_id = objects[id].id;
+				hit->pt[i].obj_id = obj.id;
 				// hit->pt[i].inside = state_y ? true : false;
 				if (!quick)
 				{
 					// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
-					hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
+					hit->pt[i].normal = mat_mult_vec(mat_transpose(obj.to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
 					hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
 				}
-				hit->pt[i].pos = mat_mult_vec(objects[id].from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
+				hit->pt[i].pos = mat_mult_vec(obj.from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
 				hit->pt[i].dist = length(hit->pt[i].pos - ray->origin);
 			}
 			else
@@ -920,51 +931,69 @@ bool intersect_union(__constant t_object *objects, int id, const t_ray *ray, boo
 
 bool intersect_intersection(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit)
 {	
-	// const t_object obj = objects[id];
-	t_ray ray_local = ray2local(ray, &objects[id]);
+	const t_object obj = objects[id];
+	t_ray ray_local = ray2local(ray, &obj);
 	bool hit_x, hit_y = false;
 
-	switch(objects[objects[id].operand.x].type)
+	switch(objects[obj.operand.x].type)
 	{
 		case PLANE :
-			hit_x = intersect_plane(objects, objects[id].operand.x, &ray_local, quick, hit);
+			hit_x = intersect_plane(objects, obj.operand.x, &ray_local, quick, hit);
 			break;
 		case SPHERE :
-			hit_x = intersect_sphere(objects, objects[id].operand.x, &ray_local, quick, hit);
+			hit_x = intersect_sphere(objects, obj.operand.x, &ray_local, quick, hit);
 			break;
 		case CYLINDER :
-			hit_x = intersect_cylinder(objects, objects[id].operand.x, &ray_local, quick, hit);
+			hit_x = intersect_cylinder(objects, obj.operand.x, &ray_local, quick, hit);
 			break;
 		case CONE :
-			hit_x = intersect_cone(objects, objects[id].operand.x, &ray_local, quick, hit);
+			hit_x = intersect_cone(objects, obj.operand.x, &ray_local, quick, hit);
 			break;
 		case BOX :
-			hit_x = intersect_box(objects, objects[id].operand.x, &ray_local, quick, hit);
+			hit_x = intersect_box(objects, obj.operand.x, &ray_local, quick, hit);
 			break;
+		// case UNION :
+		// 	hit_x = intersect_union(objects, obj.operand.x, &ray_local, quick, hit);
+		// 	break;
+		// case DIFFERENCE :
+		// 	hit_x = intersect_difference(objects, obj.operand.x, &ray_local, quick, hit);
+		// 	break;
+		// case INTERSECTION :
+		// 	hit_x = intersect_intersection(objects, obj.operand.x, &ray_local, quick, hit);
+		// 	break;
 	}
-	switch(objects[objects[id].operand.y].type)
+	switch(objects[obj.operand.y].type)
 	{
 		case PLANE :
-			hit_y = intersect_plane(objects, objects[id].operand.y, &ray_local, quick, hit);
+			hit_y = intersect_plane(objects, obj.operand.y, &ray_local, quick, hit);
 			break;
 		case SPHERE :
-			hit_y = intersect_sphere(objects, objects[id].operand.y, &ray_local, quick, hit);
+			hit_y = intersect_sphere(objects, obj.operand.y, &ray_local, quick, hit);
 			break;
 		case CYLINDER :
-			hit_y = intersect_cylinder(objects, objects[id].operand.y, &ray_local, quick, hit);
+			hit_y = intersect_cylinder(objects, obj.operand.y, &ray_local, quick, hit);
 			break;
 		case CONE :
-			hit_y = intersect_cone(objects, objects[id].operand.y, &ray_local, quick, hit);
+			hit_y = intersect_cone(objects, obj.operand.y, &ray_local, quick, hit);
 			break;
 		case BOX :
-			hit_y = intersect_box(objects, objects[id].operand.y, &ray_local, quick, hit);
+			hit_y = intersect_box(objects, obj.operand.y, &ray_local, quick, hit);
 			break;
+		// case UNION :
+		// 	hit_y = intersect_union(objects, obj.operand.y, &ray_local, quick, hit);
+		// 	break;
+		// case DIFFERENCE :
+		// 	hit_y = intersect_difference(objects, obj.operand.y, &ray_local, quick, hit);
+		// 	break;
+		// case INTERSECTION :
+		// 	hit_y = intersect_intersection(objects, obj.operand.y, &ray_local, quick, hit);
+		// 	break;
 	}
 	if (!hit_x || !hit_y)
 	{
 		for (int i = 0; i < hit->num_elements; i++)
 		{
-			if (hit->pt[i].obj_id == objects[id].operand.x || hit->pt[i].obj_id == objects[id].operand.y)
+			if (hit->pt[i].obj_id == obj.operand.x || hit->pt[i].obj_id == obj.operand.y)
 				hit->pt[i].obj_id = -1;
 		}
 		return false;
@@ -974,7 +1003,7 @@ bool intersect_intersection(__constant t_object *objects, int id, const t_ray *r
 	for (int i = 0; i < hit->num_elements; i++)
 	{
 		// determining the initial state before first intersection with first object (whether ray was out of object or inside)
-		if (hit->pt[i].obj_id == objects[id].operand.x)
+		if (hit->pt[i].obj_id == obj.operand.x)
 		{
 			state_x = !hit->pt[i].inside;
 			break;
@@ -983,7 +1012,7 @@ bool intersect_intersection(__constant t_object *objects, int id, const t_ray *r
 	for (int i = 0; i < hit->num_elements; i++)
 	{
 		// determining the initial state before first intersection with second object (whether ray was out of object or inside)
-		if (hit->pt[i].obj_id == objects[id].operand.y)
+		if (hit->pt[i].obj_id == obj.operand.y)
 		{
 			state_y = !hit->pt[i].inside;
 			break;
@@ -992,40 +1021,40 @@ bool intersect_intersection(__constant t_object *objects, int id, const t_ray *r
 	// determining whether to keep or delete points from first object or second
 	for (int i = 0; i < hit->num_elements; i++)
 	{
-		if (hit->pt[i].obj_id == objects[id].operand.x)
+		if (hit->pt[i].obj_id == obj.operand.x)
 		{
 			state_x = hit->pt[i].inside;
-			hit->pt[i].obj_id = objects[id].id;
+			hit->pt[i].obj_id = obj.id;
 			if (state_y)
 			{
 				hit->pt[i].inside = state_x ? true : false;
 				if (!quick)
 				{
 					// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
-					hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
+					hit->pt[i].normal = mat_mult_vec(mat_transpose(obj.to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
 					hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
 				}
-				hit->pt[i].pos = mat_mult_vec(objects[id].from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
+				hit->pt[i].pos = mat_mult_vec(obj.from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
 				hit->pt[i].dist = length(hit->pt[i].pos - ray->origin);
 			}
 			else
 				hit->pt[i].obj_id = -1;
 			
 		}
-		else if (hit->pt[i].obj_id == objects[id].operand.y)
+		else if (hit->pt[i].obj_id == obj.operand.y)
 		{
 			state_y = hit->pt[i].inside;
-			hit->pt[i].obj_id = objects[id].id;
+			hit->pt[i].obj_id = obj.id;
 			if (state_x)
 			{
 				hit->pt[i].inside = state_y ? true : false;
 				if (!quick)
 				{
 					// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
-					hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
+					hit->pt[i].normal = mat_mult_vec(mat_transpose(obj.to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
 					hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
 				}
-				hit->pt[i].pos = mat_mult_vec(objects[id].from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
+				hit->pt[i].pos = mat_mult_vec(obj.from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
 				hit->pt[i].dist = length(hit->pt[i].pos - ray->origin);
 			}
 			else
@@ -1037,47 +1066,56 @@ bool intersect_intersection(__constant t_object *objects, int id, const t_ray *r
 
 bool intersect_difference(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit)
 {	
-	// const t_object obj = objects[id];
-	t_ray ray_local = ray2local(ray, &objects[id]);
+	const t_object obj = objects[id];
+	t_ray ray_local = ray2local(ray, &obj);
 	bool hit_x, hit_y = false;
 
-	switch(objects[objects[id].operand.x].type)
+	switch(objects[obj.operand.x].type)
 	{
 		case PLANE :
-			hit_x = intersect_plane(objects, objects[id].operand.x, &ray_local, quick, hit);
+			hit_x = intersect_plane(objects, obj.operand.x, &ray_local, quick, hit);
 			break;
 		case SPHERE :
-			hit_x = intersect_sphere(objects, objects[id].operand.x, &ray_local, quick, hit);
+			hit_x = intersect_sphere(objects, obj.operand.x, &ray_local, quick, hit);
 			break;
 		case CYLINDER :
-			hit_x = intersect_cylinder(objects, objects[id].operand.x, &ray_local, quick, hit);
+			hit_x = intersect_cylinder(objects, obj.operand.x, &ray_local, quick, hit);
 			break;
 		case CONE :
-			hit_x = intersect_cone(objects, objects[id].operand.x, &ray_local, quick, hit);
+			hit_x = intersect_cone(objects, obj.operand.x, &ray_local, quick, hit);
 			break;
 		case BOX :
-			hit_x = intersect_box(objects, objects[id].operand.x, &ray_local, quick, hit);
+			hit_x = intersect_box(objects, obj.operand.x, &ray_local, quick, hit);
 			break;
+		// case UNION :
+		// 	hit_x = intersect_union(objects, obj.operand.x, &ray_local, quick, hit);
+		// 	break;
+		// case DIFFERENCE :
+		// 	hit_x = intersect_difference(objects, obj.operand.x, &ray_local, quick, hit);
+		// 	break;
+		// case INTERSECTION :
+		// 	hit_x = intersect_intersection(objects, obj.operand.x, &ray_local, quick, hit);
+		// 	break;
 	}
 	// if there is no intersection with first object of DIFFERENCE - ignore all the rest
 	if (!hit_x)
 		return false;
-	switch(objects[objects[id].operand.y].type)
+	switch(objects[obj.operand.y].type)
 	{
 		case PLANE :
-			hit_y = intersect_plane(objects, objects[id].operand.y, &ray_local, quick, hit);
+			hit_y = intersect_plane(objects, obj.operand.y, &ray_local, quick, hit);
 			break;
 		case SPHERE :
-			hit_y = intersect_sphere(objects, objects[id].operand.y, &ray_local, quick, hit);
+			hit_y = intersect_sphere(objects, obj.operand.y, &ray_local, quick, hit);
 			break;
 		case CYLINDER :
-			hit_y = intersect_cylinder(objects, objects[id].operand.y, &ray_local, quick, hit);
+			hit_y = intersect_cylinder(objects, obj.operand.y, &ray_local, quick, hit);
 			break;
 		case CONE :
-			hit_y = intersect_cone(objects, objects[id].operand.y, &ray_local, quick, hit);
+			hit_y = intersect_cone(objects, obj.operand.y, &ray_local, quick, hit);
 			break;
 		case BOX :
-			hit_y = intersect_box(objects, objects[id].operand.y, &ray_local, quick, hit);
+			hit_y = intersect_box(objects, obj.operand.y, &ray_local, quick, hit);
 			break;
 		// case UNION :
 		// 	hit_y = intersect_union(objects, obj.operand.y, &ray_local, quick, hit);
@@ -1094,16 +1132,16 @@ bool intersect_difference(__constant t_object *objects, int id, const t_ray *ray
 	{
 		for (int i = 0; i < hit->num_elements; i++)
 		{
-			if (hit->pt[i].obj_id == objects[id].operand.x)
+			if (hit->pt[i].obj_id == obj.operand.x)
 			{
-				hit->pt[i].obj_id = objects[id].id;
+				hit->pt[i].obj_id = obj.id;
 				if (!quick)
 				{
 					// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
-					hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
+					hit->pt[i].normal = mat_mult_vec(mat_transpose(obj.to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
 					hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
 				}
-				hit->pt[i].pos = mat_mult_vec(objects[id].from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
+				hit->pt[i].pos = mat_mult_vec(obj.from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
 				hit->pt[i].dist = length(hit->pt[i].pos - ray->origin);
 			}
 		}
@@ -1113,7 +1151,7 @@ bool intersect_difference(__constant t_object *objects, int id, const t_ray *ray
 	bool state_x, state_y;
 	for (int i = 0; i < hit->num_elements; i++)
 	{
-		if (hit->pt[i].obj_id == objects[id].operand.x)
+		if (hit->pt[i].obj_id == obj.operand.x)
 		{
 			state_x = !hit->pt[i].inside;
 			break;
@@ -1121,7 +1159,7 @@ bool intersect_difference(__constant t_object *objects, int id, const t_ray *ray
 	}
 	for (int i = 0; i < hit->num_elements; i++)
 	{
-		if (hit->pt[i].obj_id == objects[id].operand.y)
+		if (hit->pt[i].obj_id == obj.operand.y)
 		{
 			state_y = !hit->pt[i].inside;
 			break;
@@ -1130,40 +1168,40 @@ bool intersect_difference(__constant t_object *objects, int id, const t_ray *ray
 	// determining whether to keep or delete points from first object or second
 	for (int i = 0; i < hit->num_elements; i++)
 	{
-		if (hit->pt[i].obj_id == objects[id].operand.x)
+		if (hit->pt[i].obj_id == obj.operand.x)
 		{
 			state_x = hit->pt[i].inside;
-			hit->pt[i].obj_id = objects[id].id;
+			hit->pt[i].obj_id = obj.id;
 			if (!state_y)
 			{	
 				hit->pt[i].inside = state_x ? true : false;
 				if (!quick)
 				{
 					// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
-					hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
+					hit->pt[i].normal = mat_mult_vec(mat_transpose(obj.to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
 					hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
 				}
-				hit->pt[i].pos = mat_mult_vec(objects[id].from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
+				hit->pt[i].pos = mat_mult_vec(obj.from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
 				hit->pt[i].dist = length(hit->pt[i].pos - ray->origin);
 			}
 			else
 				hit->pt[i].obj_id = -1;
 
 		}
-		else if (hit->pt[i].obj_id == objects[id].operand.y)
+		else if (hit->pt[i].obj_id == obj.operand.y)
 		{
 			state_y = hit->pt[i].inside;
-			hit->pt[i].obj_id = objects[id].id;
+			hit->pt[i].obj_id = obj.id;
 			if (state_x)
 			{
 				hit->pt[i].inside = state_y ? false : true;
 				if (!quick)
 				{
 					// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
-					hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
+					hit->pt[i].normal = mat_mult_vec(mat_transpose(obj.to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
 					hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
 				}
-				hit->pt[i].pos = mat_mult_vec(objects[id].from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
+				hit->pt[i].pos = mat_mult_vec(obj.from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
 				hit->pt[i].dist = length(hit->pt[i].pos - ray->origin);
 			}
 			else
@@ -1175,102 +1213,87 @@ bool intersect_difference(__constant t_object *objects, int id, const t_ray *ray
 
 bool intersect_clipping(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit)
 {	
-	// const t_object obj = objects[id];
-	t_ray ray_local = ray2local(ray, &objects[id]);
+	const t_object obj = objects[id];
+	t_ray ray_local = ray2local(ray, &obj);
 	bool hit_x, hit_y = false;
 
-	switch(objects[objects[id].operand.x].type)
+	switch(objects[obj.operand.x].type)
 	{
 		case PLANE :
-			hit_x = intersect_plane(objects, objects[id].operand.x, &ray_local, quick, hit);
+			hit_x = intersect_plane(objects, obj.operand.x, &ray_local, quick, hit);
 			break;
 		case SPHERE :
-			hit_x = intersect_sphere(objects, objects[id].operand.x, &ray_local, quick, hit);
+			hit_x = intersect_sphere(objects, obj.operand.x, &ray_local, quick, hit);
 			break;
 		case CYLINDER :
-			hit_x = intersect_cylinder(objects, objects[id].operand.x, &ray_local, quick, hit);
+			hit_x = intersect_cylinder(objects, obj.operand.x, &ray_local, quick, hit);
 			break;
 		case CONE :
-			hit_x = intersect_cone(objects, objects[id].operand.x, &ray_local, quick, hit);
+			hit_x = intersect_cone(objects, obj.operand.x, &ray_local, quick, hit);
 			break;
 		case BOX :
-			hit_x = intersect_box(objects, objects[id].operand.x, &ray_local, quick, hit);
+			hit_x = intersect_box(objects, obj.operand.x, &ray_local, quick, hit);
 			break;
 	}
 	// if there is no intersection with first object of DIFFERENCE - ignore all the rest
 	if (!hit_x)
 		return false;
 
-	if (objects[objects[id].operand.y].type == PLANE)
+	switch(objects[obj.operand.y].type)
 	{
-		float3 plane_normal = mat_mult_vec(mat_transpose(objects[objects[id].operand.y].to_local), (float4)(0.0f, 1.0f, 0.0f, 0.0f)).xyz;
-		float3 plane_pos = mat_mult_vec(objects[objects[id].operand.y].from_local, (float4)(0.0f, 0.0f, 0.0f, 1.0f)).xyz;
-		plane_normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(plane_normal, 0.0f)).xyz;
-		plane_pos = mat_mult_vec(objects[id].from_local, (float4)(plane_pos, 1.0f)).xyz;
-		for (int i = 0; i < hit->num_elements; i++)
-		{
-			if (hit->pt[i].obj_id == objects[id].operand.x)
-			{
-				hit->pt[i].obj_id = objects[id].id;
-				if (!quick)
-				{
-					// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
-					hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
-					hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
-				}
-				hit->pt[i].pos = mat_mult_vec(objects[id].from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
-				hit->pt[i].dist = length(hit->pt[i].pos - ray->origin);
-				if (dot(plane_pos - hit->pt[i].pos, plane_normal) < 0.0f)
-					hit->pt[i].obj_id = -1;
-			}
-		}
-		return true;
+		case PLANE :
+			hit_y = intersect_plane(objects, obj.operand.y, &ray_local, quick, hit);
+			break;
+		case SPHERE :
+			hit_y = intersect_sphere(objects, obj.operand.y, &ray_local, quick, hit);
+			break;
+		case CYLINDER :
+			hit_y = intersect_cylinder(objects, obj.operand.y, &ray_local, quick, hit);
+			break;
+		case CONE :
+			hit_y = intersect_cone(objects, obj.operand.y, &ray_local, quick, hit);
+			break;
+		case BOX :
+			hit_y = intersect_box(objects, obj.operand.y, &ray_local, quick, hit);
+			break;
+		default :
+			hit_y = false;
 	}
-	else
-		switch(objects[objects[id].operand.y].type)
-		{
-			case SPHERE :
-				hit_y = intersect_sphere(objects, objects[id].operand.y, &ray_local, quick, hit);
-				break;
-			case CYLINDER :
-				hit_y = intersect_cylinder(objects, objects[id].operand.y, &ray_local, quick, hit);
-				break;
-			case CONE :
-				hit_y = intersect_cone(objects, objects[id].operand.y, &ray_local, quick, hit);
-				break;
-			case BOX :
-				hit_y = intersect_box(objects, objects[id].operand.y, &ray_local, quick, hit);
-				break;
-			default :
-				hit_y = false;
-		}
 	//if there is intersection with first object but not second - clean up points generated by first object
 	bool state_y = false;
 	if (!hit_y)
 	{
-		for (int i = 0; i < hit->num_elements; i++)
+		if (objects[obj.operand.y].type == PLANE)
 		{
-			if (hit->pt[i].obj_id == objects[id].operand.x)
-			{
-				hit->pt[i].obj_id = objects[id].id;
-				if (!quick)
-				{
-					// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
-					hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
-					hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
-				}
-				hit->pt[i].pos = mat_mult_vec(objects[id].from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
-				hit->pt[i].dist = length(hit->pt[i].pos - ray->origin);
-			}
+			float3 plane_normal = mat_mult_vec(mat_transpose(objects[obj.operand.y].to_local), (float4)(0.0f, 1.0f, 0.0f, 0.0f)).xyz;
+			state_y = (dot(ray->dir, plane_normal) <= 0.f) ? true : false; 
 		}
-		return true;	
+		else
+		{
+			for (int i = 0; i < hit->num_elements; i++)
+			{
+				if (hit->pt[i].obj_id == obj.operand.x)
+				{
+					hit->pt[i].obj_id = obj.id;
+					if (!quick)
+					{
+						// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
+						hit->pt[i].normal = mat_mult_vec(mat_transpose(obj.to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
+						hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
+					}
+					hit->pt[i].pos = mat_mult_vec(obj.from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
+					hit->pt[i].dist = length(hit->pt[i].pos - ray->origin);
+				}
+			}
+			return true;	
+		}	
 	}
 	hitpoints_sort(hit);
 	if (hit_y)
 	{
 		for (int i = 0; i < hit->num_elements; i++)
 		{
-			if (hit->pt[i].obj_id == objects[id].operand.y)
+			if (hit->pt[i].obj_id == obj.operand.y)
 			{
 				state_y = !hit->pt[i].inside;
 				break;
@@ -1281,26 +1304,27 @@ bool intersect_clipping(__constant t_object *objects, int id, const t_ray *ray, 
 	// determining whether to keep or delete points from first object or second
 	for (int i = 0; i < hit->num_elements; i++)
 	{
-		if (hit->pt[i].obj_id == objects[id].operand.x)
+		if (hit->pt[i].obj_id == obj.operand.x)
 		{
 			// state_x = hit->pt[i].inside;
-			hit->pt[i].obj_id = objects[id].id;
+			hit->pt[i].obj_id = obj.id;
 			if (!state_y)
 			{	
 				// hit->pt[i].inside = state_x ? true : false;
 				if (!quick)
 				{
 					// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
-					hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
+					hit->pt[i].normal = mat_mult_vec(mat_transpose(obj.to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
 					hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
 				}
-				hit->pt[i].pos = mat_mult_vec(objects[id].from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
+				hit->pt[i].pos = mat_mult_vec(obj.from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
 				hit->pt[i].dist = length(hit->pt[i].pos - ray->origin);
 			}
 			else
 				hit->pt[i].obj_id = -1;
+
 		}
-		else if (hit->pt[i].obj_id == objects[id].operand.y)
+		else if (hit->pt[i].obj_id == obj.operand.y)
 		{
 			state_y = hit->pt[i].inside;
 			hit->pt[i].obj_id = -1;
@@ -1308,43 +1332,7 @@ bool intersect_clipping(__constant t_object *objects, int id, const t_ray *ray, 
 	}
 	return true;
 }
-/*
-bool intersect_bocal(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit)
-{
-	const t_object obj = objects[id];
-	t_ray ray_local = ray2local(ray, &obj);
 
-	if ((MAX_POINTS - hit->num_elements) < 6)
-		return false;
-	t_hitpoints bocal_hit;
-	hitpoints_init(&bocal_hit);
-	int hit_number = 0;
-
-	if (intersect_difference(compound, 2, &ray_local, quick, &bocal_hit))
-		hit_number++;
-	if (intersect_box(compound, 3, &ray_local, quick, &bocal_hit))
-		hit_number++;
-	if (intersect_difference(compound, 4, &ray_local, quick, &bocal_hit))
-		hit_number++;
-	if (intersect_union(compound, 7, &ray_local, quick, &bocal_hit))
-		hit_number++;
-	if (intersect_union(compound, 8, &ray_local, quick, &bocal_hit))
-		hit_number++;
-
-	if (intersect_difference(compound, 2, &ray_local, quick, &bocal_hit))
-	{
-		int i = 0;
-		while (i != bocal_hit.num_elements - 1)
-		{
-			bocal_hit.pt[i].obj_id = id;
-			hit->pt[hit->num_elements++] = bocal_hit.pt[i];
-			++i;
-		}
-		return true;
-	}
-	return false;
-}
-*/
 bool intersect_scene(__constant t_object *objects, const int num_objects, const t_ray *ray,	float3 *normal, float *t, int *object_id, bool quick)
 {
 	// initialise t to a very large number, so t will be guaranteed to be smaller	when a hit with the scene occurs
@@ -1422,69 +1410,61 @@ bool intersect_scene(__constant t_object *objects, const int num_objects, const 
 /* each ray hitting a surface will be reflected in a random direction (by randomly sampling the hemisphere above the hitpoint) */
 /* small optimisation: diffuse ray directions are calculated using cosine weighted importance sampling */
 
+float3 trace_path(__constant t_object *spheres, const t_ray *camray, const int sphere_count, const int *seed0, const int *seed1)
+{
+	t_ray ray = *camray;
 
+	float3 accum_color = (float3)(0.0f, 0.0f, 0.0f);
+	float3 mask = (float3)(1.0f, 1.0f, 1.0f);
+	float3 normal_facing = (float3)(0.0f, 0.0f, 0.0f);
 
-// float3 trace_path(__constant t_object *spheres, const t_ray *camray, const int object_count, const int *seed0, const int *seed1)
-// {
-// 	t_ray ray = *camray;
+	for (int bounces = 0; bounces < NUM_BOUNCES; bounces++)
+	{
+		float t;   /* distance to intersection */
+		int hitobject_id = 0; /* index of intersected sphere */
 
-// 	float3 accum_color = (float3)(0.0f, 0.0f, 0.0f);
-// 	float3 mask = (float3)(1.0f, 1.0f, 1.0f);
-// 	float3 normal_facing = (float3)(0.0f, 0.0f, 0.0f);
+		/* if ray misses scene, return background colour */
+		if (!intersect_scene(spheres, sphere_count, &ray, &normal_facing, &t, &hitobject_id, false))
+			return accum_color += mask * (float3)(0.15f, 0.15f, 0.25f);
 
-// 	for (int bounces = 0; bounces < NUM_BOUNCES; bounces++)
-// 	{
-// 		// distance to intersection
-// 		float t;
-// 		// index of intersected sphere
-// 		int hitobject_id = 0; 
+		/* else, we've got a hit! Fetch the closest hit sphere */
+		t_object hitobject = spheres[hitobject_id]; /* version with local copy of sphere */
 
-// 		// if ray misses scene, return background colour
-// 		if (!intersect_scene(spheres, object_count, &ray, &normal_facing, &t, &hitobject_id, false))
-// 			return accum_color += mask * (float3)(0.15f, 0.15f, 0.25f);
-
-// 		// else, we've got a hit! Fetch the closest hit sphere
-// 		//version with local copy of sphere
-// 		t_object hitobject = spheres[hitobject_id]; 
-
-// 		//compute the hitpoint using the ray equation
-// 		float3 hitpoint = ray.origin + ray.dir * t;
+		/* compute the hitpoint using the ray equation */
+		float3 hitpoint = ray.origin + ray.dir * t;
 		
-// 		//compute the surface normal and flip it if necessary to face the incoming ray
-// 		// float3 normal_facing = find_normal(&hitobject, &ray, t);
+		/* compute the surface normal and flip it if necessary to face the incoming ray */
+		// float3 normal_facing = find_normal(&hitobject, &ray, t);
 
-// 		//compute two random numbers to pick a random point on the hemisphere above the hitpoint
-// 		float rand1 = 2.0f * PI * get_random(seed0, seed1);
-// 		float rand2 = get_random(seed0, seed1);
-// 		float rand2s = sqrt(rand2);
+		/* compute two random numbers to pick a random point on the hemisphere above the hitpoint */
+		float rand1 = 2.0f * PI * get_random(seed0, seed1);
+		float rand2 = get_random(seed0, seed1);
+		float rand2s = sqrt(rand2);
 
-// 		//create a local orthogonal coordinate frame centered at the hitpoint
-// 		float3 w = normal_facing;
-// 		float3 axis = fabs(w.x) > 0.1f ? (float3)(0.0f, 1.0f, 0.0f) : (float3)(1.0f, 0.0f, 0.0f);
-// 		float3 u = normalize(cross(axis, w));
-// 		float3 v = cross(w, u);
+		/* create a local orthogonal coordinate frame centered at the hitpoint */
+		float3 w = normal_facing;
+		float3 axis = fabs(w.x) > 0.1f ? (float3)(0.0f, 1.0f, 0.0f) : (float3)(1.0f, 0.0f, 0.0f);
+		float3 u = normalize(cross(axis, w));
+		float3 v = cross(w, u);
 
-// 		//use the coordinte frame and random numbers to compute the next ray direction
-// 		float3 newdir = normalize(u * cos(rand1)*rand2s + v*sin(rand1)*rand2s + w*sqrt(1.0f - rand2));
+		/* use the coordinte frame and random numbers to compute the next ray direction */
+		float3 newdir = normalize(u * cos(rand1)*rand2s + v*sin(rand1)*rand2s + w*sqrt(1.0f - rand2));
 
-// 		//add a very small offset to the hitpoint to prevent self intersection
-// 		ray.origin = hitpoint + normal_facing * EPSILON;
-// 		ray.dir = newdir;
+		/* add a very small offset to the hitpoint to prevent self intersection */
+		ray.origin = hitpoint + normal_facing * EPSILON;
+		ray.dir = newdir;
 
-// 		//add the colour and light contributions to the accumulated colour
-// 		accum_color += mask * hitobject.emi; 
+		/* add the colour and light contributions to the accumulated colour */
+		accum_color += mask * hitobject.emi; 
 
-// 		//the mask colour picks up surface colours at each bounce
-// 		mask *= hitobject.color; 
+		/* the mask colour picks up surface colours at each bounce */
+		mask *= hitobject.color; 
 		
-// 		// perform cosine-weighted importance sampling for diffuse surfaces
-// 		mask *= dot(newdir, normal_facing);
-// 	}
-// 	return accum_color;
-// }
-
-
-
+		/* perform cosine-weighted importance sampling for diffuse surfaces*/
+		mask *= dot(newdir, normal_facing);
+	}
+	return accum_color;
+}
 
 // float3 get_diffuse_light(__constant t_object *objects, const int num_objects, float3 hitpoint, int h_id, float3 normal,
 // 						 __constant t_light *lights, const int num_lights)
@@ -1514,7 +1494,7 @@ bool intersect_scene(__constant t_object *objects, const int num_objects, const 
 // 	return diffuse;
 // }
 
-float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const int object_count,
+float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const int sphere_count,
 						__constant t_light *lights, const int num_lights)
 {
 	t_ray ray = *camray;
@@ -1531,18 +1511,15 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 	int dummy_id = 0;
 
 	/* if ray misses scene, return background colour */
-	if (!intersect_scene(objects, object_count, &ray, &normal, &t, &hitobject_id, false))
+	if (!intersect_scene(objects, sphere_count, &ray, &normal, &t, &hitobject_id, false))
 		return bg_color;
 
 	/* else, we've got a hit! Fetch the closest hit sphere */
 	t_object hitobject = objects[hitobject_id]; /* version with local copy of sphere */
 
-	diffuse = hitobject.color * 0.2f;
 	/* compute the hitpoint using the ray equation */
 	float3 hitpoint = hitpoint_calc(&ray, t);
 
-	// -------------------------------------------------
-	/* add a very small offset to the hitpoint to prevent self intersection */
 	ray.origin = hitpoint + normal * EPSILON;
 
 	float dist_to_light = 0;
@@ -1552,12 +1529,11 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 		ray.dir = fast_normalize(lights[i].location - ray.origin);
 		dist_to_light = fast_length(lights[i].location - ray.origin);
 
-		if (intersect_scene(objects, object_count, &ray, &dummy_normal, &t, &dummy_id, true) && t < dist_to_light)
+		if (intersect_scene(objects, sphere_count, &ray, &dummy_normal, &t, &dummy_id, true) && t < dist_to_light)
 			continue;
 
-		//spot light shading
 		float intensity = zero_clamp(dot(normal, ray.dir));
-		diffuse += intensity * 0.8f * lights[i].emission * hitobject.color;
+		diffuse += intensity * lights[i].emission * hitobject.color;
 
 		float3 refl_dir = fast_normalize((2 * intensity * normal) - ray.dir);
 
@@ -1567,26 +1543,22 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 
 		specular += lights[i].emission * pow(phong_term, hitobject.specular_exp);
 	}
+ 	hit_color = hitobject.diffuse * diffuse + hitobject.specular * specular;
 
-	// reflection
+ 	// reflection
 	// t_ray refl_ray;
+
 	// refl_ray.origin = ray.origin;
 	// refl_ray.dir = refl_dir;
 
-	// if (intersect_scene(objects, object_count, &refl_ray, &dummy_normal, &t, &hitobject_id, true))
+	// if (intersect_scene(objects, sphere_count, &refl_ray, &dummy_normal, &t, &hitobject_id, true))
 	// 	hit_color += objects[hitobject_id].color;
 
- 	hit_color = hitobject.diffuse * diffuse + hitobject.specular * specular;
-	// -------------------------------------------------
-
-	// diffuse = get_diffuse_light(objects, object_count, hitpoint, hitobject_id, normal, lights, num_lights);
-
-	// hit_color = diffuse;
 
 	return hit_color;
 }
 
-__kernel void render_scene(__constant t_object *objects, const int object_count,
+__kernel void render_scene(__constant t_object *objects, const int sphere_count,
 					__constant t_light *lights, const int num_lights,
 					__global uchar4 *output, const int width, const int height,
 					__constant t_camera *camera)
@@ -1607,11 +1579,13 @@ __kernel void render_scene(__constant t_object *objects, const int object_count,
 	/* add the light contribution of each sample and average over all samples*/
 	// float invSamples = 1.0f / SAMPLES;
 
-	float3 pixel_float = get_direct_light(objects, &camray, object_count, lights, num_lights);
+	float3 pixel_float = get_direct_light(objects, &camray, sphere_count, lights, num_lights);
+
+	// float3 pixel_float;
 
 	// ----------- PATH TRACING! -----------
 	// for (int i = 0; i < SAMPLES; i++)
-	// 	finalcolor += trace_path(spheres, &camray, object_count, &seed0, &seed1) * invSamples;
+	// 	pixel_float += trace_path(objects, &camray, sphere_count, &seed0, &seed1) * invSamples;
 
 	output[work_item_id].z = (uchar)(clamp(pixel_float.x, 0.0f, 1.0f) * 255 + .5f);
 	output[work_item_id].y = (uchar)(clamp(pixel_float.y, 0.0f, 1.0f) * 255 + .5f);

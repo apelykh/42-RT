@@ -110,6 +110,8 @@ cl_float4	init_vec4(cl_float x, cl_float y, cl_float z, cl_float w);
 
 void	init_scene1(t_scene *scene);
 
+void	parse_scene(char *scene_path);
+
 void	init_sdl(t_sdl_context *sdl_context);
 void	sdl_cleanup(t_sdl_context *sdl_context);
 
