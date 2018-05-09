@@ -104,8 +104,8 @@ bool	intersect_clipping(__constant t_object *objects, int id, const t_ray *ray, 
 bool	intersect_scene(__constant t_object *objects, const int num_objects, const t_ray *ray, float3 *normal,
 							float *t, int *object_id, bool quick);
 
-float3 get_diffuse_light(__constant t_object *objects, const int num_objects, float3 hitpoint, int h_id, float3 normal,
-						 __constant t_light *lights, const int num_lights);
+// float3	get_diffuse_light(__constant t_object *objects, const int num_objects, float3 hitpoint, int h_id, float3 normal,
+// 						 __constant t_light *lights, const int num_lights);
 
 
 float3	hitpoint_calc(const t_ray *ray, float dist);
@@ -1520,8 +1520,6 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 	/* compute the hitpoint using the ray equation */
 	float3 hitpoint = hitpoint_calc(&ray, t);
 
-	// -------------------------------------------------
-	/* add a very small offset to the hitpoint to prevent self intersection */
 	ray.origin = hitpoint + normal * EPSILON;
 
 	float dist_to_light = 0;
@@ -1544,22 +1542,18 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 			phong_term = 0.0f;
 
 		specular += lights[i].emission * pow(phong_term, hitobject.specular_exp);
-
-		// reflection
-		// t_ray refl_ray;
-		// refl_ray.origin = ray.origin;
-		// refl_ray.dir = refl_dir;
-
-		// if (intersect_scene(objects, sphere_count, &refl_ray, &dummy_normal, &t, &hitobject_id, true))
-		// 	hit_color += objects[hitobject_id].color;
 	}
-
  	hit_color = hitobject.diffuse * diffuse + hitobject.specular * specular;
-	// -------------------------------------------------
 
-	// diffuse = get_diffuse_light(objects, sphere_count, hitpoint, hitobject_id, normal, lights, num_lights);
+ 	// reflection
+	// t_ray refl_ray;
 
-	// hit_color = diffuse;
+	// refl_ray.origin = ray.origin;
+	// refl_ray.dir = refl_dir;
+
+	// if (intersect_scene(objects, sphere_count, &refl_ray, &dummy_normal, &t, &hitobject_id, true))
+	// 	hit_color += objects[hitobject_id].color;
+
 
 	return hit_color;
 }
@@ -1577,19 +1571,21 @@ __kernel void render_scene(__constant t_object *objects, const int sphere_count,
 	unsigned int y_coord = work_item_id / width;
 	
 	/* seeds for random number generator */
-	// unsigned int seed0 = x_coord;
-	// unsigned int seed1 = y_coord;
+	unsigned int seed0 = x_coord;
+	unsigned int seed1 = y_coord;
 
 	t_ray camray = create_cam_ray(camera, x_coord, y_coord, width, height);
 
 	/* add the light contribution of each sample and average over all samples*/
-	// float invSamples = 1.0f / SAMPLES;
+	float invSamples = 1.0f / SAMPLES;
 
-	float3 pixel_float = get_direct_light(objects, &camray, sphere_count, lights, num_lights);
+	// float3 pixel_float = get_direct_light(objects, &camray, sphere_count, lights, num_lights);
+
+	float3 pixel_float;
 
 	// ----------- PATH TRACING! -----------
-	// for (int i = 0; i < SAMPLES; i++)
-	// 	finalcolor += trace_path(spheres, &camray, sphere_count, &seed0, &seed1) * invSamples;
+	for (int i = 0; i < SAMPLES; i++)
+		pixel_float += trace_path(objects, &camray, sphere_count, &seed0, &seed1) * invSamples;
 
 	output[work_item_id].z = (uchar)(clamp(pixel_float.x, 0.0f, 1.0f) * 255 + .5f);
 	output[work_item_id].y = (uchar)(clamp(pixel_float.y, 0.0f, 1.0f) * 255 + .5f);

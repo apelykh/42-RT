@@ -22,8 +22,8 @@ INCLUDE_DIR = includes
 all: $(NAME)
 	
 $(NAME): $(OBJ)
-	@ $(CC) $(OBJ) -lOpenCL -lSDL2 -lm -o $@
-	# @ $(CC) $(OBJ) -framework opencl -L/Users/mdubrovs/.brew/Cellar/sdl2/2.0.8/lib -lSDL2 -lm -o $@
+	# @ $(CC) $(OBJ) -lOpenCL -lSDL2 -lm -o $@
+	@ $(CC) $(OBJ) -framework opencl -L/Users/apelykh/.brew/Cellar/sdl2/2.0.8/lib -lSDL2 -lm -o $@
 	# @ $(CC) $(OBJ) -framework opencl -framework SDL2 -lm -o $@
 	@ echo "[+] [$(NAME)] compiled"
 
