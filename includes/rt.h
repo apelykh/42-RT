@@ -4,7 +4,7 @@
 # define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 
 # include <SDL2/SDL.h>
-// # include "/Users/mdubrovs/.brew/Cellar/sdl2/2.0.8/include/SDL2/SDL.h"
+// # include "/Users/apelykh/.brew/Cellar/sdl2/2.0.8/include/SDL2/SDL.h"
 // # include <SDL2/SDL_timer.h>
 // # include <SDL2/SDL_image.h>
 
@@ -67,7 +67,7 @@ typedef struct			s_object
 	cl_float3			rotation;
 	cl_float3			scale;
 	cl_float3			color;
-	cl_float3			emi;
+	// cl_float3			emi;
 	cl_float			diffuse;
 	cl_float			specular;
 	cl_float			spec_exp;
@@ -103,12 +103,15 @@ typedef struct			s_scene
 	cl_int				im_height;
 }						t_scene;
 
+cl_int2		init_int2(cl_int x, cl_int y);
 cl_float3	init_vec3(cl_float x, cl_float y, cl_float z);
 cl_float3	add_vec3(cl_float3 a, cl_float3 b);
 cl_float3	init_norm_vec3(cl_float x, cl_float y, cl_float z);
 cl_float4	init_vec4(cl_float x, cl_float y, cl_float z, cl_float w);
 
 void	init_scene1(t_scene *scene);
+
+void	parse_scene(char *scene_path, t_scene *scene);
 
 void	init_sdl(t_sdl_context *sdl_context);
 void	sdl_cleanup(t_sdl_context *sdl_context);

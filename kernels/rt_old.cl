@@ -61,7 +61,7 @@ typedef struct	s_object
 	float3	rotation;			// object is rotated by .x degrees along X axis, .y degrees along Y axis, .z degrees along Z axis when transformed into world coords
 	float3	scale;				// object is scaled x times along X axis ... when transfored into world coords
 	float3	color;				// .x - R, .y - G, .z - B pigments of object's color
-	// float3	emi;				// object's emission
+	float3	emi;				// object's emission
 	float	diffuse;
 	float	specular;
 	float	specular_exp;
@@ -1519,7 +1519,7 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 {
 	t_ray ray = *camray;
 
-	float3 bg_color = (float3)(1.0f, 1.0f, 1.0f);
+	float3 bg_color = (float3)(0.3f, 0.2f, 0.5f);
 	float3 hit_color = (float3)(0.0f, 0.0f, 0.0f);
 	float3 diffuse = (float3)(0.0f, 0.0f, 0.0f);
 	float3 specular = (float3)(0.0f, 0.0f, 0.0f);
@@ -1541,7 +1541,6 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 	/* compute the hitpoint using the ray equation */
 	float3 hitpoint = hitpoint_calc(&ray, t);
 
-	// -------------------------------------------------
 	/* add a very small offset to the hitpoint to prevent self intersection */
 	ray.origin = hitpoint + normal * EPSILON;
 
@@ -1567,21 +1566,17 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 
 		specular += lights[i].emission * pow(phong_term, hitobject.specular_exp);
 	}
+ 	hit_color = hitobject.diffuse * diffuse + hitobject.specular * specular;
 
 	// reflection
 	// t_ray refl_ray;
 	// refl_ray.origin = ray.origin;
-	// refl_ray.dir = refl_dir;
+
+	// float c1 = (-1.0f) * dot(normal, camray->dir);
+	// refl_ray.dir = camray->dir + 2 * normal * c1;
 
 	// if (intersect_scene(objects, object_count, &refl_ray, &dummy_normal, &t, &hitobject_id, true))
-	// 	hit_color += objects[hitobject_id].color;
-
- 	hit_color = hitobject.diffuse * diffuse + hitobject.specular * specular;
-	// -------------------------------------------------
-
-	// diffuse = get_diffuse_light(objects, object_count, hitpoint, hitobject_id, normal, lights, num_lights);
-
-	// hit_color = diffuse;
+	// 	hit_color += 0.5f * objects[hitobject_id].color;
 
 	return hit_color;
 }

@@ -1,7 +1,5 @@
 #include <stdlib.h>
 #include "rt.h"
-//!!!!
-#include <time.h>
 
 int		main(void)
 {
@@ -16,7 +14,9 @@ int		main(void)
 	init_cl(&cl_context);
 	init_sdl(&sdl_context);
 
-	init_scene1(&scene);
+	// init_scene1(&scene);
+
+	parse_scene("./scenes/scene1.json", &scene);
 
 	alloc_cl_buffers(&cl_context, &scene);
 	set_kernel_args(&cl_context, &scene);

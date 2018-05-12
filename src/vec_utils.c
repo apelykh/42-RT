@@ -24,6 +24,15 @@ cl_float3	add_vec3(cl_float3 a, cl_float3 b)
 	return init_vec3(a.x + b.x, a.y + b.y, a.z + b.z);
 }
 
+cl_int2		init_int2(cl_int x, cl_int y)
+{
+	cl_int2	res;
+
+	res.x = x;
+	res.y = y;
+	return (res);
+}
+
 cl_float3	init_vec3(cl_float x, cl_float y, cl_float z)
 {
 	cl_float3	res;

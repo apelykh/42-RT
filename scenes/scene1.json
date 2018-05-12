@@ -1,0 +1,57 @@
+{
+    "camera": {
+        "location": [0.0, 1.0, 10.0],
+        "rotation": [0, 0, 0],
+        "fov": 45.0
+    },
+    "lights": [
+        {
+            "location": [20.0, 5.0, 2.0],
+            "emission": [0.6, 0.6, 0.6]
+        },
+        {
+            "location": [0.0, 2.75, 2.75],
+            "emission": [0.8, 0.8, 0.8]
+        },
+        {
+            "location": [3.0, 3.0, -20.0],
+            "emission": [0.5, 0.5, 0.5]
+        }
+    ],
+    "objects": [
+        {
+            "type": "CYLINDER",
+            "scale": [1.0, 1.0, 1.0],
+            "rotation": [-45.0, 0.0, 15.0],
+            "location": [0.0, 2.0, -2.1],
+            "color": [0.3, 0.3, 0.3],
+            "emission": [0.0, 0.0, 0.0],
+            "capped": true,
+            "diffuse": 0.7,
+            "specular": 0.9,
+            "specular_exp": 20.0
+        },
+        {
+            "type": "CYLINDER",
+            "scale": [1.0, 1.0, 1.0],
+            "rotation": [45.0, 45.0, 15.0],
+            "location": [0.0, 0.5, -2.1],
+            "color": [0.71, 0.2, 0.0],
+            "emission": [0.0, 0.0, 0.0],
+            "capped": true,
+            "diffuse": 0.7,
+            "specular": 0.9,
+            "specular_exp": 20.0
+        },
+        {
+            "type": "PLANE",
+            "scale": [1.0, 1.0, 1.0],
+            "rotation": [0.0, 0.0, 0.0],
+            "location": [0.0, -1.0, 0.0],
+            "color": [0.9, 0.8, 0.7],
+            "diffuse": 01.0,
+            "specular": 0.0,
+            "specular_exp": 20.0
+        }
+    ]
+}
