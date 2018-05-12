@@ -26,18 +26,9 @@ int		main(void)
 	SDL_Event	event;
 	cl_float4	vec;
 	int			to_close = 0;
-	double		loop_sum = 0;
-	int			loop_count = 0;
-	double		kernel_sum = 0;
 
 	while (!to_close)
 	{
-		clock_t t_loop_iter;
-		clock_t t_kernel;
-
-		t_loop_iter = clock();
-		loop_count++;
-
 		while (SDL_PollEvent(&event))
 		{
 			if (event.type == SDL_QUIT)
@@ -127,14 +118,8 @@ int		main(void)
 		ret = clSetKernelArg(cl_context.kernel, 7, sizeof(cl_mem),
 			(void*)&cl_context.cam_buf);
 
-		t_kernel = clock();
-
 		ret = clEnqueueNDRangeKernel(cl_context.command_queue, cl_context.kernel, 1, NULL, 
 			&global_item_size, NULL, 0, NULL, NULL);
-
-		double time_kernel = (double)(clock() - t_kernel) / CLOCKS_PER_SEC;
-	    kernel_sum += time_kernel;
-	    printf("kernel: %f\n", time_kernel);
 
 		ret = clEnqueueReadBuffer(cl_context.command_queue, cl_context.pixels_buf, CL_TRUE, 0,
 			scene.im_width * scene.im_height * sizeof(cl_uchar4), sdl_context.pixels, 0, NULL, NULL);
@@ -152,16 +137,7 @@ int		main(void)
 
 		SDL_FreeSurface(sdl_context.surf);
 		SDL_DestroyTexture(sdl_context.tex);
-
-		double time_loop_iter = (double)(clock() - t_loop_iter) / CLOCKS_PER_SEC;
-		loop_sum += time_loop_iter;
-	    printf("loop iter: %f\n", time_loop_iter);
 	}
-	printf("---------------------------------------------\n");
-	printf("avg loop time: %f\n", loop_sum / loop_count);
-	printf("avg kernel time: %f\n", kernel_sum / loop_count);
-	printf("---------------------------------------------\n");
-
 	sdl_cleanup(&sdl_context);
 	cl_cleanup(&cl_context);
 
