@@ -123,6 +123,8 @@ void	cl_cleanup(t_cl_context *cl_context);
 
 void	save_image(cl_float3 *pixels);
 int		to_uchar(float x);
+float	clamp_float_minmax(float x, float min, float max);
+cl_float3	clamp_float3_minmax(cl_float3 x, float min, float max);
 
 //matrix funcs
 void		obj_transform_mats(t_object *obj);

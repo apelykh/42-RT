@@ -16,7 +16,7 @@ int		main(void)
 
 	// init_scene1(&scene);
 
-	parse_scene("./scenes/scene1.json", &scene);
+	parse_scene("./scenes/test.json", &scene);
 
 	alloc_cl_buffers(&cl_context, &scene);
 	set_kernel_args(&cl_context, &scene);

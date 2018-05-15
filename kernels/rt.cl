@@ -1568,20 +1568,17 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 		specular += lights[i].emission * pow(phong_term, hitobject.specular_exp);
 	}
 
-	// reflection
+ 	hit_color = hitobject.diffuse * diffuse + hitobject.specular * specular;
+
+ 	// reflection
 	// t_ray refl_ray;
 	// refl_ray.origin = ray.origin;
-	// refl_ray.dir = refl_dir;
+
+	// float c1 = (-1.0f) * dot(normal, camray->dir);
+	// refl_ray.dir = camray->dir + 2 * normal * c1;
 
 	// if (intersect_scene(objects, object_count, &refl_ray, &dummy_normal, &t, &hitobject_id, true))
-	// 	hit_color += objects[hitobject_id].color;
-
- 	hit_color = hitobject.diffuse * diffuse + hitobject.specular * specular;
-	// -------------------------------------------------
-
-	// diffuse = get_diffuse_light(objects, object_count, hitpoint, hitobject_id, normal, lights, num_lights);
-
-	// hit_color = diffuse;
+	// 	hit_color += 0.5f * objects[hitobject_id].color;
 
 	return hit_color;
 }

@@ -127,48 +127,115 @@ void		init_empty(t_object *obj)
 	obj->type = 0;
 	obj->hidden = CL_FALSE;
 	obj->capped = CL_FALSE;
-	obj->operand = init_int2(0, 0);
+	obj->operand = init_int2(-1, -1);
 	obj->location = init_vec3(0.0f, 0.0f, 0.0f);
 	obj->rotation = init_vec3(0.0f, 0.0f, 0.0f);
 	obj->scale = init_vec3(1.0f, 1.0f, 1.0f);
 	obj->color = init_vec3(0.5f, 0.5f, 0.5f);
-	// obj->emi = init_vec3(0.0f, 0.0f, 0.0f);
 	obj->diffuse = 1.0f;
 	obj->specular = 0.0f;
-	obj->spec_exp = 30.0f;
+	obj->spec_exp = 1.0f;
+}
+
+void		parse_object(t_object *obj, int i, int type, cJSON *cur_obj)
+{
+	obj->id = (cl_int)i;
+	obj->type = (cl_int)type;
+	obj->hidden = (cl_bool)cjGetInt(cur_obj, "hidden");
+	obj->capped = (cl_bool)cjGetInt(cur_obj, "capped");
+	obj->location = clamp_float3_minmax(
+		cjcjGetFloat3(cur_obj, "location"), -1000.0f, 1000.0f);
+	obj->rotation = clamp_float3_minmax(
+		cjcjGetFloat3(cur_obj, "rotation"), -180.0f, 180.0f);
+	obj->scale = clamp_float3_minmax(
+		cjcjGetFloat3(cur_obj, "scale"), 0.0f, 1000.0f);
+	obj->color = clamp_float3_minmax(
+		cjcjGetFloat3(cur_obj, "color"), 0.0f, 1.0f);
+	obj->diffuse = clamp_float_minmax(
+		cjGetFloat(cur_obj, "diffuse"), 0.0f, 1.0f);
+	obj->specular = clamp_float_minmax(
+		cjGetFloat(cur_obj, "specular"), 0.0f, 1.0f);
+	obj->spec_exp = clamp_float_minmax(
+		cjGetFloat(cur_obj, "specular_exp"), 0.0f, 300.0f);
+}
+
+int			count_inner_objects(cJSON *j_objects, int num_objects)
+{
+	cJSON	*inner_objects;
+	cJSON	*cur_obj;
+	int		type;
+	int		num_inner;
+	int		i;
+
+	i = 0;
+	num_inner = 0;
+	while (i < num_objects)
+	{
+		cur_obj = cJSON_GetArrayItem(j_objects, i);
+		type = cjGetType(cjGetString(cur_obj, "type"));
+		if (type >= 5 && type <= 8)
+		{
+			inner_objects = cJSON_GetObjectItem(cur_obj, "inner_objects");
+			num_inner += cJSON_GetArraySize(inner_objects);
+		}
+		i++;
+	}
+	return (num_inner);
 }
 
 void		init_objects(cJSON *j_root, t_scene *scene)
 {
 	cJSON	*j_objects;
+	cJSON	*inner_objects;
 	cJSON	*cur_obj;
-	cl_int	i;
+	int		num_objects;
+	int		type;
+	int		i;
+	int		j;
+	int		id;
 
 	j_objects = cJSON_GetObjectItem(j_root, "objects");
 
-	scene->num_objects = (cl_int)cJSON_GetArraySize(j_objects);
+	num_objects = cJSON_GetArraySize(j_objects);
+	scene->num_objects = (cl_int)(num_objects + count_inner_objects(j_objects, num_objects));
 	scene->objects = (t_object *)malloc(sizeof(t_object) * scene->num_objects);
-
 	printf("num objects: %d\n", scene->num_objects);
 
 	i = 0;
-	while (i < scene->num_objects)
+	id = 0;
+	while (i < num_objects)
 	{
-		init_empty(&scene->objects[i]);
+		init_empty(&scene->objects[id]);
 
 		cur_obj = cJSON_GetArrayItem(j_objects, i);
-		scene->objects[i].id = i;
-		scene->objects[i].type = cjGetType(cjGetString(cur_obj, "type"));
-		scene->objects[i].hidden = (cl_bool)cjGetInt(cur_obj, "hidden");
-		scene->objects[i].capped = (cl_bool)cjGetInt(cur_obj, "capped");
-		scene->objects[i].location = cjcjGetFloat3(cur_obj, "location");
-		scene->objects[i].rotation = cjcjGetFloat3(cur_obj, "rotation");
-		scene->objects[i].scale = cjcjGetFloat3(cur_obj, "scale");
-		scene->objects[i].color = cjcjGetFloat3(cur_obj, "color");
-		// scene->objects[i].emi = cjcjGetFloat3(cur_obj, "emission");
-		scene->objects[i].diffuse = cjGetFloat(cur_obj, "diffuse");
-		scene->objects[i].specular = cjGetFloat(cur_obj, "specular");
-		scene->objects[i].spec_exp = cjGetFloat(cur_obj, "specular_exp");
+		type = cjGetType(cjGetString(cur_obj, "type"));
+		parse_object(&scene->objects[id], id, type, cur_obj);
+
+		printf("id: %d, type: %d, %s\n", id, type, cjGetString(cur_obj, "type"));
+		
+		id++;
+
+		if (type >= UNION && type <= CLIPPING)
+		{
+			j = 0;
+			inner_objects = cJSON_GetObjectItem(cur_obj, "inner_objects");
+			while (j < cJSON_GetArraySize(inner_objects))
+			{
+				cur_obj = cJSON_GetArrayItem(inner_objects, j);
+				type = cjGetType(cjGetString(cur_obj, "type"));
+				parse_object(&scene->objects[id], id, type, cur_obj);
+
+				printf("id: %d, type: %s\n", id, cjGetString(cur_obj, "type"));
+
+				if (j == 0)
+					scene->objects[i].operand.x = i + 1;
+				if (j == 1)
+					scene->objects[i].operand.y = i + 2;
+
+				j++;
+				id++;
+			}
+		}
 		i++;
 	}
 }
