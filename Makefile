@@ -20,6 +20,8 @@ SRC_FILES = main.c \
 			sdl_utils.c \
 			utils.c \
 			scene_parsing.c \
+			objects_parsing.c \
+			parsing_utils.c \
 			scene1.c \
 
 SRC = $(addprefix $(SRC_DIR), $(SRC_FILES))

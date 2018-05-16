@@ -4,6 +4,7 @@
 # define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 
 # include <SDL2/SDL.h>
+# include "cJSON.h"
 // # include "/Users/apelykh/.brew/Cellar/sdl2/2.0.8/include/SDL2/SDL.h"
 // # include <SDL2/SDL_timer.h>
 // # include <SDL2/SDL_image.h>
@@ -111,7 +112,14 @@ cl_float4	init_vec4(cl_float x, cl_float y, cl_float z, cl_float w);
 
 void	init_scene1(t_scene *scene);
 
-void	parse_scene(char *scene_path, t_scene *scene);
+cl_float3	cjcjGetFloat3(cJSON *root, char *item_name);
+cl_float	cjGetFloat(cJSON *object, char *item_name);
+cl_int		cjGetInt(cJSON *object, char *item_name);
+char		*cjGetString(cJSON *object, char *item_name);
+cl_int		cjGetType(char *string_type);
+
+void		init_objects(cJSON *j_root, t_scene *scene);
+void		parse_scene(char *scene_path, t_scene *scene);
 
 void	init_sdl(t_sdl_context *sdl_context);
 void	sdl_cleanup(t_sdl_context *sdl_context);

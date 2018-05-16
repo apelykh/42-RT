@@ -15,7 +15,6 @@ int		main(void)
 	init_sdl(&sdl_context);
 
 	// init_scene1(&scene);
-
 	parse_scene("./scenes/test.json", &scene);
 
 	alloc_cl_buffers(&cl_context, &scene);
