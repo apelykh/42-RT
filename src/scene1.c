@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "rt.h"
 
-static void	init_cam(t_scene *scene)
+static void	camera_init(t_scene *scene)
 {
 	scene->cam = (t_camera*)malloc(sizeof(t_camera));
 	scene->cam->location = init_vec3(0.0f, 1.0f, 10.0f);
@@ -12,7 +12,7 @@ static void	init_cam(t_scene *scene)
 	set_cam_rotate_matrix(scene->cam);
 }
 
-static void	init_lights(t_scene *scene)
+static void	lights_init(t_scene *scene)
 {	
 	scene->num_lights = 3;
 	scene->lights = (t_light*)malloc(sizeof(t_light) * scene->num_lights);
@@ -26,8 +26,8 @@ static void	init_lights(t_scene *scene)
 
 void	init_scene1(t_scene *scene)
 {
-	init_cam(scene);
-	init_lights(scene);
+	camera_init(scene);
+	lights_init(scene);
 
 	scene->num_objects = 8;
 	scene->objects = (t_object*)malloc(sizeof(t_object) * scene->num_objects);

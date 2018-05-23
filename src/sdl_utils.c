@@ -19,7 +19,8 @@ void	init_sdl(t_sdl_context *sdl_context)
 		exit(-1);
 	}
 
-	render_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
+	// render_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
+	render_flags = 0;
 	sdl_context->rend = SDL_CreateRenderer(sdl_context->win, -1, render_flags);
 	if (!sdl_context->rend)
 	{
