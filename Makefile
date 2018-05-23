@@ -1,3 +1,4 @@
+# TEST
 FLAGS = -Wall -Wextra -Werror
 CC = gcc $(FLAGS)
 NAME = RT
