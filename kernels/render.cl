@@ -6,7 +6,7 @@ __constant float PI = 3.14159265359f;
 // __constant int NUM_BOUNCES = 7;
 
 
-# define MAX_POINTS 32
+# define MAX_POINTS		32
 
 # define PLANE			0
 # define SPHERE			1
@@ -38,7 +38,6 @@ typedef struct	s_point
 	float3		pos;				// position of intersection point in space
 	float3		normal;				// normal vector
 	bool		inside;				// true - ray enters volume of object at intersection, false - ray exits volume of object
-
 }				t_point;
 
 typedef struct	s_hitpoints
@@ -46,7 +45,6 @@ typedef struct	s_hitpoints
 	t_point		pt[MAX_POINTS];		// MAX_POINTS is defined, maximum amount of points of intersection per 1 ray
 	int			num_elements;			// counter for tracking number of points stored in array. when sorting we don't check all points, but only valid ones (id != -1, dist > 0.0)
 }				t_hitpoints;
-
 
 
 // all objects (primitive or compound) are defined in their local space, they rotate and scale around origin point
@@ -134,6 +132,11 @@ t_ray	ray2local(const t_ray *r, __constant t_object *o);
 #include "kernels/matrix_utils.cl" 
 
 
+static float zero_clamp(float x)
+{
+	return (x < 0.0f) ? 0.0f : x;
+}
+
 t_ray ray2local(const t_ray *r, __constant t_object *o)
 {
 	t_ray ray;
@@ -152,35 +155,33 @@ void hitpoints_init(t_hitpoints* hit)
 
 void hitpoints_sort(t_hitpoints* hit)
 {
-	t_point tmp;
-	int i = 0;
-	int to_del = 0;
+	t_point	tmp;
+	int		to_del = 0;
 
-	while (i != hit->num_elements - 1)
-	// while (i != MAX_POINTS - 1)
+	for(int i = 0; i < hit->num_elements; i++)
 	{
 		if (hit->pt[i].obj_id == -1)
 		{
 			hit->pt[i].dist = 0.0f;
 			++to_del;
 		}
-		if (hit->pt[i + 1].dist > 0.0f && (hit->pt[i + 1].dist < hit->pt[i].dist ||
-			hit->pt[i].dist <= 0.0f))
+	}
+	for(int i = 0; i < hit->num_elements - 1; i++)
+	{
+		for(int j = 0; j < hit->num_elements - i - 1; j++)
 		{
-			tmp = hit->pt[i];
-			hit->pt[i] = hit->pt[i + 1];
-			hit->pt[i + 1] = tmp;
-			i = 0;
+			if (hit->pt[j + 1].dist > 0.0f &&
+				(hit->pt[j + 1].dist < hit->pt[j].dist || hit->pt[j].dist <= 0.0f))
+			{
+				tmp = hit->pt[j];
+				hit->pt[j] = hit->pt[j + 1];
+				hit->pt[j + 1] = tmp;
+			}
 		}
-		else
-			i++;
 	}
 	hit->num_elements -= to_del;
 	hit->num_elements = max(hit->num_elements, 0);
 }
-
-static float zero_clamp(float x) { return (x < 0.0f) ? 0.0f : x; }
-
 
 t_ray create_cam_ray(__constant t_camera *camera, const int x, const int y,
 						const int width, const int height)

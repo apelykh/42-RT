@@ -43,6 +43,7 @@ bool intersect_plane(__constant t_object *objects, int id, const t_ray *ray, boo
 	return true;
 }
 
+
 bool intersect_sphere(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit)
 {
 	// const t_object obj = objects[id];
@@ -50,7 +51,8 @@ bool intersect_sphere(__constant t_object *objects, int id, const t_ray *ray, bo
 
 	if ((MAX_POINTS - hit->num_elements) < 2)
 		return false;
-	// sphere has 2 intersection points (rarely one, when ray is tangent to sphere), thus we need to store 2 points
+	/* sphere has 2 intersection points (rarely 1, when ray is
+	tangent to sphere), thus we need to store 2 points */
 	t_point pt[2];
 
 	float b = dot(-ray_local.origin, ray_local.dir);
@@ -103,6 +105,7 @@ bool intersect_sphere(__constant t_object *objects, int id, const t_ray *ray, bo
 	}
 	return true;
 }
+
 
 bool intersect_cylinder(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit)
 {
@@ -234,6 +237,7 @@ bool intersect_cylinder(__constant t_object *objects, int id, const t_ray *ray, 
 	return true;
 }
 
+
 bool intersect_cone(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit) // CLEAN UP CODE!
 {
 	// const t_object obj = objects[id];
@@ -327,6 +331,7 @@ bool intersect_cone(__constant t_object *objects, int id, const t_ray *ray, bool
 	return true;
 }
 
+
 bool intersect_box(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit)
 {
 	// const t_object obj = objects[id];
@@ -337,9 +342,9 @@ bool intersect_box(__constant t_object *objects, int id, const t_ray *ray, bool 
 	
 	t_point pt[2];
 
-	float3	minp = (float3)(-0.5f, -0.5f, 0.5f);								// closest bottom left point of box
-	float3	maxp = (float3)(0.5f, 0.5f, -0.5f);									// furthest top right point of box 
-	float3	ray_inv = (float3)(1.0f, 1.0f, 1.0f) / ray_local.dir;				// inverse of ray
+	float3	minp = (float3)(-0.5f, -0.5f, 0.5f);						// closest bottom left point of box
+	float3	maxp = (float3)(0.5f, 0.5f, -0.5f);							// furthest top right point of box 
+	float3	ray_inv = (float3)(1.0f, 1.0f, 1.0f) / ray_local.dir;		// inverse of ray
 
 	// intersecting "slabs". cube volume consists of volumes defined by 3 pairs of parallel planes
 	// at each step we detemine whether our intersection point of plane lies within other 'slab' defined by pair of planes
