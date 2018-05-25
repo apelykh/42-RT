@@ -96,8 +96,10 @@ bool 	intersect_difference(__constant t_object *objects, int id, const t_ray *ra
 bool	intersect_clipping(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit);
 bool 	intersect_bocal(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit);
 
-bool	intersect_scene(__constant t_object *objects, const int num_objects, const t_ray *ray, float3 *normal,
-							float *t, int *object_id, bool quick);
+// bool	intersect_scene(__constant t_object *objects, const int num_objects, const t_ray *ray, float3 *normal,
+// 							float *t, int *object_id, bool quick);
+bool intersect_scene(__constant t_object *objects, const int num_objects, const t_ray *ray,
+						t_point *hitpoint, bool quick);
 
 /* ----- matrix_utils.cl ----- */
 mat4	mat_translate(float3 v);
@@ -131,6 +133,7 @@ t_ray	ray2local(const t_ray *r, __constant t_object *o);
 #include "kernels/compound_intersections.cl"
 #include "kernels/matrix_utils.cl" 
 
+__constant float3 bg_color = (float3)(0.15f, 0.15f, 0.15f);
 
 static float zero_clamp(float x)
 {
@@ -150,7 +153,9 @@ void hitpoints_init(t_hitpoints* hit)
 {
 	hit->num_elements = 0;
 	for (int i = 0; i < MAX_POINTS; i++)
+	{
 		hit->pt[i].obj_id = -1;
+	}
 }
 
 void hitpoints_sort(t_hitpoints* hit)
@@ -212,18 +217,13 @@ t_ray create_cam_ray(__constant t_camera *camera, const int x, const int y,
 	return ray;
 }
 
-bool intersect_scene(__constant t_object *objects, const int num_objects, const t_ray *ray,	float3 *normal, float *t, int *object_id, bool quick)
+bool intersect_scene(__constant t_object *objects, const int num_objects, const t_ray *ray, t_point *hitpoint, bool quick)
 {
-	// initialise t to a very large number, so t will be guaranteed to be smaller	when a hit with the scene occurs
-	float inf = 1e20f;
-	// float hitdistance = 0.0f;
 	int	hit_occured = 0;
-	// float3 loc_normal = (float3)(0.0f, 0.0f, 0.0f);
-	*t = inf;
+
 	t_hitpoints hit;
 	hitpoints_init(&hit);
 
-	// check each object if the ray intersects it in the scene
 	for (int i = 0; i < num_objects; i++) 
 	{
 		if (!objects[i].hidden)
@@ -273,13 +273,10 @@ bool intersect_scene(__constant t_object *objects, const int num_objects, const 
 		return false;
 
 	hitpoints_sort(&hit);
+	*hitpoint = hit.pt[0];
 
 	if (hit.pt[0].obj_id == -1 || hit.pt[0].dist <= 0.0f)
 		return false;
-
-	*t = hit.pt[0].dist;
-	*normal = hit.pt[0].normal;
-	*object_id = hit.pt[0].obj_id;
 
 	return true;
 }
@@ -377,48 +374,43 @@ bool intersect_scene(__constant t_object *objects, const int num_objects, const 
 // 	return diffuse;
 // }
 
+
+float3 trace(t_ray *ray, __constant t_object *objects, const int num_objects)
+{
+	t_ray ray;
+}
+
 float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const int object_count,
 						__constant t_light *lights, const int num_lights)
 {
 	t_ray ray = *camray;
 
-	float3 bg_color = (float3)(1.0f, 1.0f, 1.0f);
-	float3 hit_color = (float3)(0.0f, 0.0f, 0.0f);
-	float3 diffuse = (float3)(0.0f, 0.0f, 0.0f);
-	float3 specular = (float3)(0.0f, 0.0f, 0.0f);
-	float3 normal = (float3)(0.0f, 0.0f, 0.0f);
-	float3 dummy_normal;
+	float3	hit_color = (float3)(0.0f, 0.0f, 0.0f);
+	float3	diffuse = (float3)(0.0f, 0.0f, 0.0f);
+	float3	specular = (float3)(0.0f, 0.0f, 0.0f);
+	float3	normal = (float3)(0.0f, 0.0f, 0.0f);
+	t_point hit;
 
-	float t = 1e20f;   /* distance to intersection */
-	int hitobject_id = 0; /* index of intersected sphere */
-	int dummy_id = 0;
-
-	/* if ray misses scene, return background colour */
-	if (!intersect_scene(objects, object_count, &ray, &normal, &t, &hitobject_id, false))
+	if (!intersect_scene(objects, object_count, &ray, &hit, false))
 		return bg_color;
 
-	/* else, we've got a hit! Fetch the closest hit sphere */
-	t_object hitobject = objects[hitobject_id]; /* version with local copy of sphere */
+	t_object hitobject = objects[hit.obj_id];
+	normal = hit.normal;
+	ray.origin = hit.pos + normal * EPSILON;
 
+	// ambient
 	diffuse = hitobject.color * 0.2f;
-	/* compute the hitpoint using the ray equation */
-	float3 hitpoint = ray.origin + ray.dir * t;
-
-	// -------------------------------------------------
-	/* add a very small offset to the hitpoint to prevent self intersection */
-	ray.origin = hitpoint + normal * EPSILON;
 
 	float dist_to_light = 0;
-
 	for (int i = 0; i < num_lights; i++)
 	{
 		ray.dir = fast_normalize(lights[i].location - ray.origin);
 		dist_to_light = fast_length(lights[i].location - ray.origin);
 
-		if (intersect_scene(objects, object_count, &ray, &dummy_normal, &t, &dummy_id, true) && t < dist_to_light)
+		if (intersect_scene(objects, object_count, &ray, &hit, true) &&
+			hit.dist < dist_to_light)
 			continue;
 
-		//spot light shading
 		float intensity = zero_clamp(dot(normal, ray.dir));
 		diffuse += intensity * 0.8f * lights[i].emission * hitobject.color;
 
@@ -430,7 +422,6 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 
 		specular += lights[i].emission * pow(phong_term, hitobject.specular_exp);
 	}
-
  	hit_color = hitobject.diffuse * diffuse + hitobject.specular * specular;
 
  	// reflection
@@ -441,7 +432,7 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 	// refl_ray.dir = camray->dir + 2 * normal * c1;
 
 	// if (intersect_scene(objects, object_count, &refl_ray, &dummy_normal, &t, &hitobject_id, true))
-	// 	hit_color += 0.5f * objects[hitobject_id].color;
+	// 	hit_color += 0.4f * objects[hitobject_id].color;
 
 	return hit_color;
 }
