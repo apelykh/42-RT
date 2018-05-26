@@ -17,11 +17,12 @@ __constant float PI = 3.14159265359f;
 # define INTERSECTION	6
 # define DIFFERENCE		7
 # define CLIPPING		8
+# define BOCAL			9
 
-// # define AMBIENT		0
-// # define POINT			1
-// # define PARALLEL		2
-// # define SPOT			3
+# define AMBIENT		0
+# define POINT			1
+# define PARALLEL		2
+# define SPOT			3
 
 typedef struct	s_ray
 {
@@ -68,7 +69,9 @@ typedef struct	s_object
 
 typedef struct	s_light
 {
-	// int		type;
+	int		type;
+	float	angle;
+	float3	dir;
 	float3	location;
 	float3	emission;
 }				t_light;
@@ -266,6 +269,10 @@ bool intersect_scene(__constant t_object *objects, const int num_objects, const 
 				if (intersect_clipping(objects, i, ray, quick, &hit))
 					hit_occured++;
 				break;
+			case BOCAL :
+				if (intersect_bocal(objects, i, ray, quick, &hit))
+					hit_occured++;
+				break;
 			}
 		}
 	}
@@ -375,10 +382,10 @@ bool intersect_scene(__constant t_object *objects, const int num_objects, const 
 // }
 
 
-float3 trace(t_ray *ray, __constant t_object *objects, const int num_objects)
-{
-	t_ray ray;
-}
+// float3 trace(t_ray *ray, __constant t_object *objects, const int num_objects)
+// {
+// 	t_ray ray;
+// }
 
 float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const int object_count,
 						__constant t_light *lights, const int num_lights)
@@ -399,20 +406,37 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 	ray.origin = hit.pos + normal * EPSILON;
 
 	// ambient
-	diffuse = hitobject.color * 0.2f;
+	// diffuse = hitobject.color * 0.1f;
 
-	float dist_to_light = 0;
+	float dist_to_light = 1e20f;
 	for (int i = 0; i < num_lights; i++)
 	{
-		ray.dir = fast_normalize(lights[i].location - ray.origin);
-		dist_to_light = fast_length(lights[i].location - ray.origin);
-
+		if (lights[i].type == AMBIENT)
+		{
+			diffuse += lights[i].emission * hitobject.color;
+			continue;
+		}
+		if (lights[i].type == PARALLEL)
+			ray.dir = -1.0f * lights[i].dir;
+		else
+		{
+			ray.dir = fast_normalize(lights[i].location - ray.origin);
+			dist_to_light = fast_length(lights[i].location - ray.origin);
+		}
 		if (intersect_scene(objects, object_count, &ray, &hit, true) &&
 			hit.dist < dist_to_light)
 			continue;
+		if (lights[i].type == SPOT)
+		{
+			float cosine = cos(radians(lights[i].angle / 2.0f));
+			float k = dot((-1.0f) * ray.dir, lights[i].dir);
+			if (k < cosine || k < 0.0f)
+				continue;
+		}
 
 		float intensity = zero_clamp(dot(normal, ray.dir));
-		diffuse += intensity * 0.8f * lights[i].emission * hitobject.color;
+
+		diffuse += intensity * lights[i].emission * hitobject.color;
 
 		float3 refl_dir = fast_normalize((2 * intensity * normal) - ray.dir);
 
@@ -436,6 +460,63 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 
 	return hit_color;
 }
+
+// float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const int object_count,
+// 						__constant t_light *lights, const int num_lights)
+// {
+// 	t_ray ray = *camray;
+
+// 	float3	hit_color = (float3)(0.0f, 0.0f, 0.0f);
+// 	float3	diffuse = (float3)(0.0f, 0.0f, 0.0f);
+// 	float3	specular = (float3)(0.0f, 0.0f, 0.0f);
+// 	float3	normal = (float3)(0.0f, 0.0f, 0.0f);
+// 	t_point hit;
+
+// 	if (!intersect_scene(objects, object_count, &ray, &hit, false))
+// 		return bg_color;
+
+// 	t_object hitobject = objects[hit.obj_id];
+// 	normal = hit.normal;
+// 	ray.origin = hit.pos + normal * EPSILON;
+
+// 	// ambient
+// 	diffuse = hitobject.color * 0.2f;
+
+// 	float dist_to_light = 0;
+// 	for (int i = 0; i < num_lights; i++)
+// 	{
+// 		ray.dir = fast_normalize(lights[i].location - ray.origin);
+// 		dist_to_light = fast_length(lights[i].location - ray.origin);
+
+// 		if (intersect_scene(objects, object_count, &ray, &hit, true) &&
+// 			hit.dist < dist_to_light)
+// 			continue;
+
+// 		float intensity = zero_clamp(dot(normal, ray.dir));
+// 		diffuse += intensity * 0.8f * lights[i].emission * hitobject.color;
+
+// 		float3 refl_dir = fast_normalize((2 * intensity * normal) - ray.dir);
+
+// 		float phong_term = zero_clamp(dot(refl_dir, (-1.0f) * camray->dir));
+// 		if (intensity == 0.0f)
+// 			phong_term = 0.0f;
+
+// 		specular += lights[i].emission * pow(phong_term, hitobject.specular_exp);
+// 	}
+//  	hit_color = hitobject.diffuse * diffuse + hitobject.specular * specular;
+
+//  	// reflection
+// 	// t_ray refl_ray;
+// 	// refl_ray.origin = ray.origin;
+
+// 	// float c1 = (-1.0f) * dot(normal, camray->dir);
+// 	// refl_ray.dir = camray->dir + 2 * normal * c1;
+
+// 	// if (intersect_scene(objects, object_count, &refl_ray, &dummy_normal, &t, &hitobject_id, true))
+// 	// 	hit_color += 0.4f * objects[hitobject_id].color;
+
+// 	return hit_color;
+// }
 
 __kernel void render_scene(__constant t_object *objects, const int object_count,
 					__constant t_light *lights, const int num_lights,

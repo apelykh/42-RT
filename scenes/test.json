@@ -5,82 +5,44 @@
         "fov": 45.0
     },
     "lights": [
-        {
-            "location": [0.0, 2.75, 2.75],
-            "emission": [1.0, 1.0, 1.0]
+        {   
+            "type": "AMBIENT",
+            "location": [3.0, 3.0, 2.75],
+            "direction": [-1.0, -1.0, 0.0],
+            "angle": 30.0,
+            "emission": [0.1, 0.1, 0.1]
         },
-        {
-            "location": [3.0, 5.0, -7.0],
-            "emission": [0.5, 0.5, 0.5]
+         {   
+            "type": "POINT",
+            "location": [0.0, 3.0, 0.0],
+            "direction": [0.0, 0.0, 0.0],
+            "angle": 30.0,
+            "emission": [0.8, 0.8, 0.8]
+        },
+        {   
+            "type": "PARALLEL",
+            "location": [3.0, -3.0, 2.75],
+            "direction": [0.0, -1.0, -1.0],
+            "angle": 30.0,
+            "emission": [0.2, 0.2, 0.2]
+        },
+        {   
+            "type": "SPOT",
+            "location": [2.0, 3.0, -0.5],
+            "direction": [-0.5, -1.0, 0.0],
+            "angle": 15.0,
+            "emission": [0.6, 0.6, 0.6]
         }
     ],
     "objects": [
         {
-            "type": "CYLINDER",
+            "type": "BOCAL",
             "scale": [1.0, 1.0, 1.0],
-            "rotation": [-45.0, 0.0, 15.0],
-            "location": [3.0, 2.0, -2.1],
-            "color": [0.3, 0.3, 0.3],
-            "capped": true,
-            "diffuse": 0.7,
-            "specular": 0.9,
-            "specular_exp": 20.0
-        },
-        {
-            "type": "DIFFERENCE",
-            "scale": [1.0, 1.0, 1.0],
-            "location": [-3.0, 0.0, 0.0],
             "rotation": [0.0, 0.0, 0.0],
-            "color": [0.9, 0.8, 0.7],
-            "diffuse": 1.0,
-            "specular": 0.0,
-            "specular_exp": 20.0,
-            "inner_objects": [
-                {
-                    "type": "BOX",
-                    "scale": [2.0, 2.0, 2.0],
-                    "location": [0.0, 0.0, 0.0],
-                    "rotation": [-1.0, 0.0, 0.0],
-                    "color": [0.3, 0.3, 0.3],
-                    "capped": true,
-                    "hidden": true,
-                    "diffuse": 0.7,
-                    "specular": 0.9,
-                    "specular_exp": 20.0
-                },
-                {
-                    "type": "SPHERE",
-                    "scale": [1.0, 2.0, 1.0],
-                    "rotation": [0.0, 0.0, 0.0],
-                    "location": [1.0, 0.0, 0.0],
-                    "color": [0.3, 0.3, 0.3],
-                    "capped": true,
-                    "hidden": true,
-                    "diffuse": 0.7,
-                    "specular": 0.9,
-                    "specular_exp": 20.0
-                }
-            ]
-        },
-        {
-            "type": "CONE",
-            "scale": [2.0, 2.0, 1.0],
-            "rotation": [0.0, 3.0, 0.0],
-            "location": [4.0, 4.0, 0.0],
-            "color": [0.3, 0.3, 0.3],
+            "location": [0.0, 0.0, 0.0],
+            "color": [0.99, 0.66, 0.33],
             "capped": true,
             "hidden": false,
-            "diffuse": 0.4,
-            "specular": 0.7,
-            "specular_exp": 40.0
-        },
-        {
-            "type": "CYLINDER",
-            "scale": [1.0, 1.0, 1.0],
-            "rotation": [-45.0, 0.0, 15.0],
-            "location": [-3.0, 2.0, -2.1],
-            "color": [0.3, 0.3, 0.3],
-            "capped": true,
             "diffuse": 0.7,
             "specular": 0.9,
             "specular_exp": 20.0
@@ -88,10 +50,13 @@
         {
             "type": "PLANE",
             "scale": [1.0, 1.0, 1.0],
+            "rotation": [0.0, 0.0, 0.0],
             "location": [0.0, -1.0, 0.0],
-            "color": [0.9, 0.8, 0.7],
-            "diffuse": 1.0,
-            "specular": 0.0,
+            "color": [0.7, 0.3, 0.3],
+            "capped": true,
+            "hidden": false,
+            "diffuse": 0.7,
+            "specular": 0.9,
             "specular_exp": 20.0
         }
     ]

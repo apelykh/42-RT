@@ -22,7 +22,7 @@ SRC_FILES = main.c \
 			parsing_scene.c \
 			parsing_objects.c \
 			parsing_utils.c \
-			scene1.c \
+			bocal_components.c \
 
 SRC = $(addprefix $(SRC_DIR), $(SRC_FILES))
 OBJ = $(SRC:.c=.o)
@@ -38,8 +38,8 @@ all: $(NAME)
 $(NAME): $(OBJ)
 	@ make -C $(LIB_DIR)/cJSON
 
-	@ $(CC) $(OBJ) -lOpenCL -lSDL2 -lm -o $@ ./lib/cJSON/cJSON.c
-	# @ $(CC) $(OBJ) $(LIB) -framework opencl -L/Users/efedoryc/.brew/Cellar/sdl2/2.0.8/lib -lSDL2 -lm -o $@
+	# @ $(CC) $(OBJ) -lOpenCL -lSDL2 -lm -o $@ ./lib/cJSON/cJSON.c
+	@ $(CC) $(OBJ) $(LIB) -framework opencl -L/Users/mdubrovs/.brew/Cellar/sdl2/2.0.8/lib -lSDL2 -lm -o $@
 	# @ $(CC) $(OBJ) -framework opencl -framework SDL2 -lm -o $@
 	@ echo "[+] [$(NAME)] compiled"
 

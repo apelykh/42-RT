@@ -360,40 +360,50 @@ bool intersect_clipping(__constant t_object *objects, int id, const t_ray *ray, 
 }
 
 
-/*
 bool intersect_bocal(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit)
 {
-	const t_object obj = objects[id];
-	t_ray ray_local = ray2local(ray, &obj);
+	t_ray ray_local = ray2local(ray, &objects[id]);
 
 	if ((MAX_POINTS - hit->num_elements) < 6)
 		return false;
-	t_hitpoints bocal_hit;
-	hitpoints_init(&bocal_hit);
-	int hit_number = 0;
-
-	if (intersect_difference(compound, 2, &ray_local, quick, &bocal_hit))
-		hit_number++;
-	if (intersect_box(compound, 3, &ray_local, quick, &bocal_hit))
-		hit_number++;
-	if (intersect_difference(compound, 4, &ray_local, quick, &bocal_hit))
-		hit_number++;
-	if (intersect_union(compound, 7, &ray_local, quick, &bocal_hit))
-		hit_number++;
-	if (intersect_union(compound, 8, &ray_local, quick, &bocal_hit))
-		hit_number++;
-
-	if (intersect_difference(compound, 2, &ray_local, quick, &bocal_hit))
+	bool hit_cup, hit_leg = false;
+	hit_cup = intersect_clipping(objects, 0, &ray_local, quick, hit);
+	hit_leg = intersect_union(objects, 3, &ray_local, quick, hit);
+	if (!hit_cup && !hit_leg)
+		return false;
+	if (hit_cup)
 	{
-		int i = 0;
-		while (i != bocal_hit.num_elements - 1)
+		for (int i = 0; i < hit->num_elements; i++)
 		{
-			bocal_hit.pt[i].obj_id = id;
-			hit->pt[hit->num_elements++] = bocal_hit.pt[i];
-			++i;
+			if (hit->pt[i].obj_id == 0)
+			{
+				hit->pt[i].obj_id = id;
+				if (!quick)
+				{
+					hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
+					hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
+				}
+				hit->pt[i].pos = mat_mult_vec(objects[id].from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
+				hit->pt[i].dist = length(hit->pt[i].pos - ray->origin);
+			}
 		}
-		return true;
 	}
-	return false;
+	if (hit_leg)
+	{
+		for (int i = 0; i < hit->num_elements; i++)
+		{
+			if (hit->pt[i].obj_id == 3)
+			{
+				hit->pt[i].obj_id = id;
+				if (!quick)
+				{
+					hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
+					hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
+				}
+				hit->pt[i].pos = mat_mult_vec(objects[id].from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
+				hit->pt[i].dist = length(hit->pt[i].pos - ray->origin);
+			}
+		}
+	}
+	return true;
 }
-*/

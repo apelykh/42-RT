@@ -18,7 +18,7 @@ int		main(void)
 	// parse_scene("./scenes/test2.json", &scene);
 //    parse_scene("./scenes/", &scene);
    // parse_scene("./scenes_LLLL/", &scene);
-	parse_scene("./scenes/test4.json", &scene);
+	parse_scene("./scenes/test.json", &scene);
 	// parse_scene("./scenes/with_errors/test2_no_camera.json", &scene);
 //	parse_scene("./scenes/with_errors/test2_no_lights.json", &scene);
 //	parse_scene("./scenes/with_errors/test2_no_objects.json", &scene);
