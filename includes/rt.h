@@ -6,9 +6,9 @@
 
 # define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 
-# include <SDL2/SDL.h>
+// # include <SDL2/SDL.h>
 # include "cJSON.h"
-// # include "/Users/efedoryc/.brew/Cellar/sdl2/2.0.8/include/SDL2/SDL.h"
+# include "/Users/apelykh/.brew/Cellar/sdl2/2.0.8/include/SDL2/SDL.h"
 // # include <SDL2/SDL_timer.h>
 // # include <SDL2/SDL_image.h>
 

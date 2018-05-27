@@ -38,8 +38,8 @@ all: $(NAME)
 $(NAME): $(OBJ)
 	@ make -C $(LIB_DIR)/cJSON
 
-	@ $(CC) $(OBJ) -lOpenCL -lSDL2 -lm -o $@ ./lib/cJSON/cJSON.c
-	# @ $(CC) $(OBJ) $(LIB) -framework opencl -L/Users/efedoryc/.brew/Cellar/sdl2/2.0.8/lib -lSDL2 -lm -o $@
+	# @ $(CC) $(OBJ) -lOpenCL -lSDL2 -lm -o $@ ./lib/cJSON/cJSON.c
+	@ $(CC) $(OBJ) $(LIB) -framework opencl -L/Users/apelykh/.brew/Cellar/sdl2/2.0.8/lib -lSDL2 -lm -o $@
 	# @ $(CC) $(OBJ) -framework opencl -framework SDL2 -lm -o $@
 	@ echo "[+] [$(NAME)] compiled"
 
