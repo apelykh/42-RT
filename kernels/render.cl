@@ -121,6 +121,7 @@ mat4	mat_transform(const t_object *obj);
 static float zero_clamp(float x);
 t_ray create_cam_ray(__constant t_camera *camera, const int x_coord, const int y_coord, const int width, const int height);
 float3 trace_path(__constant t_object *spheres, const t_ray *camray, const int object_count, const int *seed0, const int *seed1);
+float3 add_sepia(float3 color);
 float3 get_direct_light(__constant t_object *spheres, const t_ray *camray, const int object_count, __constant t_light *lights, const int num_lights);
 
 float3 get_diffuse_light(__constant t_object *objects, const int num_objects, float3 hitpoint, int h_id, float3 normal,
@@ -417,7 +418,7 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 			continue;
 		}
 		if (lights[i].type == PARALLEL)
-			ray.dir = -1.0f * lights[i].dir;
+			ray.dir = -1.0f * fast_normalize(lights[i].dir);
 		else
 		{
 			ray.dir = fast_normalize(lights[i].location - ray.origin);
@@ -428,9 +429,12 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 			continue;
 		if (lights[i].type == SPOT)
 		{
-			float cosine = cos(radians(lights[i].angle / 2.0f));
-			float k = dot((-1.0f) * ray.dir, lights[i].dir);
-			if (k < cosine || k < 0.0f)
+			// float cosine = cos(radians(lights[i].angle / 2.0f));
+			// float k = dot((-1.0f) * ray.dir, lights[i].dir);
+			// if (k < cosine || k < 0.0f)
+			// 	continue;
+			float k = acos(dot((-1.0f) * ray.dir, fast_normalize(lights[i].dir)));
+			if (degrees(k) >= (lights[i].angle / 2.0f))
 				continue;
 		}
 
@@ -457,9 +461,17 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 
 	// if (intersect_scene(objects, object_count, &refl_ray, &dummy_normal, &t, &hitobject_id, true))
 	// 	hit_color += 0.4f * objects[hitobject_id].color;
-
+ 	// float3 sepia;
+ 	// sepia.x = 0.393 * hit_color.x + 0.769 * hit_color.y + 0.189 * hit_color.z;
+ 	// sepia.y = 0.349 * hit_color.x + 0.686 * hit_color.y + 0.168 * hit_color.z;
+ 	// sepia.z = 0.272 * hit_color.x + 0.534 * hit_color.y + 0.131 * hit_color.z;
+ 	// sepia.x = (sepia.x > 1.0f) ? 1.0f : sepia.x;
+ 	// sepia.y = (sepia.y > 1.0f) ? 1.0f : sepia.y;
+ 	// sepia.z = (sepia.z > 1.0f) ? 1.0f : sepia.z;
 	return hit_color;
+	// return sepia;
 }
+
 
 // float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const int object_count,
 // 						__constant t_light *lights, const int num_lights)
@@ -518,6 +530,19 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 // 	return hit_color;
 // }
 
+float3 add_sepia(float3 color)
+{
+	float3 sepia;
+
+	sepia.x = 0.393 * color.x + 0.769 * color.y + 0.189 * color.z;
+ 	sepia.y = 0.349 * color.x + 0.686 * color.y + 0.168 * color.z;
+ 	sepia.z = 0.272 * color.x + 0.534 * color.y + 0.131 * color.z;
+ 	sepia.x = (sepia.x > 1.0f) ? 1.0f : sepia.x;
+ 	sepia.y = (sepia.y > 1.0f) ? 1.0f : sepia.y;
+ 	sepia.z = (sepia.z > 1.0f) ? 1.0f : sepia.z;
+ 	return (sepia);
+}
+
 __kernel void render_scene(__constant t_object *objects, const int object_count,
 					__constant t_light *lights, const int num_lights,
 					__global uchar4 *output, const int width, const int height,
@@ -533,7 +558,7 @@ __kernel void render_scene(__constant t_object *objects, const int object_count,
 	t_ray camray = create_cam_ray(camera, x_coord, y_coord, width, height);
 
 	float3 pixel_float = get_direct_light(objects, &camray, object_count, lights, num_lights);
-
+	pixel_float = add_sepia(pixel_float);
 	// ----------- PATH TRACING! -----------
 	// for (int i = 0; i < SAMPLES; i++)
 	// 	finalcolor += trace_path(spheres, &camray, object_count, &seed0, &seed1) * invSamples;
