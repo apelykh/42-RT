@@ -33,6 +33,11 @@
 # define DIFFERENCE		7
 # define CLIPPING		8
 
+# define AMBIENT        0
+# define POINT          1
+# define PARALLEL       2
+# define SPOT           3
+
 typedef struct			s_sdl_context
 {
 	SDL_Window 			*win;
@@ -62,7 +67,7 @@ typedef cl_float16 mat4;
 // float3 is considered as float4 by OpenCL
 typedef struct			s_object
 {
-	cl_int				id;
+	cl_int				id; // Remove in the release version
 	cl_bool				hidden;
 	cl_int				type;
 	cl_int2				operand;
@@ -83,8 +88,12 @@ typedef struct			s_object
 
 typedef struct			s_light
 {
+    cl_int              type;
 	cl_float3			location;
-	cl_float3			emi;
+	cl_float3			emission;
+    cl_float            angle;
+    cl_float3           dir;
+	cl_float			reflection;
 }						t_light;
 
 typedef struct			s_camera
@@ -112,18 +121,22 @@ cl_float3	init_vec3(cl_float x, cl_float y, cl_float z);
 cl_float3	add_vec3(cl_float3 a, cl_float3 b);
 cl_float3	init_norm_vec3(cl_float x, cl_float y, cl_float z);
 cl_float4	init_vec4(cl_float x, cl_float y, cl_float z, cl_float w);
+void        ft_putstr(char const *s);
 
-void	init_scene1(t_scene *scene);
-
-cl_float3	cjcjGetFloat3(cJSON *root, char *item_name);
+void		cjGetBool(cl_bool *target, cJSON *object, char *item_name);
 cl_float	cjGetFloat(cJSON *object, char *item_name);
-cl_int		cjGetInt(cJSON *object, char *item_name);
+cl_float3	cjGetFloat3(cJSON *root, char *item_name);
 char		*cjGetString(cJSON *object, char *item_name);
 cl_int		cjGetType(char *string_type);
+cl_int		cjGetLightType(char *string_type);
 
 void		objects_init(cJSON *j_root, t_scene *scene);
 void		parse_scene(char *scene_path, t_scene *scene);
 void		scene_init(char *strJSON, t_scene *scene);
+void		camera_init(cJSON *cj_root, t_scene *scene);
+void		lights_init(cJSON *cj_root, t_scene *scene);
+void		objects_init(cJSON *cj_root, t_scene *scene);
+void        bocal_init(t_scene *scene);
 
 void	init_sdl(t_sdl_context *sdl_context);
 void	sdl_cleanup(t_sdl_context *sdl_context);

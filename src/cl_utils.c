@@ -3,7 +3,7 @@
 
 static void	load_kernel(t_cl_context *cl_context)
 {
-	char filename[] = "./kernels/rt.cl";
+	char filename[] = "./kernels/render.cl";
 	FILE *fp;
 
 	fp = fopen(filename, "r");
@@ -36,7 +36,7 @@ void	init_cl(t_cl_context *cl_context)
 	cl_context->program = clCreateProgramWithSource(cl_context->context, 1,
 		(const char **)&(cl_context->kernel_src), (const size_t *)&(cl_context->src_size), &ret);
 
-	ret = clBuildProgram(cl_context->program, 1, &device_id, NULL, NULL, NULL);
+	ret = clBuildProgram(cl_context->program, 1, &device_id, "-I includes/ -I kernels/ -Werror", NULL, NULL);
 	if (ret != CL_SUCCESS)
 	{
 		char *buff_erro;

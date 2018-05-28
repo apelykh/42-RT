@@ -1,6 +1,17 @@
 #include <stdio.h>
 #include "rt.h"
 
+void	ft_putstr(char const *s)
+{
+	if (s == NULL)
+		return ;
+	while (*s != '\0')
+	{
+		write(1, s, 1);
+		s++;
+	}
+}
+
 cl_float3	clamp_float3_minmax(cl_float3 x, float min, float max)
 {
 	cl_float3 res;
