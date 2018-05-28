@@ -280,68 +280,6 @@ bool intersect_scene(__constant t_object *objects, const int num_objects, const 
 	return true;
 }
 
-/* the path tracing function */
-/* computes a path (starting from the camera) with a defined number of bounces, accumulates light/color at each bounce */
-/* each ray hitting a surface will be reflected in a random direction (by randomly sampling the hemisphere above the hitpoint) */
-/* small optimisation: diffuse ray directions are calculated using cosine weighted importance sampling */
-
-// float3 trace_path(__constant t_object *spheres, const t_ray *camray, const int object_count, const int *seed0, const int *seed1)
-// {
-// 	t_ray ray = *camray;
-
-// 	float3 accum_color = (float3)(0.0f, 0.0f, 0.0f);
-// 	float3 mask = (float3)(1.0f, 1.0f, 1.0f);
-// 	float3 normal_facing = (float3)(0.0f, 0.0f, 0.0f);
-
-// 	for (int bounces = 0; bounces < NUM_BOUNCES; bounces++)
-// 	{
-// 		int hitobject_id = 0;
-// 		float t;
-
-// 		// if ray misses scene, return background colour
-// 		if (!intersect_scene(spheres, object_count, &ray, &normal_facing, &t, &hitobject_id, false))
-// 			return accum_color += mask * (float3)(0.15f, 0.15f, 0.25f);
-
-// 		// else, we've got a hit! Fetch the closest hit sphere
-// 		//version with local copy of sphere
-// 		t_object hitobject = spheres[hitobject_id]; 
-
-// 		float3 hitpoint = ray.origin + ray.dir * t;
-		
-// 		//compute the surface normal and flip it if necessary to face the incoming ray
-// 		// float3 normal_facing = find_normal(&hitobject, &ray, t);
-
-// 		//compute two random numbers to pick a random point on the hemisphere above the hitpoint
-// 		float rand1 = 2.0f * PI * get_random(seed0, seed1);
-// 		float rand2 = get_random(seed0, seed1);
-// 		float rand2s = sqrt(rand2);
-
-// 		//create a local orthogonal coordinate frame centered at the hitpoint
-// 		float3 w = normal_facing;
-// 		float3 axis = fabs(w.x) > 0.1f ? (float3)(0.0f, 1.0f, 0.0f) : (float3)(1.0f, 0.0f, 0.0f);
-// 		float3 u = normalize(cross(axis, w));
-// 		float3 v = cross(w, u);
-
-// 		//use the coordinte frame and random numbers to compute the next ray direction
-// 		float3 newdir = normalize(u * cos(rand1)*rand2s + v*sin(rand1)*rand2s + w*sqrt(1.0f - rand2));
-
-// 		//add a very small offset to the hitpoint to prevent self intersection
-// 		ray.origin = hitpoint + normal_facing * EPSILON;
-// 		ray.dir = newdir;
-
-// 		//add the colour and light contributions to the accumulated colour
-// 		accum_color += mask * hitobject.emi; 
-
-// 		//the mask colour picks up surface colours at each bounce
-// 		mask *= hitobject.color; 
-		
-// 		// perform cosine-weighted importance sampling for diffuse surfaces
-// 		mask *= dot(newdir, normal_facing);
-// 	}
-// 	return accum_color;
-// }
-// -------------------------------------------------------------
-
 float3 trace(t_ray *ray, t_point *hit, __constant t_object *objects, const int num_objects,
 									   __constant t_light *lights, const int num_lights)
 {
@@ -386,23 +324,65 @@ float3 trace(t_ray *ray, t_point *hit, __constant t_object *objects, const int n
  	return (hit_color);
 }
 
+// float3 trace(t_ray *ray, t_point *hit, __constant t_object *objects, const int num_objects,
+// 									   __constant t_light *lights, const int num_lights)
+// {
+// 	float3	hit_color = (float3)(0.0f, 0.0f, 0.0f);
+// 	float3	diffuse = (float3)(0.0f, 0.0f, 0.0f);
+// 	float3	specular = (float3)(0.0f, 0.0f, 0.0f);
+// 	float3	normal = (float3)(0.0f, 0.0f, 0.0f);
+// 	t_point hit_tmp;
+
+// 	t_ray	sec_ray;
+
+// 	// t_object hitobject = objects[hit->obj_id];
+// 	normal = hit->normal;
+// 	sec_ray.origin = hit->pos + normal * EPSILON;
+
+// 	// ambient
+// 	diffuse = objects[hit->obj_id].color * 0.2f;
+
+// 	float dist_to_light = 0;
+// 	for (int i = 0; i < num_lights; i++)
+// 	{
+// 		sec_ray.dir = fast_normalize(lights[i].location - sec_ray.origin);
+// 		dist_to_light = fast_length(lights[i].location - sec_ray.origin);
+
+// 		if (intersect_scene(objects, num_objects, &sec_ray, &hit_tmp, true) &&
+// 			hit_tmp.dist < dist_to_light)
+// 			continue;
+
+// 		float intensity = zero_clamp(dot(normal, sec_ray.dir));
+// 		diffuse += intensity * 0.8f * lights[i].emission * objects[hit->obj_id].color;
+
+// 		float3 refl_dir = fast_normalize((2 * intensity * normal) - sec_ray.dir);
+
+// 		float phong_term = zero_clamp(dot(refl_dir, (-1.0f) * ray->dir));
+// 		if (intensity == 0.0f)
+// 			phong_term = 0.0f;
+
+// 		specular += lights[i].emission * pow(phong_term, objects[hit->obj_id].specular_exp);
+// 	}
+//  	hit_color = objects[hit->obj_id].diffuse * diffuse + objects[hit->obj_id].specular * specular;
+
+//  	return (hit_color);
+// }
+
 float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const int num_objects,
 						__constant t_light *lights, const int num_lights)
 {
 	t_ray	ray = *camray;
 	t_point hit;
-	float3	obj_color;
-
-	float kr = 0.5f;
 
 	if (!intersect_scene(objects, num_objects, &ray, &hit, false))
 		return bg_color;
 
-	float3 hit_color = (1 - kr) * trace(&ray, &hit, objects, num_objects, lights, num_lights);
-
 	// reflection
+	// float3 hit_color = (float3)(0.0f, 0.0f, 0.0f);
 	t_ray refl_ray;
-	// float3 mask = (float3)(1.0f, 1.0f, 1.0f);
+	float kr = 0.6f;
+	float r = kr;
+	float3 hit_color = (1 - kr) * trace(&ray, &hit, objects, num_objects, lights, num_lights);
 
 	for (int bounces = 0; bounces < 3; bounces++)
 	{
@@ -411,19 +391,15 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 		float c1 = (-1.0f) * dot(hit.normal, ray.dir);
 		refl_ray.dir = ray.dir + 2 * hit.normal * c1;
 
-		obj_color = objects[hit.obj_id].color;
-
 		if (intersect_scene(objects, num_objects, &refl_ray, &hit, true))
 		{
-			// obj_color = objects[hit.obj_id].color;
-			hit_color += kr * trace(&refl_ray, &hit, objects, num_objects, lights, num_lights);
-			// hit_color += kr * trace(&refl_ray, &hit, objects, num_objects, lights, num_lights);
-			// mask *= 0.8f * (0.5f * trace(&refl_ray, &hit, objects, num_objects, lights, num_lights) + 0.5f * objects[hit.obj_id].color);
-			// mask *= 0.5f * trace(&refl_ray, &hit, objects, num_objects, lights, num_lights);
+			hit_color += r * trace(&refl_ray, &hit, objects, num_objects, lights, num_lights);
+
+			// r *= objects[hit.obj_id].kr;
+			r *= kr;
 		}
 		ray = refl_ray;
 	}
-	// hit_color += mask;
 
 	return hit_color;
 }
@@ -433,20 +409,13 @@ __kernel void render_scene(__constant t_object *objects, const int object_count,
 					__global uchar4 *output, const int width, const int height,
 					__constant t_camera *camera)
 {
-	/* the unique global id of the work item for the current pixel */
 	unsigned int work_item_id = get_global_id(0);
-	/* x-coordinate of the pixel */
 	unsigned int x_coord = work_item_id % width;
-	/* y-coordinate of the pixel */
 	unsigned int y_coord = work_item_id / width;
 
 	t_ray camray = create_cam_ray(camera, x_coord, y_coord, width, height);
 
 	float3 pixel_float = get_direct_light(objects, &camray, object_count, lights, num_lights);
-
-	// ----------- PATH TRACING! -----------
-	// for (int i = 0; i < SAMPLES; i++)
-	// 	finalcolor += trace_path(spheres, &camray, object_count, &seed0, &seed1) * invSamples;
 
 	output[work_item_id].z = (uchar)(clamp(pixel_float.x, 0.0f, 1.0f) * 255 + .5f);
 	output[work_item_id].y = (uchar)(clamp(pixel_float.y, 0.0f, 1.0f) * 255 + .5f);
