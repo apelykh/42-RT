@@ -33,6 +33,11 @@
 # define DIFFERENCE		7
 # define CLIPPING		8
 
+# define AMBIENT		0
+# define POINT			1
+# define PARALLEL		2
+# define SPOT			3
+
 typedef struct			s_sdl_context
 {
 	SDL_Window 			*win;
@@ -83,8 +88,11 @@ typedef struct			s_object
 
 typedef struct			s_light
 {
+	cl_int				type;
+	cl_float			angle;
+	cl_float3			dir;
 	cl_float3			location;
-	cl_float3			emi;
+	cl_float3			emission;
 }						t_light;
 
 typedef struct			s_camera
@@ -115,13 +123,15 @@ cl_float4	init_vec4(cl_float x, cl_float y, cl_float z, cl_float w);
 
 void	init_scene1(t_scene *scene);
 
-cl_float3	cjcjGetFloat3(cJSON *root, char *item_name);
+cl_float3	cjGetFloat3(cJSON *root, char *item_name);
 cl_float	cjGetFloat(cJSON *object, char *item_name);
 cl_int		cjGetInt(cJSON *object, char *item_name);
 char		*cjGetString(cJSON *object, char *item_name);
 cl_int		cjGetType(char *string_type);
+cl_int		cjGetLightType(char *string_type);
 
 void		objects_init(cJSON *j_root, t_scene *scene);
+void        bocal_init(t_scene *scene);
 void		parse_scene(char *scene_path, t_scene *scene);
 void		scene_init(char *strJSON, t_scene *scene);
 

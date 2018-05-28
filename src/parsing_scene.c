@@ -33,8 +33,11 @@ void		print_lights(t_scene *scene)
         light = &scene->lights[i];
 
         printf("id: %d\n", i);
+        printf("type: %d\n", light->type);
         printf("location: %.2f %.2f %.2f\n", light->location.x, light->location.y, light->location.z);
-        printf("emission: %.2f %.2f %.2f\n", light->emi.x, light->emi.y, light->emi.z);
+        printf("emission: %.2f %.2f %.2f\n", light->emission.x, light->emission.y, light->emission.z);
+        printf("angle: %f\n", light->angle);
+        printf("direction: %.2f %.2f %.2f\n", light->dir.x, light->dir.y, light->dir.z);
         printf("----------------------------------\n");
     }
 }
@@ -76,6 +79,8 @@ void		print_objects(t_scene *scene)
             type_name = "DIFFERENCE";
         else if (obj->type == 8)
             type_name = "CLIPPING";
+        else if (obj->type == 9)
+            type_name = "BOCAL";
         printf("type: %d (%s)\n", obj->type, type_name);
         printf("hidden: %d\n", obj->hidden);
         printf("capped: %d\n", obj->capped);
@@ -91,6 +96,13 @@ void		print_objects(t_scene *scene)
     }
 }
 
+void		camera_init_empty(t_scene *scene)
+{
+    scene->cam->location = init_vec3(0.0f, 1.0f, 10.0f);
+    scene->cam->rotation = init_vec3(0.0f, 0.0f, 0.0f);
+    scene->cam->fov = 45.0f;
+}
+
 void		camera_init(cJSON *cj_root, t_scene *scene)
 {
 	cJSON		*cj_camera;
@@ -99,8 +111,9 @@ void		camera_init(cJSON *cj_root, t_scene *scene)
 	if (cj_camera)
 	{
 		scene->cam = (t_camera*)malloc(sizeof(t_camera));
-		scene->cam->location = cjcjGetFloat3(cj_camera, "location");
-		scene->cam->rotation = cjcjGetFloat3(cj_camera, "rotation");
+        camera_init_empty(scene);
+		scene->cam->location = cjGetFloat3(cj_camera, "location");
+		scene->cam->rotation = cjGetFloat3(cj_camera, "rotation");
 		scene->cam->fov = cjGetFloat(cj_camera, "fov");
 		set_cam_translate_matrix(scene->cam);
 		set_cam_rotate_matrix(scene->cam);
@@ -117,18 +130,32 @@ void		lights_init(cJSON *cj_root, t_scene *scene)
 	cJSON	*cj_lights;
 	cJSON	*cur_obj;
 	cl_int	i;
+    cl_int	count_ambient;
 
 	cj_lights = cJSON_GetObjectItem(cj_root, "lights");
 	if (cj_lights)
 	{
+        count_ambient = 0;
 		i = 0;
 		scene->num_lights = (cl_int)cJSON_GetArraySize(cj_lights);
 		scene->lights = (t_light *)malloc(sizeof(t_light) * scene->num_lights);
 		while (i < scene->num_lights)
 		{
 			cur_obj = cJSON_GetArrayItem(cj_lights, i);
-			scene->lights[i].location = cjcjGetFloat3(cur_obj, "location");
-			scene->lights[i].emi = cjcjGetFloat3(cur_obj, "emission");
+            scene->lights[i].type = cjGetLightType(cjGetString(cur_obj, "type"));
+			scene->lights[i].location = cjGetFloat3(cur_obj, "location");
+            scene->lights[i].emission = cjGetFloat3(cur_obj, "emission");
+            scene->lights[i].angle = cjGetFloat(cur_obj, "angle");
+            scene->lights[i].dir = cjGetFloat3(cur_obj, "direction");
+
+            if (scene->lights[i].type == AMBIENT)
+                count_ambient++;
+            if (count_ambient > 1)
+            {
+                printf("[-] Ambient lights must be only one\n");
+                exit(EXIT_FAILURE);
+            }
+
 			i++;
 		}
 	}
@@ -151,6 +178,7 @@ void		scene_init(char *strJSON, t_scene *scene)
 	}
 	camera_init(cj_root, scene);
 	lights_init(cj_root, scene);
+
 	objects_init(cj_root, scene);
 
 	cJSON_Delete(cj_root);

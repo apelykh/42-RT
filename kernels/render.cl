@@ -17,11 +17,12 @@ __constant float PI = 3.14159265359f;
 # define INTERSECTION	6
 # define DIFFERENCE		7
 # define CLIPPING		8
+# define BOCAL			9
 
-// # define AMBIENT		0
-// # define POINT			1
-// # define PARALLEL		2
-// # define SPOT			3
+# define AMBIENT		0
+# define POINT			1
+# define PARALLEL		2
+# define SPOT			3
 
 typedef struct	s_ray
 {
@@ -68,7 +69,9 @@ typedef struct	s_object
 
 typedef struct	s_light
 {
-	// int		type;
+	int		type;
+	float	angle;
+	float3	dir;
 	float3	location;
 	float3	emission;
 }				t_light;
@@ -118,6 +121,7 @@ mat4	mat_transform(const t_object *obj);
 static float zero_clamp(float x);
 t_ray create_cam_ray(__constant t_camera *camera, const int x_coord, const int y_coord, const int width, const int height);
 float3 trace_path(__constant t_object *spheres, const t_ray *camray, const int object_count, const int *seed0, const int *seed1);
+float3 add_sepia(float3 color);
 float3 get_direct_light(__constant t_object *spheres, const t_ray *camray, const int object_count, __constant t_light *lights, const int num_lights);
 
 float3 trace(t_ray *ray, t_point *hit, __constant t_object *objects, const int num_objects,
@@ -265,6 +269,10 @@ bool intersect_scene(__constant t_object *objects, const int num_objects, const 
 				if (intersect_clipping(objects, i, ray, quick, &hit))
 					hit_occured++;
 				break;
+			case BOCAL :
+				if (intersect_bocal(objects, i, ray, quick, &hit))
+					hit_occured++;
+				break;
 			}
 		}
 	}
@@ -296,77 +304,48 @@ float3 trace(t_ray *ray, t_point *hit, __constant t_object *objects, const int n
 	sec_ray.origin = hit->pos + normal * EPSILON;
 
 	// ambient
-	diffuse = hitobject.color * 0.2f;
+	// diffuse = hitobject.color * 0.2f;
 
-	float dist_to_light = 0;
+	float dist_to_light = 1e20f;
 	for (int i = 0; i < num_lights; i++)
 	{
-		sec_ray.dir = fast_normalize(lights[i].location - sec_ray.origin);
-		dist_to_light = fast_length(lights[i].location - sec_ray.origin);
+		if (lights[i].type == AMBIENT)
+		{
+			diffuse += lights[i].emission * hitobject.color;
+			continue;
+		}
+		if (lights[i].type == PARALLEL)
+			sec_ray.dir = -1.0f * fast_normalize(lights[i].dir);
+		else
+		{
+			sec_ray.dir = fast_normalize(lights[i].location - sec_ray.origin);
+			dist_to_light = fast_length(lights[i].location - sec_ray.origin);
+		}
 
 		if (intersect_scene(objects, num_objects, &sec_ray, &hit_tmp, true) &&
 			hit_tmp.dist < dist_to_light)
 			continue;
 
+		if (lights[i].type == SPOT)
+		{
+			float k = acos(dot((-1.0f) * sec_ray.dir, fast_normalize(lights[i].dir)));
+			if (degrees(k) >= (lights[i].angle / 2.0f))
+				continue;
+		}
+
 		float intensity = zero_clamp(dot(normal, sec_ray.dir));
-		diffuse += intensity * 0.8f * lights[i].emission * hitobject.color;
+		diffuse += intensity * lights[i].emission * hitobject.color;
 
 		float3 refl_dir = fast_normalize((2 * intensity * normal) - sec_ray.dir);
-
 		float phong_term = zero_clamp(dot(refl_dir, (-1.0f) * ray->dir));
 		if (intensity == 0.0f)
 			phong_term = 0.0f;
-
 		specular += lights[i].emission * pow(phong_term, hitobject.specular_exp);
 	}
  	hit_color = hitobject.diffuse * diffuse + hitobject.specular * specular;
 
  	return (hit_color);
 }
-
-// float3 trace(t_ray *ray, t_point *hit, __constant t_object *objects, const int num_objects,
-// 									   __constant t_light *lights, const int num_lights)
-// {
-// 	float3	hit_color = (float3)(0.0f, 0.0f, 0.0f);
-// 	float3	diffuse = (float3)(0.0f, 0.0f, 0.0f);
-// 	float3	specular = (float3)(0.0f, 0.0f, 0.0f);
-// 	float3	normal = (float3)(0.0f, 0.0f, 0.0f);
-// 	t_point hit_tmp;
-
-// 	t_ray	sec_ray;
-
-// 	// t_object hitobject = objects[hit->obj_id];
-// 	normal = hit->normal;
-// 	sec_ray.origin = hit->pos + normal * EPSILON;
-
-// 	// ambient
-// 	diffuse = objects[hit->obj_id].color * 0.2f;
-
-// 	float dist_to_light = 0;
-// 	for (int i = 0; i < num_lights; i++)
-// 	{
-// 		sec_ray.dir = fast_normalize(lights[i].location - sec_ray.origin);
-// 		dist_to_light = fast_length(lights[i].location - sec_ray.origin);
-
-// 		if (intersect_scene(objects, num_objects, &sec_ray, &hit_tmp, true) &&
-// 			hit_tmp.dist < dist_to_light)
-// 			continue;
-
-// 		float intensity = zero_clamp(dot(normal, sec_ray.dir));
-// 		diffuse += intensity * 0.8f * lights[i].emission * objects[hit->obj_id].color;
-
-// 		float3 refl_dir = fast_normalize((2 * intensity * normal) - sec_ray.dir);
-
-// 		float phong_term = zero_clamp(dot(refl_dir, (-1.0f) * ray->dir));
-// 		if (intensity == 0.0f)
-// 			phong_term = 0.0f;
-
-// 		specular += lights[i].emission * pow(phong_term, objects[hit->obj_id].specular_exp);
-// 	}
-//  	hit_color = objects[hit->obj_id].diffuse * diffuse + objects[hit->obj_id].specular * specular;
-
-//  	return (hit_color);
-// }
 
 float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const int num_objects,
 						__constant t_light *lights, const int num_lights)
@@ -404,6 +383,19 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 	return hit_color;
 }
 
+float3 add_sepia(float3 color)
+{
+	float3 sepia;
+
+	sepia.x = 0.393 * color.x + 0.769 * color.y + 0.189 * color.z;
+ 	sepia.y = 0.349 * color.x + 0.686 * color.y + 0.168 * color.z;
+ 	sepia.z = 0.272 * color.x + 0.534 * color.y + 0.131 * color.z;
+ 	sepia.x = (sepia.x > 1.0f) ? 1.0f : sepia.x;
+ 	sepia.y = (sepia.y > 1.0f) ? 1.0f : sepia.y;
+ 	sepia.z = (sepia.z > 1.0f) ? 1.0f : sepia.z;
+ 	return (sepia);
+}
+
 __kernel void render_scene(__constant t_object *objects, const int object_count,
 					__constant t_light *lights, const int num_lights,
 					__global uchar4 *output, const int width, const int height,
@@ -416,6 +408,7 @@ __kernel void render_scene(__constant t_object *objects, const int object_count,
 	t_ray camray = create_cam_ray(camera, x_coord, y_coord, width, height);
 
 	float3 pixel_float = get_direct_light(objects, &camray, object_count, lights, num_lights);
+	// pixel_float = add_sepia(pixel_float);
 
 	output[work_item_id].z = (uchar)(clamp(pixel_float.x, 0.0f, 1.0f) * 255 + .5f);
 	output[work_item_id].y = (uchar)(clamp(pixel_float.y, 0.0f, 1.0f) * 255 + .5f);

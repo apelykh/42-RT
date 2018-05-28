@@ -54,13 +54,13 @@ static cJSON	*parse_object(t_object *obj, int obj_id, cJSON *cj_objects, int cj_
 	obj->hidden = (cl_bool)cjGetInt(cj_obj_current, "hidden");
 	obj->capped = (cl_bool)cjGetInt(cj_obj_current, "capped");
 	obj->location = clamp_float3_minmax(
-		cjcjGetFloat3(cj_obj_current, "location"), -1000.0f, 1000.0f);
+		cjGetFloat3(cj_obj_current, "location"), -1000.0f, 1000.0f);
 	obj->rotation = clamp_float3_minmax(
-		cjcjGetFloat3(cj_obj_current, "rotation"), -180.0f, 180.0f);
+		cjGetFloat3(cj_obj_current, "rotation"), -180.0f, 180.0f);
 	obj->scale = clamp_float3_minmax(
-		cjcjGetFloat3(cj_obj_current, "scale"), 0.0f, 1000.0f);
+		cjGetFloat3(cj_obj_current, "scale"), 0.0f, 1000.0f);
 	obj->color = clamp_float3_minmax(
-		cjcjGetFloat3(cj_obj_current, "color"), 0.0f, 1.0f);
+		cjGetFloat3(cj_obj_current, "color"), 0.0f, 1.0f);
 	obj->diffuse = clamp_float_minmax(
 		cjGetFloat(cj_obj_current, "diffuse"), 0.0f, 1.0f);
 	obj->specular = clamp_float_minmax(
@@ -114,12 +114,13 @@ void		objects_init(cJSON *cj_root, t_scene *scene)
     if (cj_objects)
     {
         count_parent_objects = cJSON_GetArraySize(cj_objects);
-        scene->num_objects = (cl_int)(count_parent_objects +
+        scene->num_objects = (cl_int)(6 + count_parent_objects +
                                       count_inner_objects(cj_objects, count_parent_objects));
         scene->objects = (t_object *)malloc(sizeof(t_object) * scene->num_objects);
+        bocal_init(scene);
 
         cj_i = 0;
-        obj_id = 0;
+        obj_id = 6;
         while (cj_i < count_parent_objects)
         {
             cj_obj_current = parse_object(&scene->objects[obj_id], obj_id, cj_objects, cj_i);

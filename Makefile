@@ -22,7 +22,7 @@ SRC_FILES = main.c \
 			parsing_scene.c \
 			parsing_objects.c \
 			parsing_utils.c \
-			scene1.c \
+			bocal_components.c \
 
 SRC = $(addprefix $(SRC_DIR), $(SRC_FILES))
 OBJ = $(SRC:.c=.o)
