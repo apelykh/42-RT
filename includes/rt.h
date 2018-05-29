@@ -77,6 +77,8 @@ typedef struct			s_object
 	cl_float3			scale;
 	cl_float3			color;
 	// cl_float3			emi;
+	cl_float			kr;
+	cl_float			ior;
 	cl_float			diffuse;
 	cl_float			specular;
 	cl_float			spec_exp;
@@ -93,7 +95,6 @@ typedef struct			s_light
 	cl_float3			emission;
     cl_float            angle;
     cl_float3           dir;
-	cl_float			reflection;
 }						t_light;
 
 typedef struct			s_camera

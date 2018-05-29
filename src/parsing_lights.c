@@ -21,7 +21,6 @@ static void		print_lights(t_scene *scene)
         printf("emission: %.2f %.2f %.2f\n", light->emission.x, light->emission.y, light->emission.z);
         printf("angle: %f\n", light->angle);
         printf("direction: %.2f %.2f %.2f\n", light->dir.x, light->dir.y, light->dir.z);
-        printf("reflection: %f\n", light->reflection);
         printf("----------------------------------\n");
     }
 }
@@ -33,7 +32,6 @@ static void		light_init_start(t_light *light)
     light->emission = init_vec3(0.0f, 0.0f, 0.0f);
     light->angle = 0.0f;
     light->dir = init_vec3(1.0f, 1.0f, 1.0f);
-    light->reflection = 0.0f;
 }
 
 void		lights_init(cJSON *cj_root, t_scene *scene)
@@ -59,7 +57,6 @@ void		lights_init(cJSON *cj_root, t_scene *scene)
             scene->lights[i].emission = cjGetFloat3(cur_obj, "emission");
             scene->lights[i].angle = cjGetFloat(cur_obj, "angle");
             scene->lights[i].dir = cjGetFloat3(cur_obj, "direction");
-            scene->lights[i].reflection = cjGetFloat(cur_obj, "reflection");
 
             if (scene->lights[i].type == AMBIENT)
                 count_ambient++;

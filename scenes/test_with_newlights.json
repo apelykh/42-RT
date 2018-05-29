@@ -10,8 +10,7 @@
             "location": [0.0, 2.75, 2.75],
             "emission": [1.0, 1.0, 1.0],
             "angle": 90,
-            "direction": [1.0, 2.0, 3.0],
-            "reflection": 1.0
+            "direction": [1.0, 2.0, 3.0]
         }
     ],
     "objects": [
@@ -24,7 +23,9 @@
             "capped": true,
             "diffuse": 0.7,
             "specular": 0.9,
-            "specular_exp": 20.0
+            "specular_exp": 20.0,
+            "kr": 1.0,
+            "ior": 1.0
         },
         {
             "type": "DIFFERENCE",
@@ -35,6 +36,8 @@
             "diffuse": 1.0,
             "specular": 0.0,
             "specular_exp": 20.0,
+            "kr": 1.0,
+            "ior": 1.0,
             "inner_objects": [
                 {
                     "type": "BOX",
@@ -46,7 +49,10 @@
                     "hidden": true,
                     "diffuse": 0.7,
                     "specular": 0.9,
-                    "specular_exp": 20.0
+                    "specular_exp": 20.0,
+                    "kr": 1.0,
+                    "ior": 1.0
+
                 },
                 {
                     "type": "SPHERE",
@@ -58,7 +64,9 @@
                     "hidden": true,
                     "diffuse": 0.7,
                     "specular": 0.9,
-                    "specular_exp": 20.0
+                    "specular_exp": 20.0,
+                    "kr": 1.0,
+                    "ior": 1.0
                 }
             ]
         },
@@ -72,7 +80,9 @@
             "hidden": false,
             "diffuse": 0.4,
             "specular": 0.7,
-            "specular_exp": 40.0
+            "specular_exp": 40.0,
+            "kr": 1.0,
+            "ior": 1.0
         },
         {
             "type": "CYLINDER",
@@ -83,7 +93,9 @@
             "capped": true,
             "diffuse": 0.7,
             "specular": 0.9,
-            "specular_exp": 20.0
+            "specular_exp": 20.0,
+            "kr": 1.0,
+            "ior": 1.0
         },
         {
             "type": "PLANE",
@@ -92,7 +104,9 @@
             "color": [0.9, 0.8, 0.7],
             "diffuse": 1.0,
             "specular": 0.0,
-            "specular_exp": 20.0
+            "specular_exp": 20.0,
+            "kr": 1.0,
+            "ior": 1.0
         }
     ]
 }

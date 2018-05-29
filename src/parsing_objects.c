@@ -49,6 +49,8 @@ static void		print_objects(t_scene *scene)
         printf("diffuse: %.2f\n", obj->diffuse);
         printf("specular: %.2f\n", obj->specular);
         printf("specular exp: %.2f\n", obj->spec_exp);
+        printf("kr: %.2f\n", obj->kr);
+        printf("ior exp: %.2f\n", obj->ior);
         printf("----------------------------------\n");
     }
 }
@@ -68,6 +70,8 @@ static void		object_init_start(t_object *obj)
 	obj->diffuse = 1.0f;
 	obj->specular = 0.0f;
 	obj->spec_exp = 1.0f;
+    obj->kr = 0.0f;
+    obj->ior = 0.0f;
 }
 
 static int		count_inner_objects(cJSON *cj_objects, int count_objects)
@@ -120,6 +124,10 @@ static cJSON	*parse_object(t_object *obj, int obj_id, cJSON *cj_objects, int cj_
 		cjGetFloat(cj_obj_current, "specular"), 0.0f, 1.0f);
 	obj->spec_exp = clamp_float_minmax(
 		cjGetFloat(cj_obj_current, "specular_exp"), 0.0f, 300.0f);
+    obj->kr = clamp_float_minmax(
+            cjGetFloat(cj_obj_current, "kr"), 0.0f, 1.0f);
+    obj->ior = clamp_float_minmax(
+            cjGetFloat(cj_obj_current, "ior"), 0.0f, 1.0f);
 	return (cj_obj_current);
 }
 
