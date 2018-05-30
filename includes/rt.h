@@ -124,6 +124,7 @@ cl_float3	init_norm_vec3(cl_float x, cl_float y, cl_float z);
 cl_float4	init_vec4(cl_float x, cl_float y, cl_float z, cl_float w);
 void        ft_putstr(char const *s);
 
+void		parsing_error(char *text1, char *text2);
 void		cjGetBool(cl_bool *target, cJSON *object, char *item_name);
 cl_float	cjGetFloat(cJSON *object, char *item_name);
 cl_float3	cjGetFloat3(cJSON *root, char *item_name);
@@ -149,8 +150,8 @@ void	cl_cleanup(t_cl_context *cl_context);
 
 void	save_image(cl_float3 *pixels);
 int		to_uchar(float x);
-float	clamp_float_minmax(float x, float min, float max);
-cl_float3	clamp_float3_minmax(cl_float3 x, float min, float max);
+float	minmax_float(float x, float min, float max);
+cl_float3	minmax_float3(cl_float3 x, float min, float max);
 
 //matrix funcs
 void		obj_transform_mats(t_object *obj);

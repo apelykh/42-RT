@@ -7,10 +7,8 @@ void		scene_init(char *strJSON, t_scene *scene)
 
 	cj_root = cJSON_Parse(strJSON);
 	if (!cj_root)
-	{
-		printf("[-] JSON Error: %s\n", cJSON_GetErrorPtr());
-		exit(0);
-	}
+        parsing_error("[-] JSON Error", (char *)cJSON_GetErrorPtr());
+
 	camera_init(cj_root, scene);
 	lights_init(cj_root, scene);
 	objects_init(cj_root, scene);
@@ -26,9 +24,9 @@ void		parse_scene(char *scene_path, t_scene *scene)
 
     if ((fd = open(scene_path, O_RDONLY)) < 0 || read(fd, 0, 0) < 0)
     {
+        close(fd);
         // Проверить можем ли мы использовать perror
         perror("[-] Read Scene Error");
-        close(fd);
         exit(EXIT_FAILURE);
     }
 
@@ -36,11 +34,8 @@ void		parse_scene(char *scene_path, t_scene *scene)
     read(fd, scene_str, MAX_SOURCE_SIZE);
 	close(fd);
 
-    if (scene_str[0] != '{') {
-        printf("[-] Read Scene Error\n");
-        exit(EXIT_FAILURE);
-    }
-
+    if (scene_str[0] != '{')
+        parsing_error("[-] Read Scene Error", "No first bracket");
 	scene_init(scene_str, scene);
 
     i = 0;

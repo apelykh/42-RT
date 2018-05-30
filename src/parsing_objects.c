@@ -38,6 +38,8 @@ static void		print_objects(t_scene *scene)
             type_name = "DIFFERENCE";
         else if (obj->type == 8)
             type_name = "CLIPPING";
+        else if (obj->type == 9)
+            type_name = "BOCAL";
         printf("type: %d (%s)\n", obj->type, type_name);
         printf("hidden: %d\n", obj->hidden);
         printf("capped: %d\n", obj->capped);
@@ -54,7 +56,6 @@ static void		print_objects(t_scene *scene)
         printf("----------------------------------\n");
     }
 }
-
 
 static void		object_init_start(t_object *obj)
 {
@@ -110,23 +111,23 @@ static cJSON	*parse_object(t_object *obj, int obj_id, cJSON *cj_objects, int cj_
 	obj->type = obj_type;
     cjGetBool(&(obj->hidden), cj_obj_current, "hidden");
     cjGetBool(&(obj->capped), cj_obj_current, "capped");
-	obj->location = clamp_float3_minmax(
+	obj->location = minmax_float3(
 		cjGetFloat3(cj_obj_current, "location"), -1000.0f, 1000.0f);
-	obj->rotation = clamp_float3_minmax(
+	obj->rotation = minmax_float3(
 		cjGetFloat3(cj_obj_current, "rotation"), -180.0f, 180.0f);
-	obj->scale = clamp_float3_minmax(
+	obj->scale = minmax_float3(
 		cjGetFloat3(cj_obj_current, "scale"), 0.0f, 1000.0f);
-	obj->color = clamp_float3_minmax(
+	obj->color = minmax_float3(
 		cjGetFloat3(cj_obj_current, "color"), 0.0f, 1.0f);
-	obj->diffuse = clamp_float_minmax(
+	obj->diffuse = minmax_float(
 		cjGetFloat(cj_obj_current, "diffuse"), 0.0f, 1.0f);
-	obj->specular = clamp_float_minmax(
+	obj->specular = minmax_float(
 		cjGetFloat(cj_obj_current, "specular"), 0.0f, 1.0f);
-	obj->spec_exp = clamp_float_minmax(
+	obj->spec_exp = minmax_float(
 		cjGetFloat(cj_obj_current, "specular_exp"), 0.0f, 300.0f);
-    obj->kr = clamp_float_minmax(
+    obj->kr = minmax_float(
             cjGetFloat(cj_obj_current, "kr"), 0.0f, 1.0f);
-    obj->ior = clamp_float_minmax(
+    obj->ior = minmax_float(
             cjGetFloat(cj_obj_current, "ior"), 0.0f, 1.0f);
 	return (cj_obj_current);
 }
@@ -140,10 +141,7 @@ static void		parse_inner_objects(t_scene *scene, int *obj_parent_id, cJSON *cj_o
     cj_inner_objects = cJSON_GetObjectItem(cj_obj_parent, "inner_objects");
 
     if (cJSON_GetArraySize(cj_inner_objects) != 2)
-    {
-        printf("Error: Inner object count must be only 2\n");
-        exit(EXIT_FAILURE);
-    }
+        parsing_error("Error: Inner object count must be only 2", NULL);
 
     cj_inner_i = 0;
     obj_inner_id = (*obj_parent_id) + 1;
@@ -194,10 +192,7 @@ void		objects_init(cJSON *cj_root, t_scene *scene)
         }
     }
     else
-    {
-        printf("[-] No objects field in scene document\n");
-        exit(EXIT_FAILURE);
-    }
+        parsing_error("[-] No objects field in scene document", NULL);
 
     print_objects(scene);
 }

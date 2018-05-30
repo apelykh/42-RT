@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "rt.h"
 
 /*
@@ -32,6 +31,7 @@ void		    camera_init(cJSON *cj_root, t_scene *scene)
     cj_camera = cJSON_GetObjectItem(cj_root, "camera");
     if (cj_camera)
     {
+        /* Add limits */
         scene->cam = (t_camera*)malloc(sizeof(t_camera));
         camera_init_start(scene->cam);
         scene->cam->location = cjGetFloat3(cj_camera, "location");
@@ -41,10 +41,6 @@ void		    camera_init(cJSON *cj_root, t_scene *scene)
         set_cam_rotate_matrix(scene->cam);
     }
     else
-    {
-        printf("[-] No camera field in scene document\n");
-        exit(EXIT_FAILURE);
-    }
-
+        parsing_error("[-] No camera field in scene document", NULL);
     print_camera(scene);
 }

@@ -1,5 +1,16 @@
 #include "rt.h"
 
+void parsing_error(char *text1, char *text2)
+{
+    ft_putstr(text1);
+    ft_putstr("\n");
+    if (text2 != NULL) {
+        ft_putstr(text2);
+        ft_putstr("\n");
+    }
+    exit(EXIT_FAILURE);
+}
+
 cl_float3	cjGetFloat3(cJSON *root, char *item_name)
 {
 	cJSON		*j_float3_arr;
@@ -7,14 +18,15 @@ cl_float3	cjGetFloat3(cJSON *root, char *item_name)
 
 	res = init_vec3(0.0f, 0.0f, 0.0f);
 	j_float3_arr = cJSON_GetObjectItem(root, item_name);
-//	printf("Float3 size: %d (%s)\n", cJSON_GetArraySize(j_float3_arr), item_name);
 	if (j_float3_arr)
 	{
         if (cJSON_GetArraySize(j_float3_arr) != 3)
-        {
-            printf("[-] Error Parsing Float3 (%s)\n", item_name);
-            exit(EXIT_FAILURE);
-        }
+            parsing_error("[-] Error Parsing Float3", item_name);
+
+        if (!cJSON_IsNumber(cJSON_GetArrayItem(j_float3_arr, 0))
+                || !cJSON_IsNumber(cJSON_GetArrayItem(j_float3_arr, 1))
+                || !cJSON_IsNumber(cJSON_GetArrayItem(j_float3_arr, 2)))
+            parsing_error("[-] Error Parsing Float3", item_name);
 		res.x = (cl_float)cJSON_GetArrayItem(j_float3_arr, 0)->valuedouble;
 		res.y = (cl_float)cJSON_GetArrayItem(j_float3_arr, 1)->valuedouble;
 		res.z = (cl_float)cJSON_GetArrayItem(j_float3_arr, 2)->valuedouble;
@@ -32,10 +44,7 @@ cl_float	cjGetFloat(cJSON *object, char *item_name)
 	if (float_obj)
     {
         if (!cJSON_IsNumber(float_obj))
-        {
-            printf("[-] Error Parsing Float (%s)\n", item_name);
-            exit(EXIT_FAILURE);
-        }
+            parsing_error("[-] Error Parsing Float", item_name);
         res = (cl_float)float_obj->valuedouble;
     }
 	return (res);
@@ -49,10 +58,7 @@ void cjGetBool(cl_bool *target, cJSON *object, char *item_name)
     if (bool_obj)
     {
         if (!cJSON_IsBool(bool_obj))
-        {
-            printf("[-] Error Parsing Boolean (%s)\n", item_name);
-            exit(EXIT_FAILURE);
-        }
+            parsing_error("[-] Error Parsing Boolean", item_name);
         *target = (cl_bool)bool_obj->valueint;
     };
 }
@@ -67,10 +73,7 @@ char		*cjGetString(cJSON *object, char *item_name)
 	if (string_obj)
     {
         if (!cJSON_IsString(string_obj))
-        {
-            printf("[-] Error Parsing String (%s)\n", item_name);
-            exit(EXIT_FAILURE);
-        }
+            parsing_error("[-] Error Parsing String", item_name);
         res = string_obj->valuestring;
     }
 	return (res);
@@ -98,11 +101,10 @@ cl_int		cjGetType(char *string_type)
 		result = 7;
 	else if (!strcmp(string_type, "CLIPPING"))
 		result = 8;
+    else if (!strcmp(string_type, "BOCAL"))
+        result = 9;
     else
-    {
-        printf("[-] Error Parsing Object Type (%s)\n", string_type);
-        exit(EXIT_FAILURE);
-    }
+        parsing_error("[-] Error Parsing Object Type", string_type);
 	return (result);
 }
 
@@ -119,9 +121,6 @@ cl_int		cjGetLightType(char *string_type)
     else if (!strcmp(string_type, "SPOT"))
         result = 3;
     else
-    {
-        printf("[-] Error Parsing Light Type (%s)\n", string_type);
-        exit(EXIT_FAILURE);
-    }
+        parsing_error("[-] Error Parsing Light Type", string_type);
     return (result);
 }

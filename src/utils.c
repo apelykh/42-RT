@@ -12,25 +12,37 @@ void	ft_putstr(char const *s)
 	}
 }
 
-cl_float3	clamp_float3_minmax(cl_float3 x, float min, float max)
+cl_float3	minmax_float3(cl_float3 x, float min, float max)
 {
-	cl_float3 res;
+	cl_float3   res;
+    cl_int      error;
 
-	res.x = clamp_float_minmax(x.x, min, max);
-	res.y = clamp_float_minmax(x.y, min, max);
-	res.z = clamp_float_minmax(x.z, min, max);
+    error = 0;
+    (x.x < min || x.x > max) && (error = 1);
+    (x.y < min || x.y > max) && (error = 1);
+    (x.z < min || x.z > max) && (error = 1);
+
+    if (error)
+    {
+        printf("[-] Float3 value outside the limit\n");
+        exit(EXIT_FAILURE);
+    }
+
+	res.x = minmax_float(x.x, min, max);
+	res.y = minmax_float(x.y, min, max);
+	res.z = minmax_float(x.z, min, max);
 	return (res);
 }
 
 
-float	clamp_float_minmax(float x, float min, float max)
+float	minmax_float(float x, float min, float max)
 {
-	float res;
-
-	res = (x > max) ? max : x;
-	if (x < min)
-		res = min;
-	return (res);
+	if (x < min || x > max)
+    {
+        printf("[-] Float value outside the limit\n %f\n", x);
+        exit(EXIT_FAILURE);
+    }
+    return (x);
 }
 
 

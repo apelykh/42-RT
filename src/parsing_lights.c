@@ -50,6 +50,7 @@ void		lights_init(cJSON *cj_root, t_scene *scene)
         scene->lights = (t_light *)malloc(sizeof(t_light) * scene->num_lights);
         while (i < scene->num_lights)
         {
+            /* Add limits */
             cur_obj = cJSON_GetArrayItem(cj_lights, i);
             light_init_start(&(scene->lights[i]));
             scene->lights[i].type = cjGetLightType(cjGetString(cur_obj, "type"));
@@ -61,19 +62,11 @@ void		lights_init(cJSON *cj_root, t_scene *scene)
             if (scene->lights[i].type == AMBIENT)
                 count_ambient++;
             if (count_ambient > 1)
-            {
-                printf("[-] Ambient lights must be only one\n");
-                exit(EXIT_FAILURE);
-            }
-
+                parsing_error("[-] Ambient lights must be only one", NULL);
             i++;
         }
     }
     else
-    {
-        printf("[-] No lights field in scene document\n");
-        exit(EXIT_FAILURE);
-    }
-
+        parsing_error("[-] No lights field in scene document", NULL);
     print_lights(scene);
 }
