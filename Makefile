@@ -20,6 +20,8 @@ SRC_FILES = main.c \
 			sdl_utils.c \
 			utils.c \
 			parsing_scene.c \
+			parsing_camera.c \
+			parsing_lights.c \
 			parsing_objects.c \
 			parsing_utils.c \
 			bocal_components.c \

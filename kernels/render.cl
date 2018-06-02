@@ -51,29 +51,31 @@ typedef struct	s_hitpoints
 // all objects (primitive or compound) are defined in their local space, they rotate and scale around origin point
 typedef struct	s_object
 {
-	int		id;					// object's ID corresponds to it's order in array of objects
-	bool	hidden;				// if true - object won't be rendered unless called by some boolean operation
-	int		type;				// primitive type or operation type
-	int2	operand;			// ID's of 2 objects upon which to perform operation. Both can be primitives or other operations
-	bool	capped;				// defines whether cylinder or cone are capped or unlimited
-	float3	location;			// object is moved by this vector when transformed into world coordinates
-	float3	rotation;			// object is rotated by .x degrees along X axis, .y degrees along Y axis, .z degrees along Z axis when transformed into world coords
-	float3	scale;				// object is scaled x times along X axis ... when transfored into world coords
-	float3	color;				// .x - R, .y - G, .z - B pigments of object's color
-	float	diffuse;
-	float	specular;
-	float	specular_exp;
-	mat4 from_local;			// 4x4 homogenous matrix of transformation from object's local space to world space
-	mat4 to_local;				// 4x4 homogenous matrix of transformation to object's local space from world space
+	int			id;					// object's ID corresponds to it's order in array of objects
+	bool		hidden;				// if true - object won't be rendered unless called by some boolean operation
+	int			type;				// primitive type or operation type
+	int2		operand;			// ID's of 2 objects upon which to perform operation. Both can be primitives or other operations
+	bool		capped;				// defines whether cylinder or cone are capped or unlimited
+	float3		location;			// object is moved by this vector when transformed into world coordinates
+	float3		rotation;			// object is rotated by .x degrees along X axis, .y degrees along Y axis, .z degrees along Z axis when transformed into world coords
+	float3		scale;				// object is scaled x times along X axis ... when transfored into world coords
+	float3		color;				// .x - R, .y - G, .z - B pigments of object's color
+	float		diffuse;
+	float		specular;
+	float		specular_exp;
+	float		ior;
+	float		kr;
+	mat4		from_local;			// 4x4 homogenous matrix of transformation from object's local space to world space
+	mat4		to_local;				// 4x4 homogenous matrix of transformation to object's local space from world space
 }				t_object;
 
 typedef struct	s_light
 {
-	int		type;
-	float	angle;
-	float3	dir;
-	float3	location;
-	float3	emission;
+	int			type;
+	float		angle;
+	float3		dir;
+	float3		location;
+	float3		emission;
 }				t_light;
 
 typedef struct	s_camera
@@ -99,9 +101,7 @@ bool 	intersect_difference(__constant t_object *objects, int id, const t_ray *ra
 bool	intersect_clipping(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit);
 bool 	intersect_bocal(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit);
 
-// bool	intersect_scene(__constant t_object *objects, const int num_objects, const t_ray *ray, float3 *normal,
-// 							float *t, int *object_id, bool quick);
-bool intersect_scene(__constant t_object *objects, const int num_objects, const t_ray *ray,
+bool	intersect_scene(__constant t_object *objects, const int num_objects, const t_ray *ray,
 						t_point *hitpoint, bool quick);
 
 /* ----- matrix_utils.cl ----- */
@@ -120,12 +120,14 @@ mat4	mat_transform(const t_object *obj);
 // static float get_random(unsigned int *seed0, unsigned int *seed1);
 static float zero_clamp(float x);
 t_ray create_cam_ray(__constant t_camera *camera, const int x_coord, const int y_coord, const int width, const int height);
-float3 trace_path(__constant t_object *spheres, const t_ray *camray, const int object_count, const int *seed0, const int *seed1);
+// float3 trace_path(__constant t_object *spheres, const t_ray *camray, const int object_count, const int *seed0, const int *seed1);
 float3 add_sepia(float3 color);
 float3 get_direct_light(__constant t_object *spheres, const t_ray *camray, const int object_count, __constant t_light *lights, const int num_lights);
 
-float3 trace(t_ray *ray, t_point *hit, __constant t_object *objects, const int num_objects,
-									   __constant t_light *lights, const int num_lights);
+float3	shade(float3 incident_dir, t_point *hit, __constant t_object *objects, const int num_objects,
+										__constant t_light *lights, const int num_lights);
+
+float	fresnel_reflect_amount(float n1, float n2, float3 normal, float3 incident, float obj_kr);
 
 void	hitpoints_init(t_hitpoints* hit);
 void	hitpoints_sort(t_hitpoints* hit);
@@ -288,8 +290,8 @@ bool intersect_scene(__constant t_object *objects, const int num_objects, const 
 	return true;
 }
 
-float3 trace(t_ray *ray, t_point *hit, __constant t_object *objects, const int num_objects,
-									   __constant t_light *lights, const int num_lights)
+float3	shade(float3 incident_dir, t_point *hit, __constant t_object *objects, const int num_objects,
+										__constant t_light *lights, const int num_lights)
 {
 	float3	hit_color = (float3)(0.0f, 0.0f, 0.0f);
 	float3	diffuse = (float3)(0.0f, 0.0f, 0.0f);
@@ -337,7 +339,8 @@ float3 trace(t_ray *ray, t_point *hit, __constant t_object *objects, const int n
 		diffuse += intensity * lights[i].emission * hitobject.color;
 
 		float3 refl_dir = fast_normalize((2 * intensity * normal) - sec_ray.dir);
-		float phong_term = zero_clamp(dot(refl_dir, (-1.0f) * ray->dir));
+		// float phong_term = zero_clamp(dot(refl_dir, (-1.0f) * ray->dir));
+		float phong_term = zero_clamp(dot(refl_dir, (-1.0f) * incident_dir));
 		if (intensity == 0.0f)
 			phong_term = 0.0f;
 		specular += lights[i].emission * pow(phong_term, hitobject.specular_exp);
@@ -345,6 +348,31 @@ float3 trace(t_ray *ray, t_point *hit, __constant t_object *objects, const int n
  	hit_color = hitobject.diffuse * diffuse + hitobject.specular * specular;
 
  	return (hit_color);
+}
+
+float	fresnel_reflect_amount(float n1, float n2, float3 normal, float3 incident, float obj_kr)
+{
+    // Schlick aproximation
+    float r0 = (n1 - n2) / (n1 + n2);
+    r0 *= r0;
+    float cosX = -dot(normal, incident);
+    if (n1 > n2)
+    {
+        float n = n1 / n2;
+        float sinT2 = n * n * (1.0 - cosX * cosX);
+        // Total internal reflection
+        if (sinT2 > 1.0)
+            return (1.0f);
+
+        cosX = sqrt(1.0 - sinT2);
+    }
+    float x = 1.0 - cosX;
+    float ret = r0 + (1.0 - r0) * x * x * x * x * x;
+
+    // adjust reflect multiplier for object reflectivity
+    ret = (obj_kr + (1.0 - obj_kr) * ret);
+
+    return (ret);
 }
 
 float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const int num_objects,
@@ -356,31 +384,37 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 	if (!intersect_scene(objects, num_objects, &ray, &hit, false))
 		return bg_color;
 
-	// reflection
-	// float3 hit_color = (float3)(0.0f, 0.0f, 0.0f);
 	t_ray refl_ray;
-	float kr = 0.6f;
-	float r = kr;
-	float3 hit_color = (1 - kr) * trace(&ray, &hit, objects, num_objects, lights, num_lights);
+	float3 hit_color;
+	int	primary_id = hit.obj_id;
 
-	for (int bounces = 0; bounces < 3; bounces++)
+	// float r = objects[hit.obj_id].kr;
+	float r = fresnel_reflect_amount(1.0f, 1.0f, hit.normal, ray.dir, objects[hit.obj_id].kr);
+
+	// hit_color = (float3)(0.0f, 0.0f, 0.0f);
+	// hit_color = (1 - r) * shade(ray.dir, &hit, objects, num_objects, lights, num_lights);
+	hit_color = shade(ray.dir, &hit, objects, num_objects, lights, num_lights);
+	if (objects[primary_id].kr > 0.0f)
+		hit_color *= (1 - r);
+
+	if (objects[primary_id].kr > 0.0f)
 	{
-		refl_ray.origin = hit.pos + hit.normal * EPSILON;
-
-		float c1 = (-1.0f) * dot(hit.normal, ray.dir);
-		refl_ray.dir = ray.dir + 2 * hit.normal * c1;
-
-		if (intersect_scene(objects, num_objects, &refl_ray, &hit, true))
+		for (int bounces = 0; bounces < 3; bounces++)
 		{
-			hit_color += r * trace(&refl_ray, &hit, objects, num_objects, lights, num_lights);
+			float c1 = (-1.0f) * dot(hit.normal, ray.dir);
+			refl_ray.origin = hit.pos + hit.normal * EPSILON;
+			refl_ray.dir = fast_normalize(ray.dir + 2 * hit.normal * c1);
 
-			// r *= objects[hit.obj_id].kr;
-			r *= kr;
+			if (intersect_scene(objects, num_objects, &refl_ray, &hit, true))
+			{
+				hit_color += r * shade(refl_ray.dir, &hit, objects, num_objects, lights, num_lights);
+				r *= objects[hit.obj_id].kr;
+			}
+			ray = refl_ray;
 		}
-		ray = refl_ray;
 	}
 
-	return hit_color;
+	return (hit_color);
 }
 
 float3 add_sepia(float3 color)

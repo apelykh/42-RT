@@ -1,7 +1,63 @@
 #include <stdio.h>
 #include "rt.h"
 
-void		object_init_empty(t_object *obj)
+/*
+ * !! JUST FOR DEBUG !! -------------------------------------------------------
+ */
+static void		print_objects(t_scene *scene)
+{
+    t_object *obj;
+    char     *type_name;
+
+    printf("================================\n");
+    printf("num lights: %d\n", scene->num_lights);
+    printf("num objects: %d\n", scene->num_objects);
+    printf("================================\n");
+    printf("OBJECTS\n");
+    printf("================================\n");
+    for (int i = 0; i < scene->num_objects; i++)
+    {
+        obj = &scene->objects[i];
+
+        printf("id: %d\n", obj->id);
+        if (obj->type == 0)
+            type_name = "PLANE";
+        else if (obj->type == 1)
+            type_name = "SPHERE";
+        else if (obj->type == 2)
+            type_name = "CYLINDER";
+        else if (obj->type == 3)
+            type_name = "CONE";
+        else if (obj->type == 4)
+            type_name = "BOX";
+        else if (obj->type == 5)
+            type_name = "UNION";
+        else if (obj->type == 6)
+            type_name = "INTERSECTION";
+        else if (obj->type == 7)
+            type_name = "DIFFERENCE";
+        else if (obj->type == 8)
+            type_name = "CLIPPING";
+        else if (obj->type == 9)
+            type_name = "BOCAL";
+        printf("type: %d (%s)\n", obj->type, type_name);
+        printf("hidden: %d\n", obj->hidden);
+        printf("capped: %d\n", obj->capped);
+        printf("operands: %d %d\n", obj->operand.x, obj->operand.y);
+        printf("location: %.2f %.2f %.2f\n", obj->location.x, obj->location.y, obj->location.z);
+        printf("rotation: %.2f %.2f %.2f\n", obj->rotation.x, obj->rotation.y, obj->rotation.z);
+        printf("scale: %.2f %.2f %.2f\n", obj->scale.x, obj->scale.y, obj->scale.z);
+        printf("color: %.2f %.2f %.2f\n", obj->color.x, obj->color.y, obj->color.z);
+        printf("diffuse: %.2f\n", obj->diffuse);
+        printf("specular: %.2f\n", obj->specular);
+        printf("specular exp: %.2f\n", obj->spec_exp);
+        printf("kr: %.2f\n", obj->kr);
+        printf("ior exp: %.2f\n", obj->ior);
+        printf("----------------------------------\n");
+    }
+}
+
+static void		object_init_start(t_object *obj)
 {
 	obj->id = 0;
 	obj->type = 0;
@@ -15,6 +71,8 @@ void		object_init_empty(t_object *obj)
 	obj->diffuse = 1.0f;
 	obj->specular = 0.0f;
 	obj->spec_exp = 1.0f;
+    obj->kr = 0.0f;
+    obj->ior = 1.0f;
 }
 
 static int		count_inner_objects(cJSON *cj_objects, int count_objects)
@@ -31,7 +89,7 @@ static int		count_inner_objects(cJSON *cj_objects, int count_objects)
 	{
         cj_current_obj = cJSON_GetArrayItem(cj_objects, i);
 		type = cjGetType(cjGetString(cj_current_obj, "type"));
-		if (type >= 5 && type <= 8)
+		if (type >= UNION && type <= CLIPPING)
 		{
             cj_inner_objects = cJSON_GetObjectItem(cj_current_obj, "inner_objects");
             count_inner += cJSON_GetArraySize(cj_inner_objects);
@@ -44,29 +102,33 @@ static int		count_inner_objects(cJSON *cj_objects, int count_objects)
 static cJSON	*parse_object(t_object *obj, int obj_id, cJSON *cj_objects, int cj_i)
 {
 	cJSON	*cj_obj_current;
-	int		obj_type;
+    cl_int	obj_type;
 
-	object_init_empty(obj);
     cj_obj_current = cJSON_GetArrayItem(cj_objects, cj_i);
-    obj_type = cjGetType(cjGetString(cj_obj_current, "type"));
+    object_init_start(obj);
+    obj_type = (cl_int)cjGetType(cjGetString(cj_obj_current, "type"));
 	obj->id = (cl_int)obj_id;
-	obj->type = (cl_int)obj_type;
-	obj->hidden = (cl_bool)cjGetInt(cj_obj_current, "hidden");
-	obj->capped = (cl_bool)cjGetInt(cj_obj_current, "capped");
-	obj->location = clamp_float3_minmax(
+	obj->type = obj_type;
+    cjGetBool(&(obj->hidden), cj_obj_current, "hidden");
+    cjGetBool(&(obj->capped), cj_obj_current, "capped");
+	obj->location = minmax_float3(
 		cjGetFloat3(cj_obj_current, "location"), -1000.0f, 1000.0f);
-	obj->rotation = clamp_float3_minmax(
+	obj->rotation = minmax_float3(
 		cjGetFloat3(cj_obj_current, "rotation"), -180.0f, 180.0f);
-	obj->scale = clamp_float3_minmax(
+	obj->scale = minmax_float3(
 		cjGetFloat3(cj_obj_current, "scale"), 0.0f, 1000.0f);
-	obj->color = clamp_float3_minmax(
+	obj->color = minmax_float3(
 		cjGetFloat3(cj_obj_current, "color"), 0.0f, 1.0f);
-	obj->diffuse = clamp_float_minmax(
+	obj->diffuse = minmax_float(
 		cjGetFloat(cj_obj_current, "diffuse"), 0.0f, 1.0f);
-	obj->specular = clamp_float_minmax(
+	obj->specular = minmax_float(
 		cjGetFloat(cj_obj_current, "specular"), 0.0f, 1.0f);
-	obj->spec_exp = clamp_float_minmax(
+	obj->spec_exp = minmax_float(
 		cjGetFloat(cj_obj_current, "specular_exp"), 0.0f, 300.0f);
+    obj->kr = minmax_float(
+            cjGetFloat(cj_obj_current, "kr"), 0.0f, 1.0f);
+    obj->ior = minmax_float(
+            cjGetFloat(cj_obj_current, "ior"), 0.0f, 1.0f);
 	return (cj_obj_current);
 }
 
@@ -79,10 +141,7 @@ static void		parse_inner_objects(t_scene *scene, int *obj_parent_id, cJSON *cj_o
     cj_inner_objects = cJSON_GetObjectItem(cj_obj_parent, "inner_objects");
 
     if (cJSON_GetArraySize(cj_inner_objects) != 2)
-    {
-        printf("Error: Inner object count must be only 2\n");
-        exit(EXIT_FAILURE);
-    }
+        parsing_error("Error: Inner object count must be only 2", NULL);
 
     cj_inner_i = 0;
     obj_inner_id = (*obj_parent_id) + 1;
@@ -133,9 +192,7 @@ void		objects_init(cJSON *cj_root, t_scene *scene)
         }
     }
     else
-    {
-        printf("[-] No objects field in scene document\n");
-        exit(EXIT_FAILURE);
-    }
+        parsing_error("[-] No objects field in scene document", NULL);
 
+    print_objects(scene);
 }

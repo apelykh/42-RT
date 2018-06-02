@@ -14,18 +14,9 @@ int		main(void)
 	init_cl(&cl_context);
 	init_sdl(&sdl_context);
 
-	// init_scene1(&scene);
-	// parse_scene("./scenes/test2.json", &scene);
-//    parse_scene("./scenes/", &scene);
-   // parse_scene("./scenes_LLLL/", &scene);
-	parse_scene("./scenes/test.json", &scene);
-	// parse_scene("./scenes/with_errors/test2_no_camera.json", &scene);
-//	parse_scene("./scenes/with_errors/test2_no_lights.json", &scene);
-//	parse_scene("./scenes/with_errors/test2_no_objects.json", &scene);
-//    parse_scene("./scenes/with_errors/test2_1.json", &scene);
-    // parse_scene("./scenes/with_errors/test2_without_object_fields.json", &scene);
-//    parse_scene("/bin/sh", &scene);
-	// print_objects()
+	// parse_scene("./scenes/test.json", &scene);
+	// parse_scene("./scenes/test4.json", &scene);
+	parse_scene("./scenes/sphere.json", &scene);
 
 	alloc_cl_buffers(&cl_context, &scene);
 	set_kernel_args(&cl_context, &scene);
