@@ -8,7 +8,7 @@
 
 // # include <SDL2/SDL.h>
 # include "cJSON.h"
-# include "/Users/apelykh/.brew/Cellar/sdl2/2.0.8/include/SDL2/SDL.h"
+# include "/Users/mdubrovs/.brew/Cellar/sdl2/2.0.8/include/SDL2/SDL.h"
 // # include <SDL2/SDL_timer.h>
 // # include <SDL2/SDL_image.h>
 
@@ -105,6 +105,16 @@ typedef struct			s_camera
 	mat4				rotate_matrix;
 }						t_camera;
 
+typedef struct			s_control_flags
+{
+	int					ismoving;
+	int					isstrafing;
+	int					isflying;
+	int					isrotating;
+	int					ispitching;
+	int					quit;
+}						t_control_flags;
+
 typedef struct			s_scene
 {
 	t_camera			*cam;
@@ -114,6 +124,7 @@ typedef struct			s_scene
 	cl_int				num_lights;
 	cl_int				im_width;
 	cl_int				im_height;
+	t_control_flags		controls;
 }						t_scene;
 
 cl_int2		init_int2(cl_int x, cl_int y);
@@ -137,6 +148,16 @@ void		camera_init(cJSON *cj_root, t_scene *scene);
 void		lights_init(cJSON *cj_root, t_scene *scene);
 void		objects_init(cJSON *cj_root, t_scene *scene);
 void        bocal_init(t_scene *scene);
+
+void		move(t_scene *scene, int dir);
+void		strafe(t_scene *scene, int dir);
+void		fly(t_scene *scene, int dir);
+void		rotate(t_scene *scene, int dir);
+void		pitch(t_scene *scene, int dir);
+
+void		actions(t_scene *scene);
+void		key_press(t_scene *scene, SDL_Event event);
+void		key_release(t_scene *scene, SDL_Event event);
 
 void	init_sdl(t_sdl_context *sdl_context);
 void	sdl_cleanup(t_sdl_context *sdl_context);

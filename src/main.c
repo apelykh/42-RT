@@ -1,6 +1,20 @@
 #include <stdlib.h>
 #include "rt.h"
 
+void actions(t_scene *scene)
+{
+	if (scene->controls.ismoving != 0)
+		move(scene, scene->controls.ismoving);
+	if (scene->controls.isstrafing != 0)
+		strafe(scene, scene->controls.isstrafing);
+	if (scene->controls.isflying != 0)
+		fly(scene, scene->controls.isflying);
+	if (scene->controls.isrotating != 0)
+		rotate(scene, scene->controls.isrotating);
+	if (scene->controls.ispitching != 0)
+		pitch(scene, scene->controls.ispitching);
+}
+
 int		main(void)
 {
 	t_cl_context cl_context;
@@ -10,6 +24,7 @@ int		main(void)
 
 	scene.im_width = WIN_WIDTH;
 	scene.im_height = WIN_HEIGHT;
+	scene.controls.quit = 0;
 
 	init_cl(&cl_context);
 	init_sdl(&sdl_context);
@@ -24,93 +39,19 @@ int		main(void)
 	size_t global_item_size = scene.im_width * scene.im_height;
 
 	SDL_Event	event;
-	cl_float4	vec;
-	int			to_close = 0;
 
-	while (!to_close)
+	while (!scene.controls.quit)
 	{
 		while (SDL_PollEvent(&event))
 		{
 			if (event.type == SDL_QUIT)
-				to_close = 1;
-			if (event.type == SDL_KEYDOWN)
-			{
-				if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
-					to_close = 1;
-				if (event.key.keysym.scancode == SDL_SCANCODE_W)
-				{
-					vec = mat_mult_vec(scene.cam->rotate_matrix, init_vec4(0.f, 0.f, -.2f, 0.f));
-
-					scene.cam->location = add_vec3(scene.cam->location, vec);
-					set_cam_translate_matrix(scene.cam);
-				}
-				if (event.key.keysym.scancode == SDL_SCANCODE_S)
-				{
-					vec = mat_mult_vec(scene.cam->rotate_matrix, init_vec4(0.f, 0.f, .2f, 0.f));
-
-					scene.cam->location = add_vec3(scene.cam->location, vec);
-					set_cam_translate_matrix(scene.cam);
-				}
-
-				if (event.key.keysym.scancode == SDL_SCANCODE_Q)
-				{
-					vec = mat_mult_vec(scene.cam->rotate_matrix, init_vec4(0.f, -.2f, 0.f, 0.f));
-
-					scene.cam->location = add_vec3(scene.cam->location, vec);
-					set_cam_translate_matrix(scene.cam);
-				}
-				if (event.key.keysym.scancode == SDL_SCANCODE_E)
-				{
-					vec = mat_mult_vec(scene.cam->rotate_matrix, init_vec4(0.f, .2f, 0.f, 0.f));
-
-					scene.cam->location = add_vec3(scene.cam->location, vec);
-					set_cam_translate_matrix(scene.cam);
-				} 
-				if (event.key.keysym.scancode == SDL_SCANCODE_A)
-				{
-					vec = mat_mult_vec(scene.cam->rotate_matrix, init_vec4(-.2f, 0.f, 0.0f, 0.f));
-
-					scene.cam->location = add_vec3(scene.cam->location, vec);
-					set_cam_translate_matrix(scene.cam);
-				}
-				if (event.key.keysym.scancode == SDL_SCANCODE_D)
-				{
-					vec = mat_mult_vec(scene.cam->rotate_matrix, init_vec4(.2f, 0.f, 0.0f, 0.f));
-					scene.cam->location = add_vec3(scene.cam->location, vec);
-					set_cam_translate_matrix(scene.cam);
-				}
-				if (event.key.keysym.scancode == SDL_SCANCODE_LEFT)
-				{
-					scene.cam->rotation.y += 5.f;
-					set_cam_rotate_matrix(scene.cam);
-				}
-				if (event.key.keysym.scancode == SDL_SCANCODE_RIGHT)
-				{
-					scene.cam->rotation.y -= 5.f;
-					set_cam_rotate_matrix(scene.cam);
-				}
-				if (event.key.keysym.scancode == SDL_SCANCODE_UP)
-				{
-					scene.cam->rotation.x += 5.f;
-					set_cam_rotate_matrix(scene.cam);
-				}
-				if (event.key.keysym.scancode == SDL_SCANCODE_DOWN)
-				{
-					scene.cam->rotation.x -= 5.f;
-					set_cam_rotate_matrix(scene.cam);
-				}
-				if (event.key.keysym.scancode == SDL_SCANCODE_PAGEUP)
-				{
-					scene.cam->rotation.z += 5.f;
-					set_cam_rotate_matrix(scene.cam);
-				}
-				if (event.key.keysym.scancode == SDL_SCANCODE_PAGEDOWN)
-				{
-					scene.cam->rotation.z -= 5.f;
-					set_cam_rotate_matrix(scene.cam);
-				}
-			}
+				scene.controls.quit = 1;
+			else if (event.type == SDL_KEYDOWN)
+				key_press(&scene, event);
+			else if (event.type == SDL_KEYUP)
+				key_release(&scene, event);
 		}
+		actions(&scene);
 
 		ret = clEnqueueWriteBuffer(cl_context.command_queue, cl_context.cam_buf,
 			CL_TRUE, 0, sizeof(t_camera), scene.cam, 0, NULL, NULL);

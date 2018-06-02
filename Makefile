@@ -19,6 +19,9 @@ SRC_FILES = main.c \
 			cl_utils.c \
 			sdl_utils.c \
 			utils.c \
+			controls.c \
+			controls_press.c \
+			controls_release.c \
 			parsing_scene.c \
 			parsing_camera.c \
 			parsing_lights.c \
@@ -41,7 +44,7 @@ $(NAME): $(OBJ)
 	@ make -C $(LIB_DIR)/cJSON
 
 	# @ $(CC) $(OBJ) -lOpenCL -lSDL2 -lm -o $@ ./lib/cJSON/cJSON.c
-	@ $(CC) $(OBJ) $(LIB) -framework opencl -L/Users/apelykh/.brew/Cellar/sdl2/2.0.8/lib -lSDL2 -lm -o $@
+	@ $(CC) $(OBJ) $(LIB) -framework opencl -L/Users/mdubrovs/.brew/Cellar/sdl2/2.0.8/lib -lSDL2 -lm -o $@
 	# @ $(CC) $(OBJ) -framework opencl -framework SDL2 -lm -o $@
 	@ echo "[+] [$(NAME)] compiled"
 
