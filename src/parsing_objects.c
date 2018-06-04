@@ -59,6 +59,7 @@ static void		print_objects(t_scene *scene)
 
 static void		object_init_start(t_object *obj)
 {
+    /* Take start values from Anton & Nikita */
 	obj->id = 0;
 	obj->type = 0;
 	obj->hidden = CL_FALSE;
@@ -72,7 +73,7 @@ static void		object_init_start(t_object *obj)
 	obj->specular = 0.0f;
 	obj->spec_exp = 1.0f;
     obj->kr = 0.0f;
-    obj->ior = 0.0f;
+    obj->ior = 1.0f;
 }
 
 static int		count_inner_objects(cJSON *cj_objects, int count_objects)
@@ -101,35 +102,27 @@ static int		count_inner_objects(cJSON *cj_objects, int count_objects)
 
 static cJSON	*parse_object(t_object *obj, int obj_id, cJSON *cj_objects, int cj_i)
 {
-	cJSON	*cj_obj_current;
+	cJSON	*cj_current;
     cl_int	obj_type;
 
-    cj_obj_current = cJSON_GetArrayItem(cj_objects, cj_i);
+    if (!(cj_current = cJSON_GetArrayItem(cj_objects, cj_i)))
+        parsing_error("[-] Parsing Error: Object does not exist", NULL);
     object_init_start(obj);
-    obj_type = (cl_int)cjGetType(cjGetString(cj_obj_current, "type"));
+    obj_type = (cl_int)cjGetType(cjGetString(cj_current, "type"));
 	obj->id = (cl_int)obj_id;
 	obj->type = obj_type;
-    cjGetBool(&(obj->hidden), cj_obj_current, "hidden");
-    cjGetBool(&(obj->capped), cj_obj_current, "capped");
-	obj->location = minmax_float3(
-		cjGetFloat3(cj_obj_current, "location"), -1000.0f, 1000.0f);
-	obj->rotation = minmax_float3(
-		cjGetFloat3(cj_obj_current, "rotation"), -180.0f, 180.0f);
-	obj->scale = minmax_float3(
-		cjGetFloat3(cj_obj_current, "scale"), 0.0f, 1000.0f);
-	obj->color = minmax_float3(
-		cjGetFloat3(cj_obj_current, "color"), 0.0f, 1.0f);
-	obj->diffuse = minmax_float(
-		cjGetFloat(cj_obj_current, "diffuse"), 0.0f, 1.0f);
-	obj->specular = minmax_float(
-		cjGetFloat(cj_obj_current, "specular"), 0.0f, 1.0f);
-	obj->spec_exp = minmax_float(
-		cjGetFloat(cj_obj_current, "specular_exp"), 0.0f, 300.0f);
-    obj->kr = minmax_float(
-            cjGetFloat(cj_obj_current, "kr"), 0.0f, 1.0f);
-    obj->ior = minmax_float(
-            cjGetFloat(cj_obj_current, "ior"), 0.0f, 1.0f);
-	return (cj_obj_current);
+    cjGetBool(&(obj->hidden), cj_current, "hidden");
+    cjGetBool(&(obj->capped), cj_current, "capped");
+    save_float3(&(obj->location), cjObj(cj_current, "location"), -100.0f, 100.0f);
+    save_float3(&(obj->rotation), cjObj(cj_current, "rotation"), -180.0f, 180.0f);
+    save_float3(&(obj->scale), cjObj(cj_current, "scale"), 0.0f, 1000.0f);
+    save_float3(&(obj->color), cjObj(cj_current, "color"), 0.0f, 1.0f);
+    save_float(&(obj->diffuse), cjObj(cj_current, "diffuse"), 0.0f, 1.0f);
+    save_float(&(obj->specular), cjObj(cj_current, "specular"), 0.0f, 1.0f);
+    save_float(&(obj->spec_exp), cjObj(cj_current, "specular_exp"), 0.0f, 300.0f);
+    save_float(&(obj->kr), cjObj(cj_current, "kr"), 0.0f, 1.0f);
+    save_float(&(obj->ior), cjObj(cj_current, "ior"), 0.0f, 1.0f);
+	return (cj_current);
 }
 
 static void		parse_inner_objects(t_scene *scene, int *obj_parent_id, cJSON *cj_obj_parent)
@@ -141,7 +134,7 @@ static void		parse_inner_objects(t_scene *scene, int *obj_parent_id, cJSON *cj_o
     cj_inner_objects = cJSON_GetObjectItem(cj_obj_parent, "inner_objects");
 
     if (cJSON_GetArraySize(cj_inner_objects) != 2)
-        parsing_error("Error: Inner object count must be only 2", NULL);
+        parsing_error("[-] Parsing Error: For complex objects inner object count must be only 2", NULL);
 
     cj_inner_i = 0;
     obj_inner_id = (*obj_parent_id) + 1;

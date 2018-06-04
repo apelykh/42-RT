@@ -1,24 +1,24 @@
 #include <stdio.h>
 #include "rt.h"
 
-void		scene_init(char *strJSON, t_scene *scene)
+void        scene_init(char *strJSON, t_scene *scene)
 {
-	cJSON *cj_root;
+    cJSON *cj_root;
 
-	cj_root = cJSON_Parse(strJSON);
-	if (!cj_root)
+    cj_root = cJSON_Parse(strJSON);
+    if (!cj_root)
         parsing_error("[-] JSON Error", (char *)cJSON_GetErrorPtr());
 
-	camera_init(cj_root, scene);
-	lights_init(cj_root, scene);
-	objects_init(cj_root, scene);
+    camera_init(cj_root, scene);
+    lights_init(cj_root, scene);
+    objects_init(cj_root, scene);
 
-	cJSON_Delete(cj_root);
+    cJSON_Delete(cj_root);
 }
 
-void		parse_scene(char *scene_path, t_scene *scene)
+void        parse_scene(char *scene_path, t_scene *scene)
 {
-	char    *scene_str;
+    char    *scene_str;
     int     fd;
     int     i;
 
@@ -32,15 +32,15 @@ void		parse_scene(char *scene_path, t_scene *scene)
 
     scene_str = (char *)malloc(MAX_SOURCE_SIZE);
     read(fd, scene_str, MAX_SOURCE_SIZE);
-	close(fd);
+    close(fd);
 
     if (scene_str[0] != '{')
         parsing_error("[-] Read Scene Error", "No first bracket");
-	scene_init(scene_str, scene);
+    scene_init(scene_str, scene);
 
     i = 0;
     while (i < scene->num_objects)
         obj_transform_mats(&scene->objects[i++]);
-	free(scene_str);
-	scene_str = NULL;
+    free(scene_str);
+    scene_str = NULL;
 }

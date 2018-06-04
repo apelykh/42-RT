@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "rt.h"
 
-int		main(void)
+int		main(int argc, char **argv)
 {
 //	t_cl_context cl_context;
 //	t_sdl_context sdl_context;
@@ -18,7 +18,12 @@ int		main(void)
 //  parse_scene("./scenes/", &scene);
 //  parse_scene("./scenes_LLLL/", &scene);
 //	parse_scene("./scenes/test.json", &scene);
-	parse_scene("./scenes/test_with_newlights.json", &scene);
+//    if (argc != 2)
+//        parsing_error("usage: ./RT [scene path]", NULL);
+//	parse_scene(argv[1], &scene);
+    if (argc == 1)
+        argv[1] = "111";
+    parse_scene("./scenes/with_errors/error_test5.json", &scene);
 	// parse_scene("./scenes/with_errors/test2_no_camera.json", &scene);
 //	parse_scene("./scenes/with_errors/test2_no_lights.json", &scene);
 //	parse_scene("./scenes/with_errors/test2_no_objects.json", &scene);

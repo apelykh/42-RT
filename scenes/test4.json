@@ -5,13 +5,19 @@
         "fov": 45.0
     },
     "lights": [
-        {
-            "location": [0.0, 2.75, 2.75],
-            "emission": [1.0, 1.0, 1.0]
+        {   
+            "type": "AMBIENT",
+            "location": [2.0, 3.0, -0.5],
+            "direction": [-1.0, 0.0, 0.0],
+            "angle": 60.0,
+            "emission": [0.35, 0.35, 0.35]
         },
-        {
-            "location": [3.0, 5.0, -7.0],
-            "emission": [0.5, 0.5, 0.5]
+        {   
+            "type": "POINT",
+            "location": [3.0, 3.0, -3.0],
+            "direction": [0.0, -1.0, 0.0],
+            "angle": 45.0,
+            "emission": [0.7, 0.7, 0.7]
         }
     ],
     "objects": [
@@ -19,29 +25,31 @@
             "type": "CONE",
             "scale": [2.0, 2.0, 1.0],
             "rotation": [0.0, 3.0, 0.0],
-            "location": [4.0, 4.0, 0.0],
+            "location": [4.0, 2.0, -3.0],
             "color": [0.3, 0.3, 0.3],
             "capped": true,
             "hidden": false,
-            "diffuse": 0.4,
+            "diffuse": 0.8,
             "specular": 0.7,
+            "kr": 0.0,
             "specular_exp": 40.0
         },
         {
             "type": "UNION",
             "scale": [1.0, 1.0, 1.0],
-            "location": [1.0, 0.0, 0.0],
-            "rotation": [60.0, 60.0, 0.0],
-            "color": [0.9, 0.8, 0.7],
+            "location": [-3.0, 0.0, 0.0],
+            "rotation": [0.0, 0.0, 0.0],
+            "color": [0.75, 0.12, 0.0],
             "diffuse": 1.0,
             "specular": 0.0,
             "specular_exp": 20.0,
+            "kr": 0.4,
             "inner_objects": [
                 {
                     "type": "BOX",
                     "scale": [2.0, 2.0, 2.0],
                     "location": [0.0, 0.0, 0.0],
-                    "rotation": [-1.0, 0.0, 0.0],
+                    "rotation": [0.0, 0.0, 0.0],
                     "color": [0.3, 0.3, 0.3],
                     "capped": true,
                     "hidden": true,
@@ -72,7 +80,8 @@
             "capped": true,
             "diffuse": 0.7,
             "specular": 0.9,
-            "specular_exp": 20.0
+            "specular_exp": 20.0,
+            "kr": 0.0
         },
         {
             "type": "PLANE",
@@ -81,23 +90,25 @@
             "color": [0.9, 0.8, 0.7],
             "diffuse": 1.0,
             "specular": 0.0,
-            "specular_exp": 20.0
+            "specular_exp": 20.0,
+            "kr": 0.1
         },
         {
-            "type": "UNION",
+            "type": "DIFFERENCE",
             "scale": [1.0, 1.0, 1.0],
-            "location": [3.0, 0.0, 0.0],
+            "location": [0.0, -0.5, 0.0],
             "rotation": [0.0, 0.0, 0.0],
-            "color": [0.9, 0.8, 0.7],
+            "color": [0.75, 0.12, 0.0],
             "diffuse": 1.0,
             "specular": 0.0,
             "specular_exp": 20.0,
+            "kr": 0.6,
             "inner_objects": [
                 {
-                    "type": "BOX",
+                    "type": "SPHERE",
                     "scale": [2.0, 2.0, 2.0],
                     "location": [0.0, 0.0, 0.0],
-                    "rotation": [-1.0, 0.0, 0.0],
+                    "rotation": [0.0, 0.0, 0.0],
                     "color": [0.3, 0.3, 0.3],
                     "capped": true,
                     "hidden": true,
@@ -112,6 +123,42 @@
                     "location": [1.0, 0.0, 0.0],
                     "color": [0.3, 0.3, 0.3],
                     "capped": true,
+                    "hidden": true,
+                    "diffuse": 0.7,
+                    "specular": 0.9,
+                    "specular_exp": 20.0
+                }
+            ]
+        },
+        {
+            "type": "DIFFERENCE",
+            "scale": [1.0, 1.0, 1.0],
+            "location": [3.0, 0.0, 0.0],
+            "rotation": [0.0, 0.0, 0.0],
+            "color": [0.9, 0.8, 0.7],
+            "diffuse": 1.0,
+            "specular": 0.0,
+            "specular_exp": 20.0,
+            "kr": 0.1,
+            "inner_objects": [
+                {
+                    "type": "BOX",
+                    "scale": [0.5, 2.0, 2.0],
+                    "location": [0.0, 0.0, 0.0],
+                    "rotation": [0.0, 0.0, 0.0],
+                    "color": [0.3, 0.3, 0.3],
+                    "capped": true,
+                    "hidden": true,
+                    "diffuse": 0.7,
+                    "specular": 0.9,
+                    "specular_exp": 20.0
+                },
+                {
+                    "type": "SPHERE",
+                    "scale": [1.0, 2.0, 1.0],
+                    "rotation": [0.0, 0.0, 90.0],
+                    "location": [-0.5, 0.0, 0.0],
+                    "color": [0.3, 0.3, 0.3],
                     "hidden": true,
                     "diffuse": 0.7,
                     "specular": 0.9,

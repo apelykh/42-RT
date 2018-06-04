@@ -1,6 +1,6 @@
 #include "rt.h"
 
-void bocal_init_objects1_inners(t_scene *scene) {
+static void bocal_init_objects1_inners(t_scene *scene) {
     scene->objects[1].id = 1;
     scene->objects[1].type = SPHERE;
     scene->objects[1].operand = init_int2(-1, -1);
@@ -28,7 +28,7 @@ void bocal_init_objects1_inners(t_scene *scene) {
     scene->objects[2].spec_exp = 0.0f;
 }
 
-void bocal_init_objects1(t_scene *scene) {
+static void bocal_init_objects1(t_scene *scene) {
     scene->objects[0].id = 0;
     scene->objects[0].type = CLIPPING;
     scene->objects[0].operand = init_int2(1, 2);
@@ -45,7 +45,7 @@ void bocal_init_objects1(t_scene *scene) {
     bocal_init_objects1_inners(scene);
 }
 
-void bocal_init_objects2_inners(t_scene *scene) {
+static void bocal_init_objects2_inners(t_scene *scene) {
     scene->objects[4].id = 4;
     scene->objects[4].type = CYLINDER;
     scene->objects[4].operand = init_int2(-1, -1);
@@ -73,7 +73,7 @@ void bocal_init_objects2_inners(t_scene *scene) {
     scene->objects[5].spec_exp = 0.0f;
 }
 
-void bocal_init_objects2(t_scene *scene) {
+static void bocal_init_objects2(t_scene *scene) {
     scene->objects[3].id = 3;
     scene->objects[3].type = UNION;
     scene->objects[3].operand = init_int2(4, 5);
