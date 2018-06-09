@@ -6,9 +6,9 @@
 
 # define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 
-# include <SDL2/SDL.h>
+//# include <SDL2/SDL.h>
 # include "cJSON.h"
-// # include "/Users/efedoryc/.brew/Cellar/sdl2/2.0.8/include/SDL2/SDL.h"
+# include "/Users/efedoryc/.brew/Cellar/sdl2/2.0.8/include/SDL2/SDL.h"
 // # include <SDL2/SDL_timer.h>
 // # include <SDL2/SDL_image.h>
 
@@ -122,21 +122,20 @@ cl_float3	add_vec3(cl_float3 a, cl_float3 b);
 cl_float3	init_norm_vec3(cl_float x, cl_float y, cl_float z);
 cl_float4	init_vec4(cl_float x, cl_float y, cl_float z, cl_float w);
 
-cJSON		*cjObj(cJSON *root, char *item_name);
-void		cjGetBool(cl_bool *target, cJSON *object, char *item_name);
-//cl_float3	cjGetFloat3(cJSON *root, char *item_name);
-//cl_float	cjGetFloat(cJSON *object, char *item_name);
-// cl_int		cjGetInt(cJSON *object, char *item_name);
-char		*cjGetString(cJSON *object, char *item_name);
-cl_int		cjGetType(char *string_type);
-cl_int		cjGetLightType(char *string_type);
+cJSON		*cj_obj(cJSON *root, char *item_name);
+void		cj_get_bool(cl_bool *target, cJSON *object, char *item_name);
+char		*cj_get_str(cJSON *object, char *item_name);
+cl_int		cj_get_obj_type(char *string_type);
+cl_int		cj_get_light_type(char *string_type);
+int			is_complex_obj(cl_int object_type);
 
-void		objects_init(cJSON *j_root, t_scene *scene);
-void		parse_scene(char *scene_path, t_scene *scene);
-void		scene_init(char *strJSON, t_scene *scene);
-void		camera_init(cJSON *cj_root, t_scene *scene);
-void		lights_init(cJSON *cj_root, t_scene *scene);
-void		objects_init(cJSON *cj_root, t_scene *scene);
+void		open_scene(char *scene_path, t_scene *scene);
+void        camera_init_start(t_camera *camera);
+void        light_init_start(t_light *light);
+void        object_init_start(t_object *obj);
+void		parse_camera(cJSON *cj_root, t_scene *scene);
+void		parse_lights(cJSON *cj_root, t_scene *scene);
+void		parse_objects(cJSON *cj_root, t_scene *scene);
 void        bocal_init(t_scene *scene);
 void	    save_float(cl_float *target, cJSON *float_obj, float min, float max);
 void	    save_float3(cl_float3 *target, cJSON *cj_float3_arr, float min, float max);
@@ -157,7 +156,7 @@ cl_float3	clamp_float3_minmax(cl_float3 x, float min, float max);
 float		minmax_float(float x, float min, float max);
 cl_float3	minmax_float3(cl_float3 x, float min, float max);
 
-void		parsing_error(char *text1, char *text2);
+void		ft_error(char *text1, char *text2);
 void        ft_putstr(char const *s);
 
 //matrix funcs
@@ -174,5 +173,9 @@ mat4		mat_mult_mat(mat4 a, mat4 b);
 cl_float4	mat_mult_vec(mat4 m, cl_float4 v);
 void		set_cam_translate_matrix(t_camera *cam);
 void		set_cam_rotate_matrix(t_camera *cam);
+
+void		print_camera(t_scene *scene);
+void		print_lights(t_scene *scene);
+void		print_objects(t_scene *scene);
 
 #endif

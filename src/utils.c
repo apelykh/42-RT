@@ -12,6 +12,18 @@ void		ft_putstr(char const *s)
 	}
 }
 
+void	ft_error(char *text1, char *text2)
+{
+	ft_putstr(text1);
+	ft_putstr("\n");
+	if (text2 != NULL)
+	{
+		ft_putstr(text2);
+		ft_putstr("\n");
+	}
+	exit(EXIT_FAILURE);
+}
+
 cl_float3	clamp_float3_minmax(cl_float3 x, float min, float max)
 {
 	cl_float3 res;
@@ -73,22 +85,3 @@ int		to_uchar(float x)
 {
 	return (unsigned char)(clamp(x) * 255 + .5);
 }
-
-// static int		to_int(float x)
-// {
-// 	return (int)(clamp(x) * 255 + .5);
-// }
-
-// void	save_image(cl_float3 *pixels)
-// {
-// 	FILE *f = fopen("./saved_images/9_spheres.ppm", "w");
-// 	fprintf(f, "P3\n%d %d\n%d\n", WIN_WIDTH, WIN_HEIGHT, 255);
-
-// 	for (int i = 0; i < WIN_WIDTH * WIN_HEIGHT; i++)
-// 		fprintf(f, "%d %d %d ",
-// 		to_int(pixels[i].s[0]),
-// 		to_int(pixels[i].s[1]),
-// 		to_int(pixels[i].s[2]));
-
-// 	printf("[+] Image saved!\n");
-// }

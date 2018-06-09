@@ -14,23 +14,26 @@ int		main(int argc, char **argv)
 //	init_cl(&cl_context);
 //	init_sdl(&sdl_context);
 
-//	parse_scene("./scenes/test2.json", &scene);
-//  parse_scene("./scenes/", &scene);
-//  parse_scene("./scenes_LLLL/", &scene);
-//	parse_scene("./scenes/test.json", &scene);
+//	open_scene("./scenes/test2.json", &scene);
+//  open_scene("./scenes/", &scene);
+//  open_scene("./scenes_LLLL/", &scene);
+//	open_scene("./scenes/test.json", &scene);
 //    if (argc != 2)
-//        parsing_error("usage: ./RT [scene path]", NULL);
-//	parse_scene(argv[1], &scene);
+//        ft_error("usage: ./RT [scene path]", NULL);
+//	open_scene(argv[1], &scene);
     if (argc == 1)
         argv[1] = "111";
-    parse_scene("./scenes/with_errors/error_test5.json", &scene);
-	// parse_scene("./scenes/with_errors/test2_no_camera.json", &scene);
-//	parse_scene("./scenes/with_errors/test2_no_lights.json", &scene);
-//	parse_scene("./scenes/with_errors/test2_no_objects.json", &scene);
-//  parse_scene("./scenes/with_errors/test2_1.json", &scene);
-//  parse_scene("./scenes/with_errors/test2_without_object_fields.json", &scene);
-//  parse_scene("./scenes/with_errors/test2_almost_empty.json", &scene);
-//  parse_scene("/bin/sh", &scene);
+    open_scene("./scenes/test_with_new_lights.json", &scene);
+    print_camera(&scene);
+    print_lights(&scene);
+    print_objects(&scene);
+//    open_scene("./scenes/with_errors/test2_no_camera.json", &scene);
+//	open_scene("./scenes/with_errors/test2_no_lights.json", &scene);
+//	open_scene("./scenes/with_errors/test2_no_objects.json", &scene);
+//  open_scene("./scenes/with_errors/test2_1.json", &scene);
+//  open_scene("./scenes/with_errors/test2_without_object_fields.json", &scene);
+//  open_scene("./scenes/with_errors/test2_almost_empty.json", &scene);
+//  open_scene("/bin/sh", &scene);
 
 //	alloc_cl_buffers(&cl_context, &scene);
 //	set_kernel_args(&cl_context, &scene);
