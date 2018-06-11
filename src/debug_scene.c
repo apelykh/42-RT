@@ -78,8 +78,8 @@ void		print_objects(t_scene *scene)
         printf("rotation: %.2f %.2f %.2f\n", obj->rotation.x, obj->rotation.y, obj->rotation.z);
         printf("scale: %.2f %.2f %.2f\n", obj->scale.x, obj->scale.y, obj->scale.z);
         printf("color: %.2f %.2f %.2f\n", obj->color.x, obj->color.y, obj->color.z);
-        printf("diffuse: %.2f\n", obj->diffuse);
-        printf("specular: %.2f\n", obj->specular);
+        // printf("diffuse: %.2f\n", obj->diffuse);
+        // printf("specular: %.2f\n", obj->specular);
         printf("specular exp: %.2f\n", obj->spec_exp);
         printf("kr: %.2f\n", obj->kr);
         printf("ior exp: %.2f\n", obj->ior);

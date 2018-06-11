@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parsing_start_values.c                             :+:      :+:    :+:   */
+/*   values_init.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: efedoryc <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -12,14 +12,24 @@
 
 #include "rt.h"
 
-void	camera_init_start(t_camera *camera)
+void	controls_init_empty(t_control_flags *controls)
 {
-	camera->location = init_vec3(-101.0f, 2.0f, 13.0f);
+	controls->quit = 0;
+	controls->move_z = 0;
+	controls->move_x = 0;
+	controls->move_y = 0;
+	controls->rotate_y = 0;
+	controls->rotate_x = 0;
+}
+
+void	camera_init_empty(t_camera *camera)
+{
+	camera->location = init_vec3(0.0f, 0.0f, -10.0f);
 	camera->rotation = init_vec3(0.0f, 0.0f, 0.0f);
 	camera->fov = 45.0f;
 }
 
-void	light_init_start(t_light *light)
+void	light_init_empty(t_light *light)
 {
 	light->type = 0;
 	light->location = init_vec3(0.0f, 0.0f, 0.0f);
@@ -28,7 +38,7 @@ void	light_init_start(t_light *light)
 	light->angle = 0.0f;
 }
 
-void	object_init_start(t_object *obj)
+void	object_init_empty(t_object *obj)
 {
 	obj->id = 0;
 	obj->type = 0;
@@ -39,8 +49,8 @@ void	object_init_start(t_object *obj)
 	obj->rotation = init_vec3(0.0f, 0.0f, 0.0f);
 	obj->scale = init_vec3(1.0f, 1.0f, 1.0f);
 	obj->color = init_vec3(0.5f, 0.5f, 0.5f);
-	obj->diffuse = 1.0f;
-	obj->specular = 0.0f;
+	// obj->diffuse = 1.0f;
+	// obj->specular = 0.0f;
 	obj->spec_exp = 1.0f;
 	obj->kr = 0.0f;
 	obj->ior = 1.0f;

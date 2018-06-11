@@ -41,7 +41,7 @@ void		parse_lights(cJSON *cj_root, t_scene *scene)
 	while (i < scene->num_lights)
 	{
 		cj_current_light = cJSON_GetArrayItem(cj_lights, i);
-		light_init_start(&(scene->lights[i]));
+		light_init_empty(&(scene->lights[i]));
 		light_init(&(scene->lights[i]), cj_current_light);
 		if (scene->lights[i].type == AMBIENT)
 			count_ambient++;

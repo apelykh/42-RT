@@ -29,7 +29,7 @@ void		parse_camera(cJSON *cj_root, t_scene *scene)
 	if (!(cj_camera = cJSON_GetObjectItem(cj_root, "camera")))
 		ft_error("[-] Parsing: No camera field in scene document", NULL);
 	scene->cam = (t_camera*)malloc(sizeof(t_camera));
-	camera_init_start(scene->cam);
+	camera_init_empty(scene->cam);
 	camera_init(scene->cam, cj_camera);
 	set_cam_translate_matrix(scene->cam);
 	set_cam_rotate_matrix(scene->cam);

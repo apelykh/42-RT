@@ -9,8 +9,6 @@
 # include <SDL2/SDL.h>
 # include "cJSON.h"
 // # include "/Users/apelykh/.brew/Cellar/sdl2/2.0.8/include/SDL2/SDL.h"
-// # include <SDL2/SDL_timer.h>
-// # include <SDL2/SDL_image.h>
 
 # ifdef __APPLE__
 # include <OpenCL/opencl.h>
@@ -76,9 +74,9 @@ typedef struct			s_object
 	cl_float3			rotation;
 	cl_float3			scale;
 	cl_float3			color;
-	// cl_float3			emi;
-	cl_float			diffuse;
-	cl_float			specular;
+	// cl_float3		emi;
+	// cl_float			diffuse;
+	// cl_float			specular;
 	cl_float			spec_exp;
 	cl_float			ior;
 	cl_float			kr;
@@ -108,11 +106,11 @@ typedef struct			s_camera
 
 typedef struct			s_control_flags
 {
-	int					ismoving;
-	int					isstrafing;
-	int					isflying;
-	int					isrotating;
-	int					ispitching;
+	int					move_z;
+	int					move_x;
+	int					move_y;
+	int					rotate_y;
+	int					rotate_x;
 	int					quit;
 }						t_control_flags;
 
@@ -142,9 +140,6 @@ cl_int		cj_get_light_type(char *string_type);
 int			is_complex_obj(cl_int object_type);
 
 void		open_scene(char *scene_path, t_scene *scene);
-void        camera_init_start(t_camera *camera);
-void        light_init_start(t_light *light);
-void        object_init_start(t_object *obj);
 void		parse_camera(cJSON *cj_root, t_scene *scene);
 void		parse_lights(cJSON *cj_root, t_scene *scene);
 void		parse_objects(cJSON *cj_root, t_scene *scene);
@@ -152,11 +147,22 @@ void        bocal_init(t_scene *scene);
 void	    save_float(cl_float *target, cJSON *float_obj, float min, float max);
 void	    save_float3(cl_float3 *target, cJSON *cj_float3_arr, float min, float max);
 
-void		move(t_scene *scene, int dir);
-void		strafe(t_scene *scene, int dir);
-void		fly(t_scene *scene, int dir);
-void		rotate(t_scene *scene, int dir);
-void		pitch(t_scene *scene, int dir);
+/*
+ *	--------------- values_init.c ---------------
+ */
+void		controls_init_empty(t_control_flags *controls);
+void        camera_init_empty(t_camera *camera);
+void        light_init_empty(t_light *light);
+void        object_init_empty(t_object *obj);
+
+/*
+ *	--------------- controls.c ---------------
+ */
+void		move_z(t_scene *scene, int dir);
+void		move_x(t_scene *scene, int dir);
+void		move_y(t_scene *scene, int dir);
+void		rotate_y(t_scene *scene, int dir);
+void		rotate_x(t_scene *scene, int dir);
 
 void		actions(t_scene *scene);
 void		key_press(t_scene *scene, SDL_Event event);

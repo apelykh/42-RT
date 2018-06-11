@@ -1,6 +1,6 @@
 #include "rt.h"
 
-void move(t_scene *scene, int dir)
+void	move_z(t_scene *scene, int dir)
 {
 	cl_float4 vec;
 
@@ -9,7 +9,7 @@ void move(t_scene *scene, int dir)
 	set_cam_translate_matrix(scene->cam);
 }
 
-void strafe(t_scene *scene, int dir)
+void	move_x(t_scene *scene, int dir)
 {
 	cl_float4 vec;
 	
@@ -18,7 +18,7 @@ void strafe(t_scene *scene, int dir)
 	set_cam_translate_matrix(scene->cam);
 }
 
-void fly(t_scene *scene, int dir)
+void	move_y(t_scene *scene, int dir)
 {
 	cl_float4 vec;
 
@@ -27,14 +27,14 @@ void fly(t_scene *scene, int dir)
 	set_cam_translate_matrix(scene->cam);
 }
 
-void rotate(t_scene *scene, int dir)
+void	rotate_y(t_scene *scene, int dir)
 {
-	scene->cam->rotation.y += dir * 2.0f;
+	scene->cam->rotation.y += dir * 2.5f;
 	set_cam_rotate_matrix(scene->cam);
 }
 
-void pitch(t_scene *scene, int dir)
+void	rotate_x(t_scene *scene, int dir)
 {
-	scene->cam->rotation.x += dir * 2.0f;
+	scene->cam->rotation.x += dir * 2.5f;
 	set_cam_rotate_matrix(scene->cam);	
 }

@@ -23,8 +23,6 @@ static void	bocal_init_objects1_inners(t_scene *scene)
 	scene->objects[1].color = init_vec3(0.0f, 0.0f, 0.0f);
 	scene->objects[1].capped = CL_TRUE;
 	scene->objects[1].hidden = CL_TRUE;
-	scene->objects[1].diffuse = 0.0f;
-	scene->objects[1].specular = 0.0f;
 	scene->objects[1].spec_exp = 0.0f;
 	scene->objects[2].id = 2;
 	scene->objects[2].type = PLANE;
@@ -35,8 +33,6 @@ static void	bocal_init_objects1_inners(t_scene *scene)
 	scene->objects[2].color = init_vec3(0.0f, 0.0f, 0.0f);
 	scene->objects[2].capped = CL_TRUE;
 	scene->objects[2].hidden = CL_TRUE;
-	scene->objects[2].diffuse = 0.0f;
-	scene->objects[2].specular = 0.0f;
 	scene->objects[2].spec_exp = 0.0f;
 }
 
@@ -51,8 +47,6 @@ static void	bocal_init_objects1(t_scene *scene)
 	scene->objects[0].color = init_vec3(0.99f, 0.66f, 0.33f);
 	scene->objects[0].capped = CL_FALSE;
 	scene->objects[0].hidden = CL_TRUE;
-	scene->objects[0].diffuse = 0.7f;
-	scene->objects[0].specular = 0.9f;
 	scene->objects[0].spec_exp = 20.0f;
 	bocal_init_objects1_inners(scene);
 }
@@ -68,8 +62,6 @@ static void	bocal_init_objects2_inners(t_scene *scene)
 	scene->objects[4].color = init_vec3(0.0f, 0.0f, 0.0f);
 	scene->objects[4].capped = CL_TRUE;
 	scene->objects[4].hidden = CL_TRUE;
-	scene->objects[4].diffuse = 0.0f;
-	scene->objects[4].specular = 0.0f;
 	scene->objects[4].spec_exp = 0.0f;
 	scene->objects[5].id = 5;
 	scene->objects[5].type = CONE;
@@ -80,8 +72,6 @@ static void	bocal_init_objects2_inners(t_scene *scene)
 	scene->objects[5].color = init_vec3(0.0f, 0.0f, 0.0f);
 	scene->objects[5].capped = CL_TRUE;
 	scene->objects[5].hidden = CL_TRUE;
-	scene->objects[5].diffuse = 0.0f;
-	scene->objects[5].specular = 0.0f;
 	scene->objects[5].spec_exp = 0.0f;
 }
 
@@ -96,8 +86,6 @@ static void	bocal_init_objects2(t_scene *scene)
 	scene->objects[3].color = init_vec3(0.99f, 0.66f, 0.33f);
 	scene->objects[3].capped = CL_FALSE;
 	scene->objects[3].hidden = CL_TRUE;
-	scene->objects[3].diffuse = 0.7f;
-	scene->objects[3].specular = 0.9f;
 	scene->objects[3].spec_exp = 20.0f;
 	bocal_init_objects2_inners(scene);
 }

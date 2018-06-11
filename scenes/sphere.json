@@ -49,8 +49,6 @@
 			"color": [0.5, 0.5, 0.5],
 			"capped": true,
 			"hidden": false,
-			"diffuse": 0.5,
-			"specular": 1.0,
 			"specular_exp": 50.0,
 			"kr": 0.3
 		},
@@ -59,8 +57,6 @@
 			"scale": [1.0, 1.0, 1.0],
 			"location": [0.0, -1.0, 0.0],
 			"color": [0.9, 0.8, 0.7],
-			"diffuse": 1.0,
-			"specular": 0.0,
 			"specular_exp": 20.0,
 			"kr": 0.2
 		},
@@ -70,8 +66,6 @@
 			"rotation": [0.0, 0.0, 0.0],
 			"location": [4.0, 0.5, 0.0],
 			"color": [0.99, 0.66, 0.33],
-			"diffuse": 0.7,
-			"specular": 0.9,
 			"specular_exp": 20.0,
 			"kr": 0.4
 		},
@@ -81,8 +75,6 @@
 			"rotation": [0.0, 0.0, 0.0],
 			"location": [4.0, -1.5, 2.0],
 			"color": [0.99, 0.66, 0.33],
-			"diffuse": 0.7,
-			"specular": 0.9,
 			"specular_exp": 20.0,
 			"kr": 0.4
 		}

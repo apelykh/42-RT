@@ -25,10 +25,10 @@ static void		object_init(t_object *obj, int obj_id, cJSON *cj_current)
 				cj_obj(cj_current, "location"), -100.0f, 100.0f);
 	save_float3(&(obj->rotation),
 				cj_obj(cj_current, "rotation"), -180.0f, 180.0f);
-	save_float3(&(obj->scale), cj_obj(cj_current, "scale"), 0.0f, 1000.0f);
+	save_float3(&(obj->scale), cj_obj(cj_current, "scale"), 0.01f, 100.0f);
 	save_float3(&(obj->color), cj_obj(cj_current, "color"), 0.0f, 1.0f);
-	save_float(&(obj->diffuse), cj_obj(cj_current, "diffuse"), 0.0f, 1.0f);
-	save_float(&(obj->specular), cj_obj(cj_current, "specular"), 0.0f, 1.0f);
+	// save_float(&(obj->diffuse), cj_obj(cj_current, "diffuse"), 0.0f, 1.0f);
+	// save_float(&(obj->specular), cj_obj(cj_current, "specular"), 0.0f, 1.0f);
 	save_float(&(obj->spec_exp),
 				cj_obj(cj_current, "specular_exp"), 0.0f, 300.0f);
 	save_float(&(obj->kr), cj_obj(cj_current, "kr"), 0.0f, 1.0f);
@@ -67,7 +67,7 @@ static cJSON	*parse_object(t_object *obj, int obj_id, cJSON *cj_objects,
 
 	if (!(cj_current = cJSON_GetArrayItem(cj_objects, cj_i)))
 		ft_error("[-] Parsing: Object does not exist", NULL);
-	object_init_start(obj);
+	object_init_empty(obj);
 	object_init(obj, obj_id, cj_current);
 	return (cj_current);
 }

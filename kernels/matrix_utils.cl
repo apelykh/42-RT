@@ -1,90 +1,90 @@
-mat4	mat_translate(float3 v)
-{
-	mat4 r;
+// mat4	mat_translate(float3 v)
+// {
+// 	mat4 r;
 
-	r.s0123 = (float4)(1.0f, 0.0f, 0.0f, 0.0f);
-	r.s4567 = (float4)(0.0f, 1.0f, 0.0f, 0.0f);
-	r.s89AB = (float4)(0.0f, 0.0f, 1.0f, 0.0f);
-	r.sCDEF = (float4)(v, 1.0f);
-	return r;
-}
+// 	r.s0123 = (float4)(1.0f, 0.0f, 0.0f, 0.0f);
+// 	r.s4567 = (float4)(0.0f, 1.0f, 0.0f, 0.0f);
+// 	r.s89AB = (float4)(0.0f, 0.0f, 1.0f, 0.0f);
+// 	r.sCDEF = (float4)(v, 1.0f);
+// 	return r;
+// }
 
-mat4	mat_scale(float3 s)
-{
-	mat4 r;
+// mat4	mat_scale(float3 s)
+// {
+// 	mat4 r;
 
-	r.s0123 = (float4)(s.x, 0.0f, 0.0f, 0.0f);
-	r.s4567 = (float4)(0.0f, s.y, 0.0f, 0.0f);
-	r.s89AB = (float4)(0.0f, 0.0f, s.z, 0.0f);
-	r.sCDEF = (float4)(0.0f, 0.0f, 0.0f, 1.0f);
-	return r;
-}
+// 	r.s0123 = (float4)(s.x, 0.0f, 0.0f, 0.0f);
+// 	r.s4567 = (float4)(0.0f, s.y, 0.0f, 0.0f);
+// 	r.s89AB = (float4)(0.0f, 0.0f, s.z, 0.0f);
+// 	r.sCDEF = (float4)(0.0f, 0.0f, 0.0f, 1.0f);
+// 	return r;
+// }
 
-mat4	mat_rotatex(float angle)
-{
-	float sint = sin(radians(angle));
-	float cost = cos(radians(angle));
-	mat4 r;
+// mat4	mat_rotatex(float angle)
+// {
+// 	float sint = sin(radians(angle));
+// 	float cost = cos(radians(angle));
+// 	mat4 r;
 
-	r.s0123 = (float4)(1.0f, 0.0f, 0.0f, 0.0f);
-	r.s4567 = (float4)(0.0f, cost, sint, 0.0f);
-	r.s89AB = (float4)(0.0f, -sint, cost, 0.0f);
-	r.sCDEF = (float4)(0.0f, 0.0f, 0.0f, 1.0f);
-	return r;
-}
+// 	r.s0123 = (float4)(1.0f, 0.0f, 0.0f, 0.0f);
+// 	r.s4567 = (float4)(0.0f, cost, sint, 0.0f);
+// 	r.s89AB = (float4)(0.0f, -sint, cost, 0.0f);
+// 	r.sCDEF = (float4)(0.0f, 0.0f, 0.0f, 1.0f);
+// 	return r;
+// }
 
-mat4	mat_rotatey(float angle)
-{
-	float sint = sin(radians(angle));
-	float cost = cos(radians(angle));
-	mat4 r;
+// mat4	mat_rotatey(float angle)
+// {
+// 	float sint = sin(radians(angle));
+// 	float cost = cos(radians(angle));
+// 	mat4 r;
 
-	r.s0123 = (float4)(cost, 0.0f, -sint, 0.0f);
-	r.s4567 = (float4)(0.0f, 1.0f, 0.0f, 0.0f);
-	r.s89AB = (float4)(sint, 0.0f, cost, 0.0f);
-	r.sCDEF = (float4)(0.0f, 0.0f, 0.0f, 1.0f);
-	return r;
-}
+// 	r.s0123 = (float4)(cost, 0.0f, -sint, 0.0f);
+// 	r.s4567 = (float4)(0.0f, 1.0f, 0.0f, 0.0f);
+// 	r.s89AB = (float4)(sint, 0.0f, cost, 0.0f);
+// 	r.sCDEF = (float4)(0.0f, 0.0f, 0.0f, 1.0f);
+// 	return r;
+// }
 
-mat4	mat_rotatez(float angle)
-{
-	float sint = sin(radians(angle));
-	float cost = cos(radians(angle));
-	mat4 r;
+// mat4	mat_rotatez(float angle)
+// {
+// 	float sint = sin(radians(angle));
+// 	float cost = cos(radians(angle));
+// 	mat4 r;
 
-	r.s0123 = (float4)(cost, sint, 0.0f, 0.0f);
-	r.s4567 = (float4)(-sint, cost, 0.0f, 0.0f);
-	r.s89AB = (float4)(0.0f, 0.0f, 1.0f, 0.0f);
-	r.sCDEF = (float4)(0.0f, 0.0f, 0.0f, 1.0f);
-	return r;
-}
+// 	r.s0123 = (float4)(cost, sint, 0.0f, 0.0f);
+// 	r.s4567 = (float4)(-sint, cost, 0.0f, 0.0f);
+// 	r.s89AB = (float4)(0.0f, 0.0f, 1.0f, 0.0f);
+// 	r.sCDEF = (float4)(0.0f, 0.0f, 0.0f, 1.0f);
+// 	return r;
+// }
 
-mat4 mat_rotatea(float angle, float3 axis)
-{
-	mat4 r;
-	float3 v = fast_normalize(axis);
-	float s = sin(radians(angle));
-	float c = cos(radians(angle));
-	float ic = 1.0f - c;
+// mat4 mat_rotatea(float angle, float3 axis)
+// {
+// 	mat4 r;
+// 	float3 v = fast_normalize(axis);
+// 	float s = sin(radians(angle));
+// 	float c = cos(radians(angle));
+// 	float ic = 1.0f - c;
 
-	r.s0 = v.x * v.x * ic + c;
-	r.s1 = v.y * v.x * ic - s * v.z;
-	r.s2 = v.z * v.x * ic + s * v.y;
-	r.s3 = 0.0f;
+// 	r.s0 = v.x * v.x * ic + c;
+// 	r.s1 = v.y * v.x * ic - s * v.z;
+// 	r.s2 = v.z * v.x * ic + s * v.y;
+// 	r.s3 = 0.0f;
 
-	r.s4 = v.x * v.y * ic + s * v.z;
-	r.s5 = v.y * v.y * ic + c;
-	r.s6 = v.z * v.y * ic - s * v.x;
-	r.s7 = 0.0f;
+// 	r.s4 = v.x * v.y * ic + s * v.z;
+// 	r.s5 = v.y * v.y * ic + c;
+// 	r.s6 = v.z * v.y * ic - s * v.x;
+// 	r.s7 = 0.0f;
 
-	r.s8 = v.x * v.z * ic - s * v.y;
-	r.s9 = v.y * v.z * ic + s * v.x;
-	r.sA = v.z * v.z * ic + c;
-	r.sB = 0.0f;
+// 	r.s8 = v.x * v.z * ic - s * v.y;
+// 	r.s9 = v.y * v.z * ic + s * v.x;
+// 	r.sA = v.z * v.z * ic + c;
+// 	r.sB = 0.0f;
 
-	r.sCDEF = (float4)(0.0f, 0.0f, 0.0f, 1.0f);
-	return r;
-}
+// 	r.sCDEF = (float4)(0.0f, 0.0f, 0.0f, 1.0f);
+// 	return r;
+// }
 
 mat4 mat_invert(mat4 m)
 {

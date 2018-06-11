@@ -1,33 +1,34 @@
 #include <stdlib.h>
 #include "rt.h"
 
-void actions(t_scene *scene)
+void	actions(t_scene *scene)
 {
-	if (scene->controls.ismoving != 0)
-		move(scene, scene->controls.ismoving);
-	if (scene->controls.isstrafing != 0)
-		strafe(scene, scene->controls.isstrafing);
-	if (scene->controls.isflying != 0)
-		fly(scene, scene->controls.isflying);
-	if (scene->controls.isrotating != 0)
-		rotate(scene, scene->controls.isrotating);
-	if (scene->controls.ispitching != 0)
-		pitch(scene, scene->controls.ispitching);
+	if (scene->controls.move_z != 0)
+		move_z(scene, scene->controls.move_z);
+	if (scene->controls.move_x != 0)
+		move_x(scene, scene->controls.move_x);
+	if (scene->controls.move_y != 0)
+		move_y(scene, scene->controls.move_y);
+	if (scene->controls.rotate_y != 0)
+		rotate_y(scene, scene->controls.rotate_y);
+	if (scene->controls.rotate_x != 0)
+		rotate_x(scene, scene->controls.rotate_x);
 }
 
-int		main(void)
+int		main(int argc, char **argv)
 {
 	t_cl_context	cl_context;
 	t_sdl_context	sdl_context;
 	t_scene			scene;
 	cl_int			ret;
 
+	if (argc != 2)
+		ft_error("[-] Arguments: Invalid number of arguments",
+			"Usage: ./RT scene.json");
+
+	open_scene(argv[1], &scene);
 	init_cl(&cl_context);
 	init_sdl(&sdl_context);
-
-	// parse_scene("./scenes/test.json", &scene);
-	// parse_scene("./scenes/test4.json", &scene);
-	open_scene("./scenes/sphere.json", &scene);
 
 	alloc_cl_buffers(&cl_context, &scene);
 	set_kernel_args(&cl_context, &scene);
