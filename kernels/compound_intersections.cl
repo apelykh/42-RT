@@ -1,23 +1,23 @@
-static bool intersect_primitives(__constant t_object *objects, int id, t_ray *ray_local, bool quick, t_hitpoints *hitpoints)
+static bool intersect_primitives(__constant t_object *objects, int id, t_ray *ray_local, t_hitpoints *hitpoints)
 {
 	bool hit = false;
 
 	switch(objects[id].type)
 	{
 		case PLANE :
-			hit = intersect_plane(objects, id, ray_local, quick, hitpoints);
+			hit = intersect_plane(objects, id, ray_local, hitpoints);
 			break;
 		case SPHERE :
-			hit = intersect_sphere(objects, id, ray_local, quick, hitpoints);
+			hit = intersect_sphere(objects, id, ray_local, hitpoints);
 			break;
 		case CYLINDER :
-			hit = intersect_cylinder(objects, id, ray_local, quick, hitpoints);
+			hit = intersect_cylinder(objects, id, ray_local, hitpoints);
 			break;
 		case CONE :
-			hit = intersect_cone(objects, id, ray_local, quick, hitpoints);
+			hit = intersect_cone(objects, id, ray_local, hitpoints);
 			break;
 		case BOX :
-			hit = intersect_box(objects, id, ray_local, quick, hitpoints);
+			hit = intersect_box(objects, id, ray_local, hitpoints);
 			break;
 	}
 	return (hit);
@@ -38,17 +38,17 @@ static bool get_ray_state(t_hitpoints *hit, int obj_id)
 }
 
 
-bool intersect_union(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit)
+bool intersect_union(__constant t_object *objects, int id, const t_ray *ray, t_hitpoints *hit)
 {	
 	// const t_object obj = objects[id];
 	t_ray ray_local = ray2local(ray, &objects[id]);
 	bool hit_x, hit_y = false;
 
-	hit_x = intersect_primitives(objects, objects[id].operand.x, &ray_local, quick, hit);
+	hit_x = intersect_primitives(objects, objects[id].operand.x, &ray_local, hit);
 	if (objects[objects[id].operand.y].type == PLANE)
 		hit_y = false;
 	else
-		hit_y = intersect_primitives(objects, objects[id].operand.y, &ray_local, quick, hit);
+		hit_y = intersect_primitives(objects, objects[id].operand.y, &ray_local, hit);
 
 	if (!hit_x && !hit_y)
 		return false;
@@ -72,12 +72,11 @@ bool intersect_union(__constant t_object *objects, int id, const t_ray *ray, boo
 			{
 				hit->pt[i].obj_id = objects[id].id;
 				// hit->pt[i].inside = state_x ? true : false;
-				if (!quick)
-				{
-					// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
-					hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
-					hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
-				}
+
+				// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
+				hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
+				hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
+
 				hit->pt[i].pos = mat_mult_vec(objects[id].from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
 				hit->pt[i].dist = length(hit->pt[i].pos - ray->origin);
 			}
@@ -92,12 +91,11 @@ bool intersect_union(__constant t_object *objects, int id, const t_ray *ray, boo
 			{
 				hit->pt[i].obj_id = objects[id].id;
 				// hit->pt[i].inside = state_y ? true : false;
-				if (!quick)
-				{
-					// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
-					hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
-					hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
-				}
+
+				// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
+				hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
+				hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
+
 				hit->pt[i].pos = mat_mult_vec(objects[id].from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
 				hit->pt[i].dist = length(hit->pt[i].pos - ray->origin);
 			}
@@ -109,17 +107,17 @@ bool intersect_union(__constant t_object *objects, int id, const t_ray *ray, boo
 }
 
 
-bool intersect_intersection(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit)
+bool intersect_intersection(__constant t_object *objects, int id, const t_ray *ray, t_hitpoints *hit)
 {	
 	// const t_object obj = objects[id];
 	t_ray ray_local = ray2local(ray, &objects[id]);
 	bool hit_x, hit_y = false;
 
-	hit_x = intersect_primitives(objects, objects[id].operand.x, &ray_local, quick, hit);
+	hit_x = intersect_primitives(objects, objects[id].operand.x, &ray_local, hit);
 	if (objects[objects[id].operand.y].type == PLANE)
 		hit_y = false;
 	else
-		hit_y = intersect_primitives(objects, objects[id].operand.y, &ray_local, quick, hit);
+		hit_y = intersect_primitives(objects, objects[id].operand.y, &ray_local, hit);
 
 	if (!hit_x || !hit_y)
 	{
@@ -146,12 +144,10 @@ bool intersect_intersection(__constant t_object *objects, int id, const t_ray *r
 			if (state_y)
 			{
 				hit->pt[i].inside = state_x ? true : false;
-				if (!quick)
-				{
-					// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
-					hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
-					hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
-				}
+				// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
+				hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
+				hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
+
 				hit->pt[i].pos = mat_mult_vec(objects[id].from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
 				hit->pt[i].dist = length(hit->pt[i].pos - ray->origin);
 			}
@@ -166,12 +162,10 @@ bool intersect_intersection(__constant t_object *objects, int id, const t_ray *r
 			if (state_x)
 			{
 				hit->pt[i].inside = state_y ? true : false;
-				if (!quick)
-				{
-					// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
-					hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
-					hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
-				}
+				// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
+				hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
+				hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
+
 				hit->pt[i].pos = mat_mult_vec(objects[id].from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
 				hit->pt[i].dist = length(hit->pt[i].pos - ray->origin);
 			}
@@ -183,13 +177,13 @@ bool intersect_intersection(__constant t_object *objects, int id, const t_ray *r
 }
 
 
-bool intersect_difference(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit)
+bool intersect_difference(__constant t_object *objects, int id, const t_ray *ray, t_hitpoints *hit)
 {	
 	// const t_object obj = objects[id];
 	t_ray ray_local = ray2local(ray, &objects[id]);
 	bool hit_x, hit_y = false;
 
-	hit_x = intersect_primitives(objects, objects[id].operand.x, &ray_local, quick, hit);
+	hit_x = intersect_primitives(objects, objects[id].operand.x, &ray_local, hit);
 	// if there is no intersection with first object of DIFFERENCE - ignore all the rest
 	if (!hit_x)
 		return false;
@@ -197,7 +191,7 @@ bool intersect_difference(__constant t_object *objects, int id, const t_ray *ray
 	if (objects[objects[id].operand.y].type == PLANE)
 		hit_y = false;
 	else
-		hit_y = intersect_primitives(objects, objects[id].operand.y, &ray_local, quick, hit);
+		hit_y = intersect_primitives(objects, objects[id].operand.y, &ray_local, hit);
 	//if there is intersection with first object but not second - clean up points generated by first object
 	if (!hit_y)
 	{
@@ -206,12 +200,10 @@ bool intersect_difference(__constant t_object *objects, int id, const t_ray *ray
 			if (hit->pt[i].obj_id == objects[id].operand.x)
 			{
 				hit->pt[i].obj_id = objects[id].id;
-				if (!quick)
-				{
-					// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
-					hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
-					hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
-				}
+				// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
+				hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
+				hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
+
 				hit->pt[i].pos = mat_mult_vec(objects[id].from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
 				hit->pt[i].dist = length(hit->pt[i].pos - ray->origin);
 			}
@@ -234,12 +226,10 @@ bool intersect_difference(__constant t_object *objects, int id, const t_ray *ray
 			if (!state_y)
 			{	
 				hit->pt[i].inside = state_x ? true : false;
-				if (!quick)
-				{
-					// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
-					hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
-					hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
-				}
+				// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
+				hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
+				hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
+
 				hit->pt[i].pos = mat_mult_vec(objects[id].from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
 				hit->pt[i].dist = length(hit->pt[i].pos - ray->origin);
 			}
@@ -254,12 +244,10 @@ bool intersect_difference(__constant t_object *objects, int id, const t_ray *ray
 			if (state_x)
 			{
 				hit->pt[i].inside = state_y ? false : true;
-				if (!quick)
-				{
-					// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
-					hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
-					hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
-				}
+				// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
+				hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
+				hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
+
 				hit->pt[i].pos = mat_mult_vec(objects[id].from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
 				hit->pt[i].dist = length(hit->pt[i].pos - ray->origin);
 			}
@@ -271,13 +259,13 @@ bool intersect_difference(__constant t_object *objects, int id, const t_ray *ray
 }
 
 
-bool intersect_clipping(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit)
+bool intersect_clipping(__constant t_object *objects, int id, const t_ray *ray, t_hitpoints *hit)
 {	
 	// const t_object obj = objects[id];
 	t_ray ray_local = ray2local(ray, &objects[id]);
 	bool hit_x, hit_y = false;
 
-	hit_x = intersect_primitives(objects, objects[id].operand.x, &ray_local, quick, hit);
+	hit_x = intersect_primitives(objects, objects[id].operand.x, &ray_local, hit);
 	// if there is no intersection with first object of DIFFERENCE - ignore all the rest
 	if (!hit_x)
 		return false;
@@ -293,12 +281,10 @@ bool intersect_clipping(__constant t_object *objects, int id, const t_ray *ray, 
 			if (hit->pt[i].obj_id == objects[id].operand.x)
 			{
 				hit->pt[i].obj_id = objects[id].id;
-				if (!quick)
-				{
-					// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
-					hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
-					hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
-				}
+				// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
+				hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
+				hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
+
 				hit->pt[i].pos = mat_mult_vec(objects[id].from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
 				hit->pt[i].dist = length(hit->pt[i].pos - ray->origin);
 				if (dot(plane_pos - hit->pt[i].pos, plane_normal) < 0.0f)
@@ -308,7 +294,7 @@ bool intersect_clipping(__constant t_object *objects, int id, const t_ray *ray, 
 		return true;
 	}
 	else
-		hit_y = intersect_primitives(objects, objects[id].operand.y, &ray_local, quick, hit);
+		hit_y = intersect_primitives(objects, objects[id].operand.y, &ray_local, hit);
 
 	//if there is intersection with first object but not second - clean up points generated by first object
 	if (!hit_y)
@@ -318,12 +304,10 @@ bool intersect_clipping(__constant t_object *objects, int id, const t_ray *ray, 
 			if (hit->pt[i].obj_id == objects[id].operand.x)
 			{
 				hit->pt[i].obj_id = objects[id].id;
-				if (!quick)
-				{
-					// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
-					hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
-					hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
-				}
+				// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
+				hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
+				hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
+
 				hit->pt[i].pos = mat_mult_vec(objects[id].from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
 				hit->pt[i].dist = length(hit->pt[i].pos - ray->origin);
 			}
@@ -347,12 +331,10 @@ bool intersect_clipping(__constant t_object *objects, int id, const t_ray *ray, 
 			if (!state_y)
 			{	
 				// hit->pt[i].inside = state_x ? true : false;
-				if (!quick)
-				{
-					// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
-					hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
-					hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
-				}
+				// hit->pt[i].normal = dot(hit->pt[i].normal, ray_local.dir) < 0.0f ? hit->pt[i].normal : -hit->pt[i].normal;
+				hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
+				hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
+
 				hit->pt[i].pos = mat_mult_vec(objects[id].from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
 				hit->pt[i].dist = length(hit->pt[i].pos - ray->origin);
 			}
@@ -369,15 +351,15 @@ bool intersect_clipping(__constant t_object *objects, int id, const t_ray *ray, 
 }
 
 
-bool intersect_bocal(__constant t_object *objects, int id, const t_ray *ray, bool quick, t_hitpoints *hit)
+bool intersect_bocal(__constant t_object *objects, int id, const t_ray *ray, t_hitpoints *hit)
 {
 	t_ray ray_local = ray2local(ray, &objects[id]);
 
 	if ((MAX_POINTS - hit->num_elements) < 6)
 		return false;
 	bool hit_cup, hit_leg = false;
-	hit_cup = intersect_clipping(objects, 0, &ray_local, quick, hit);
-	hit_leg = intersect_union(objects, 3, &ray_local, quick, hit);
+	hit_cup = intersect_clipping(objects, 0, &ray_local, hit);
+	hit_leg = intersect_union(objects, 3, &ray_local, hit);
 	if (!hit_cup && !hit_leg)
 		return false;
 	if (hit_cup)
@@ -387,11 +369,8 @@ bool intersect_bocal(__constant t_object *objects, int id, const t_ray *ray, boo
 			if (hit->pt[i].obj_id == 0)
 			{
 				hit->pt[i].obj_id = id;
-				if (!quick)
-				{
-					hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
-					hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
-				}
+				hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
+				hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
 				hit->pt[i].pos = mat_mult_vec(objects[id].from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
 				hit->pt[i].dist = length(hit->pt[i].pos - ray->origin);
 			}
@@ -404,11 +383,8 @@ bool intersect_bocal(__constant t_object *objects, int id, const t_ray *ray, boo
 			if (hit->pt[i].obj_id == 3)
 			{
 				hit->pt[i].obj_id = id;
-				if (!quick)
-				{
-					hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
-					hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
-				}
+				hit->pt[i].normal = mat_mult_vec(mat_transpose(objects[id].to_local), (float4)(hit->pt[i].normal, 0.0f)).xyz;
+				hit->pt[i].normal = fast_normalize(hit->pt[i].normal);
 				hit->pt[i].pos = mat_mult_vec(objects[id].from_local, (float4)(hit->pt[i].pos, 1.0f)).xyz;
 				hit->pt[i].dist = length(hit->pt[i].pos - ray->origin);
 			}

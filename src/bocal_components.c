@@ -8,7 +8,7 @@ static void bocal_init_objects1_inners(t_scene *scene) {
     scene->objects[1].location = init_vec3(0.0f, 0.0f, 0.0f);
     scene->objects[1].rotation = init_vec3(0.0f, 0.0f, 0.0f);
     scene->objects[1].color = init_vec3(0.0f, 0.0f, 0.0f);
-    scene->objects[1].capped = CL_TRUE;
+    scene->objects[1].capped = CL_FALSE;
     scene->objects[1].hidden = CL_TRUE;
     scene->objects[1].diffuse = 0.0f;
     scene->objects[1].specular = 0.0f;
@@ -21,7 +21,7 @@ static void bocal_init_objects1_inners(t_scene *scene) {
     scene->objects[2].location = init_vec3(0.0f, 0.0f, 0.0f);
     scene->objects[2].rotation = init_vec3(0.0f, 0.0f, 0.0f);
     scene->objects[2].color = init_vec3(0.0f, 0.0f, 0.0f);
-    scene->objects[2].capped = CL_TRUE;
+    scene->objects[2].capped = CL_FALSE;
     scene->objects[2].hidden = CL_TRUE;
     scene->objects[2].diffuse = 0.0f;
     scene->objects[2].specular = 0.0f;
