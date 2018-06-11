@@ -104,7 +104,6 @@ void			parse_objects(cJSON *cj_root, t_scene *scene)
 	cJSON	*cj_objects;
 	cJSON	*cj_obj_current;
 	int		count_parent_objects;
-	int		obj_type;
 	int		obj_id;
 	int		cj_i;
 
@@ -127,32 +126,4 @@ void			parse_objects(cJSON *cj_root, t_scene *scene)
 		obj_id++;
 		cj_i++;
 	}
-}
-
-    if (cj_objects)
-    {
-        count_parent_objects = cJSON_GetArraySize(cj_objects);
-        scene->num_objects = (cl_int)(count_parent_objects +
-                                      count_inner_objects(cj_objects, count_parent_objects));
-        scene->objects = (t_object *)malloc(sizeof(t_object) * scene->num_objects);
-
-        cj_i = 0;
-        obj_id = 0;
-        while (cj_i < count_parent_objects)
-        {
-            cj_obj_current = parse_object(&scene->objects[obj_id], obj_id, cj_objects, cj_i);
-            obj_type = scene->objects[obj_id].type;
-
-            if (obj_type >= UNION && obj_type <= CLIPPING)
-                parse_inner_objects(scene, &obj_id, cj_obj_current);
-            obj_id++;
-            cj_i++;
-        }
-    }
-    else
-    {
-        printf("[-] No objects field in scene document\n");
-        exit(EXIT_FAILURE);
-    }
-
 }

@@ -8,7 +8,7 @@
 
 # include <SDL2/SDL.h>
 # include "cJSON.h"
-# include "/Users/efedoryc/.brew/Cellar/sdl2/2.0.8/include/SDL2/SDL.h"
+// # include "/Users/apelykh/.brew/Cellar/sdl2/2.0.8/include/SDL2/SDL.h"
 // # include <SDL2/SDL_timer.h>
 // # include <SDL2/SDL_image.h>
 
@@ -125,6 +125,7 @@ typedef struct			s_scene
 	cl_int				num_lights;
 	cl_int				im_width;
 	cl_int				im_height;
+	t_control_flags		controls;
 }						t_scene;
 
 cl_int2		init_int2(cl_int x, cl_int y);

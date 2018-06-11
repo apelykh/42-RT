@@ -17,17 +17,17 @@ void actions(t_scene *scene)
 
 int		main(void)
 {
-	t_cl_context cl_context;
-	t_sdl_context sdl_context;
-	t_scene scene;
-	cl_int ret;
+	t_cl_context	cl_context;
+	t_sdl_context	sdl_context;
+	t_scene			scene;
+	cl_int			ret;
 
 	init_cl(&cl_context);
 	init_sdl(&sdl_context);
 
 	// parse_scene("./scenes/test.json", &scene);
 	// parse_scene("./scenes/test4.json", &scene);
-	parse_scene("./scenes/sphere.json", &scene);
+	open_scene("./scenes/sphere.json", &scene);
 
 	alloc_cl_buffers(&cl_context, &scene);
 	set_kernel_args(&cl_context, &scene);
