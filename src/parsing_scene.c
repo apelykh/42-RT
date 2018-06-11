@@ -1,6 +1,16 @@
 #include <stdio.h>
 #include "rt.h"
 
+static void controls_init(t_scene *scene)
+{
+    scene->controls.quit = 0;
+    scene->controls.ismoving = 0;
+    scene->controls.isstrafing = 0;
+    scene->controls.isflying = 0;
+    scene->controls.isrotating = 0;
+    scene->controls.ispitching = 0;
+}
+
 void        scene_init(char *strJSON, t_scene *scene)
 {
     cJSON *cj_root;
@@ -8,6 +18,10 @@ void        scene_init(char *strJSON, t_scene *scene)
     cj_root = cJSON_Parse(strJSON);
     if (!cj_root)
         parsing_error("[-] JSON Error", (char *)cJSON_GetErrorPtr());
+
+    scene->im_width = WIN_WIDTH;
+    scene->im_height = WIN_HEIGHT;
+    controls_init(scene);
 
     camera_init(cj_root, scene);
     lights_init(cj_root, scene);

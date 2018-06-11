@@ -29,12 +29,12 @@ void fly(t_scene *scene, int dir)
 
 void rotate(t_scene *scene, int dir)
 {
-	scene->cam->rotation.y += dir * 2.5f;
+	scene->cam->rotation.y += dir * 2.0f;
 	set_cam_rotate_matrix(scene->cam);
 }
 
 void pitch(t_scene *scene, int dir)
 {
-	scene->cam->rotation.x += dir * 2.5f;
+	scene->cam->rotation.x += dir * 2.0f;
 	set_cam_rotate_matrix(scene->cam);	
 }

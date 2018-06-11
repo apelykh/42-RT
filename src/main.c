@@ -22,10 +22,6 @@ int		main(void)
 	t_scene scene;
 	cl_int ret;
 
-	scene.im_width = WIN_WIDTH;
-	scene.im_height = WIN_HEIGHT;
-	scene.controls.quit = 0;
-
 	init_cl(&cl_context);
 	init_sdl(&sdl_context);
 
