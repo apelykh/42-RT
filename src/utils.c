@@ -12,6 +12,18 @@ void		ft_putstr(char const *s)
 	}
 }
 
+void	ft_error(char *text1, char *text2)
+{
+	ft_putstr(text1);
+	ft_putstr("\n");
+	if (text2 != NULL)
+	{
+		ft_putstr(text2);
+		ft_putstr("\n");
+	}
+	exit(EXIT_FAILURE);
+}
+
 cl_float3	clamp_float3_minmax(cl_float3 x, float min, float max)
 {
 	cl_float3 res;
@@ -63,6 +75,7 @@ float	clamp_float_minmax(float x, float min, float max)
 		res = min;
 	return (res);
 }
+
 
 static float	clamp(float x)
 {

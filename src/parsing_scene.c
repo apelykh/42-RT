@@ -1,60 +1,56 @@
-#include <stdio.h>
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parsing_scene.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: efedoryc <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2018/06/07 20:32:36 by efedoryc          #+#    #+#             */
+/*   Updated: 2018/06/07 20:32:39 by efedoryc         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "rt.h"
 
-static void controls_init(t_scene *scene)
+static void	scene_init(char *str_json, t_scene *scene)
 {
-    scene->controls.quit = 0;
-    scene->controls.ismoving = 0;
-    scene->controls.isstrafing = 0;
-    scene->controls.isflying = 0;
-    scene->controls.isrotating = 0;
-    scene->controls.ispitching = 0;
+	cJSON	*cj_root;
+
+	if (!(cj_root = cJSON_Parse(str_json)))
+		ft_error("[-] Parsing: JSON Error", (char *)cJSON_GetErrorPtr());
+	parse_camera(cj_root, scene);
+	parse_lights(cj_root, scene);
+	parse_objects(cj_root, scene);
+	cJSON_Delete(cj_root);
 }
 
-void        scene_init(char *strJSON, t_scene *scene)
+static void	parse_scene(char *scene_str, t_scene *scene)
 {
-    cJSON *cj_root;
+	int		i;
 
-    cj_root = cJSON_Parse(strJSON);
-    if (!cj_root)
-        parsing_error("[-] JSON Error", (char *)cJSON_GetErrorPtr());
-
-    scene->im_width = WIN_WIDTH;
-    scene->im_height = WIN_HEIGHT;
-    controls_init(scene);
-
-    camera_init(cj_root, scene);
-    lights_init(cj_root, scene);
-    objects_init(cj_root, scene);
-
-    cJSON_Delete(cj_root);
+	if (scene_str[0] != '{')
+		ft_error("[-] Parsing: No first bracket", NULL);
+	scene_init(scene_str, scene);
+	i = 0;
+	while (i < scene->num_objects)
+		obj_transform_mats(&scene->objects[i++]);
+	free(scene_str);
+	scene_str = NULL;
 }
 
-void        parse_scene(char *scene_path, t_scene *scene)
+void		open_scene(char *scene_path, t_scene *scene)
 {
-    char    *scene_str;
-    int     fd;
-    int     i;
+	char	*scene_str;
+	int		fd;
 
-    if ((fd = open(scene_path, O_RDONLY)) < 0 || read(fd, 0, 0) < 0)
-    {
-        close(fd);
-        // Проверить можем ли мы использовать perror
-        perror("[-] Read Scene Error");
-        exit(EXIT_FAILURE);
-    }
-
-    scene_str = (char *)malloc(MAX_SOURCE_SIZE);
-    read(fd, scene_str, MAX_SOURCE_SIZE);
-    close(fd);
-
-    if (scene_str[0] != '{')
-        parsing_error("[-] Read Scene Error", "No first bracket");
-    scene_init(scene_str, scene);
-
-    i = 0;
-    while (i < scene->num_objects)
-        obj_transform_mats(&scene->objects[i++]);
-    free(scene_str);
-    scene_str = NULL;
+	if ((fd = open(scene_path, O_RDONLY)) < 0 || read(fd, 0, 0) < 0)
+	{
+		close(fd);
+		perror("[-] Read Scene Error");
+		exit(EXIT_FAILURE);
+	}
+	scene_str = (char *)malloc(MAX_SOURCE_SIZE);
+	read(fd, scene_str, MAX_SOURCE_SIZE);
+	close(fd);
+	parse_scene(scene_str, scene);
 }

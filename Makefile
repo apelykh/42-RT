@@ -26,8 +26,11 @@ SRC_FILES = main.c \
 			parsing_camera.c \
 			parsing_lights.c \
 			parsing_objects.c \
-			parsing_utils.c \
+			parsing_start_values.c \
+			parsing_utils_1.c \
+			parsing_utils_2.c \
 			bocal_components.c \
+			debug_scene.c \
 
 SRC = $(addprefix $(SRC_DIR), $(SRC_FILES))
 OBJ = $(SRC:.c=.o)
