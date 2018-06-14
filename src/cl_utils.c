@@ -126,6 +126,8 @@ void	set_kernel_args(t_cl_context *cl_context, t_scene *scene)
 		(void*)&scene->im_height);
 	ret = clSetKernelArg(cl_context->kernel, 7, sizeof(cl_mem),
 		(void*)&cl_context->cam_buf);
+	ret = clSetKernelArg(cl_context->kernel, 8, sizeof(cl_int),
+		(void*)&scene->sepia);
 
 	if (ret != CL_SUCCESS)
 		exit(-1);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parsing_scene.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: efedoryc <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/07 20:32:36 by efedoryc          #+#    #+#             */
-/*   Updated: 2018/06/07 20:32:39 by efedoryc         ###   ########.fr       */
+/*   Updated: 2018/06/14 23:08:43 by apelykh          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@ static void	scene_init(char *str_json, t_scene *scene)
 		ft_error("[-] Parsing: JSON Error", (char *)cJSON_GetErrorPtr());
 	scene->im_width = WIN_WIDTH;
 	scene->im_height = WIN_HEIGHT;
+	scene->sepia = 0;
 	controls_init_empty(&scene->controls);
 	parse_camera(cj_root, scene);
 	parse_lights(cj_root, scene);

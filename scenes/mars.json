@@ -1,0 +1,163 @@
+{
+    "camera": {
+        "location": [0.0, 1.0, 10.0],
+        "rotation": [0, 0, 0],
+        "fov": 45.0
+    },
+    "lights": [
+        {   
+            "type": "AMBIENT",
+            "location": [0.0, 0.0, 0.0],
+            "direction": [0.0, 0.0, 0.0],
+            "angle": 0.0,
+            "emission": [0.27, 0.09, 0.02]
+        },
+        {   
+            "type": "POINT",
+            "location": [0.0, 5.0, 0.0],
+            "direction": [-1.0, -1.0, 0.0],
+            "angle": 45.0,
+            "emission": [0.9, 0.9, 0.9]
+        }
+    ],
+    "objects": [
+        {
+            "type": "SPHERE",
+            "scale": [20.0, 30.0, 50.0],
+            "rotation": [0.0, 0.0, 0.0],
+            "location": [0.0, -1.0, 0.0],
+            "color": [0.94, 0.91, 0.91],
+            "capped": true,
+            "hidden": false,
+            "kr": 0.0,
+            "specular_exp": 0.0
+        },
+        {
+            "type": "DIFFERENCE",
+            "scale": [1.0, 1.0, 1.0],
+            "location": [1.5, -1.0, 3.0],
+            "rotation": [0.0, 0.0, 0.0],
+            "color": [0.99, 0.65, 0.0],
+            "specular_exp": 0.0,
+            "inner_objects": [
+                {
+                    "type": "PLANE",
+                    "scale": [1.0, 1.0, 1.0],
+                    "location": [0.0, 0.0, 0.0],
+                    "rotation": [0.0, 0.0, 0.0],
+                    "color": [0.3, 0.3, 0.3],
+                    "capped": true,
+                    "hidden": true,
+                    "specular_exp": 20.0
+                },
+                {
+                    "type": "SPHERE",
+                    "scale": [2.3, 2.0, 2.5],
+                    "rotation": [0.0, 0.0, 0.0],
+                    "location": [0.0, 0.0, 0.0],
+                    "color": [0.3, 0.3, 0.3],
+                    "hidden": true,
+                    "specular_exp": 20.0
+                }
+            ]
+        },
+        {
+            "type": "DIFFERENCE",
+            "scale": [1.0, 1.0, 1.0],
+            "location": [0.0, 0.5, 0.0],
+            "rotation": [0.0, 0.0, 0.0],
+            "color": [0.91, 0.49, 0.07],
+            "specular_exp": 0.0,
+            "inner_objects": [
+                {
+                    "type": "CONE",
+                    "scale": [3.0, 1.5, 3.0],
+                    "location": [0.0, 0.0, 0.0],
+                    "rotation": [0.0, 0.0, 0.0],
+                    "color": [0.3, 0.3, 0.3],
+                    "capped": true,
+                    "hidden": true,
+                    "specular_exp": 20.0
+                },
+                {
+                    "type": "SPHERE",
+                    "scale": [2.5, 2.5, 2.5],
+                    "rotation": [0.0, 0.0, 0.0],
+                    "location": [0.0, 0.0, 0.0],
+                    "color": [0.3, 0.3, 0.3],
+                    "hidden": true,
+                    "specular_exp": 20.0
+                }
+            ]
+        },
+        {
+            "type": "DIFFERENCE",
+            "scale": [1.2, 1.5, 1.2],
+            "location": [5.0, 1.25, 0.0],
+            "rotation": [0.0, 0.0, 0.0],
+            "color": [0.76, 0.21, 0.05],
+            "specular_exp": 0.0,
+            "inner_objects": [
+                {
+                    "type": "CONE",
+                    "scale": [3.0, 1.5, 3.0],
+                    "location": [0.0, 0.0, 0.0],
+                    "rotation": [0.0, 0.0, 0.0],
+                    "color": [0.3, 0.3, 0.3],
+                    "capped": true,
+                    "hidden": true,
+                    "specular_exp": 20.0
+                },
+                {
+                    "type": "SPHERE",
+                    "scale": [2.5, 2.9, 2.5],
+                    "rotation": [0.0, 0.0, 0.0],
+                    "location": [0.0, 0.0, 0.0],
+                    "color": [0.3, 0.3, 0.3],
+                    "hidden": true,
+                    "specular_exp": 20.0
+                }
+            ]
+        },
+        {
+            "type": "CONE",
+            "scale": [3.0, 1.5, 1.0],
+            "location": [0.0, 0.5, -6.0],
+            "rotation": [0.0, 0.0, 0.0],
+            "color": [0.91, 0.49, 0.07],
+            "capped": true,
+            "hidden": false,
+            "specular_exp": 20.0
+        },
+        {
+            "type": "CONE",
+            "scale": [2.7, 1.0, 0.8],
+            "location": [2.0, 0.0, -6.0],
+            "rotation": [0.0, 0.0, 0.0],
+            "color": [0.91, 0.49, 0.07],
+            "capped": true,
+            "hidden": false,
+            "specular_exp": 20.0
+        },
+        {
+            "type": "CONE",
+            "scale": [3.0, 2.5, 1.0],
+            "location": [4.0, 1.25, -6.0],
+            "rotation": [0.0, 0.0, 0.0],
+            "color": [0.91, 0.49, 0.07],
+            "capped": true,
+            "hidden": false,
+            "specular_exp": 20.0
+        },
+          {
+            "type": "CONE",
+            "scale": [3.0, 1.75, 1.25],
+            "location": [6.0, 0.75, -6.0],
+            "rotation": [0.0, 0.0, 0.0],
+            "color": [0.91, 0.49, 0.07],
+            "capped": true,
+            "hidden": false,
+            "specular_exp": 20.0
+        }
+    ]
+}

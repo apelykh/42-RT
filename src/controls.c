@@ -38,3 +38,11 @@ void	rotate_x(t_scene *scene, int dir)
 	scene->cam->rotation.x += dir * 2.5f;
 	set_cam_rotate_matrix(scene->cam);	
 }
+
+void	toggle_sepia(t_scene *scene)
+{
+	if (scene->sepia == 1)
+		scene->sepia = 0;
+	else
+		scene->sepia = 1;
+}

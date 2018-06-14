@@ -6,9 +6,9 @@
 
 # define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 
-# include <SDL2/SDL.h>
+// # include <SDL2/SDL.h>
 # include "cJSON.h"
-// # include "/Users/apelykh/.brew/Cellar/sdl2/2.0.8/include/SDL2/SDL.h"
+# include "/Users/apelykh/.brew/Cellar/sdl2/2.0.8/include/SDL2/SDL.h"
 
 # ifdef __APPLE__
 # include <OpenCL/opencl.h>
@@ -77,6 +77,7 @@ typedef struct			s_object
 	// cl_float3		emi;
 	// cl_float			diffuse;
 	// cl_float			specular;
+	cl_float			transparency;
 	cl_float			spec_exp;
 	cl_float			ior;
 	cl_float			kr;
@@ -124,6 +125,7 @@ typedef struct			s_scene
 	cl_int				im_width;
 	cl_int				im_height;
 	t_control_flags		controls;
+	cl_int				sepia;
 }						t_scene;
 
 cl_int2		init_int2(cl_int x, cl_int y);
@@ -163,6 +165,7 @@ void		move_x(t_scene *scene, int dir);
 void		move_y(t_scene *scene, int dir);
 void		rotate_y(t_scene *scene, int dir);
 void		rotate_x(t_scene *scene, int dir);
+void		toggle_sepia(t_scene *scene);
 
 void		actions(t_scene *scene);
 void		key_press(t_scene *scene, SDL_Event event);

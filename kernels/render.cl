@@ -1,11 +1,11 @@
 /* required to compensate for limited float precision */
 // __constant float EPSILON = 0.00003f;
-__constant float EPSILON = 0.005f;
+__constant float EPSILON = 0.005;
 __constant float PI = 3.14159265359f;
 // __constant int SAMPLES = 500;
 __constant int NUM_BOUNCES = 4;
 // __constant float3 bg_color = (float3)(0.55f, 0.1f, 0.61f);
-__constant float3 bg_color = (float3)(0.25f, 0.1f, 0.25f);
+__constant float3 bg_color = (float3)(0.1f, 0.1f, 0.1f);
 
 
 # define MAX_POINTS		32
@@ -64,6 +64,7 @@ typedef struct	s_object
 	float3		color;				// .x - R, .y - G, .z - B pigments of object's color
 	// float		diffuse;
 	// float		specular;
+	float		transparency;
 	float		specular_exp;
 	float		ior;
 	float		kr;
@@ -126,6 +127,9 @@ t_ray create_cam_ray(__constant t_camera *camera, const int x_coord, const int y
 // float3 trace_path(__constant t_object *spheres, const t_ray *camray, const int object_count, const int *seed0, const int *seed1);
 float3 add_sepia(float3 color);
 float3 get_direct_light(__constant t_object *spheres, const t_ray *camray, const int object_count, __constant t_light *lights, const int num_lights);
+
+float3 get_reflection(t_point hit, t_ray ray, float fresnel, __constant t_object *objects, const int num_objects,
+						__constant t_light *lights, const int num_lights);
 
 float3	shade(float3 incident_dir, t_point *hit, __constant t_object *objects, const int num_objects,
 										__constant t_light *lights, const int num_lights);
@@ -325,7 +329,7 @@ float3	shade(float3 incident_dir, t_point *hit, __constant t_object *objects, co
 			dist_to_light = fast_length(lights[i].location - sec_ray.origin);
 		}
 
-		if (intersect_scene(objects, num_objects, &sec_ray, &hit_tmp, NULL) &&
+		if (intersect_scene(objects, num_objects, &sec_ray, &hit_tmp, 0) &&
 			hit_tmp.dist < dist_to_light)
 			continue;
 
@@ -375,52 +379,79 @@ float	fresnel_reflect_amount(float n1, float n2, float3 normal, float3 incident,
     return (ret);
 }
 
+float3 get_reflection(t_point hit, t_ray ray, float fresnel, __constant t_object *objects, const int num_objects,
+						__constant t_light *lights, const int num_lights)
+{
+	t_ray	refl_ray;
+	float3	refl_color = (float3)(0.0f, 0.0f, 0.0f);
+
+	// float decay_rate = 1.0f;
+	float decay_rate = fresnel;
+
+	for (int bounces = 0; bounces < NUM_BOUNCES; bounces++)
+	{
+		if (fresnel > 0.0f)
+		{
+			float c1 = (-1.0f) * dot(hit.normal, ray.dir);
+			refl_ray.origin = hit.pos + hit.normal * EPSILON;
+			refl_ray.dir = fast_normalize(ray.dir + 2 * hit.normal * c1);
+
+			if (!intersect_scene(objects, num_objects, &refl_ray, &hit, 0))
+			{
+				refl_color += decay_rate * bg_color;
+				break;
+			}
+			fresnel = fresnel_reflect_amount(1.0f, 1.0f, refl_ray.dir, hit.normal, objects[hit.obj_id].kr);
+
+			if (objects[hit.obj_id].kr < 1.0f)
+				refl_color += decay_rate * shade(refl_ray.dir, &hit, objects, num_objects, lights, num_lights);
+
+			decay_rate *= fresnel;
+			ray = refl_ray;
+		}
+		else
+			break;
+	}
+
+	return (refl_color);
+}	
+
+
 float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const int num_objects,
 						__constant t_light *lights, const int num_lights)
 {
 	t_ray	ray = *camray;
 	t_point hit;
 	t_point first_hit;
+	t_point next_hit;
 
-	if (!intersect_scene(objects, num_objects, &ray, &first_hit, NULL))
+	if (!intersect_scene(objects, num_objects, &ray, &first_hit, &next_hit))
 		return bg_color;
 
 	hit = first_hit;
-	t_ray	refl_ray;
-	float3	hit_color;
-	float	fresnel;
-	float	decay_rate;
 
-	hit_color = shade(ray.dir, &hit, objects, num_objects, lights, num_lights);
+	float fresnel = fresnel_reflect_amount(1.0f, 1.0f, ray.dir, hit.normal, objects[hit.obj_id].kr);
+
+	float3 diffuse_color = (1 - fresnel) * shade(ray.dir, &hit, objects, num_objects, lights, num_lights);
+
+	float3 refl_color = (float3)(0.0f, 0.0f, 0.0f);
 
 	// REFLECTION
 	if (objects[first_hit.obj_id].kr > 0.0f)
-	{
-		fresnel = fresnel_reflect_amount(1.0f, 1.0f, hit.normal, ray.dir, objects[hit.obj_id].kr);
-		decay_rate = 1.0f;
-		hit_color *= (1 - fresnel);
+		refl_color = fresnel * get_reflection(hit, ray, fresnel, objects, num_objects, lights, num_lights);
 
-		for (int bounces = 0; bounces < NUM_BOUNCES; bounces++)
-		{
-			float c1 = (-1.0f) * dot(hit.normal, ray.dir);
-			refl_ray.origin = hit.pos + hit.normal * EPSILON;
-			refl_ray.dir = fast_normalize(ray.dir + 2 * hit.normal * c1);
+	// t_ray	refr_ray = *camray;
+	// refr_ray.origin = first_hit.pos + first_hit.normal * EPSILON;
+	// // TRANSPARENCY
+	// if (objects[first_hit.obj_id].kr < 1.0f && objects[first_hit.obj_id].transparency > 0.0f)
+	// {
 
-			if (!intersect_scene(objects, num_objects, &refl_ray, &hit, NULL))
-			{
-				hit_color += fresnel * bg_color;
-				break;
-			}
-			if (objects[hit.obj_id].kr < 1.0f)
-			{
-				fresnel = fresnel_reflect_amount(1.0f, 1.0f, hit.normal, refl_ray.dir, objects[hit.obj_id].kr);
-				hit_color += (1 - fresnel) * decay_rate * shade(refl_ray.dir, &hit, objects, num_objects, lights, num_lights);
-			}
-			decay_rate *= objects[hit.obj_id].kr;
-			ray = refl_ray;
-		}
-	}
-	return (hit_color);
+	// 	hit_color += objects[first_hit.obj_id].transparency *
+	// 		shade(camray->dir, &next_hit, objects, num_objects, lights, num_lights);
+	// 	// hit_color += objects[hit.obj_id].color;
+	// }
+
+	return (diffuse_color + refl_color);
 }
 
 float3 add_sepia(float3 color)
@@ -439,7 +470,7 @@ float3 add_sepia(float3 color)
 __kernel void render_scene(__constant t_object *objects, const int object_count,
 					__constant t_light *lights, const int num_lights,
 					__global uchar4 *output, const int width, const int height,
-					__constant t_camera *camera)
+					__constant t_camera *camera, const int sepia)
 {
 	unsigned int work_item_id = get_global_id(0);
 	unsigned int x_coord = work_item_id % width;
@@ -448,7 +479,9 @@ __kernel void render_scene(__constant t_object *objects, const int object_count,
 	t_ray camray = create_cam_ray(camera, x_coord, y_coord, width, height);
 
 	float3 pixel_float = get_direct_light(objects, &camray, object_count, lights, num_lights);
-	// pixel_float = add_sepia(pixel_float);
+
+	if (sepia)
+		pixel_float = add_sepia(pixel_float);
 
 	output[work_item_id].z = (uchar)(clamp(pixel_float.x, 0.0f, 1.0f) * 255 + .5f);
 	output[work_item_id].y = (uchar)(clamp(pixel_float.y, 0.0f, 1.0f) * 255 + .5f);

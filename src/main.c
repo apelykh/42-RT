@@ -56,6 +56,9 @@ int		main(int argc, char **argv)
 		ret = clSetKernelArg(cl_context.kernel, 7, sizeof(cl_mem),
 			(void*)&cl_context.cam_buf);
 
+		ret = clSetKernelArg(cl_context.kernel, 8, sizeof(cl_mem),
+			(void*)&scene.sepia);
+
 		ret = clEnqueueNDRangeKernel(cl_context.command_queue, cl_context.kernel, 1, NULL, 
 			&global_item_size, NULL, 0, NULL, NULL);
 

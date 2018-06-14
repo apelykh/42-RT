@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parsing_objects.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: efedoryc <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/07 20:32:22 by efedoryc          #+#    #+#             */
-/*   Updated: 2018/06/07 20:32:26 by efedoryc         ###   ########.fr       */
+/*   Updated: 2018/06/13 20:15:17 by apelykh          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,10 +29,11 @@ static void		object_init(t_object *obj, int obj_id, cJSON *cj_current)
 	save_float3(&(obj->color), cj_obj(cj_current, "color"), 0.0f, 1.0f);
 	// save_float(&(obj->diffuse), cj_obj(cj_current, "diffuse"), 0.0f, 1.0f);
 	// save_float(&(obj->specular), cj_obj(cj_current, "specular"), 0.0f, 1.0f);
+	save_float(&(obj->transparency), cj_obj(cj_current, "transparency"), 0.0f, 1.0f);
 	save_float(&(obj->spec_exp),
 				cj_obj(cj_current, "specular_exp"), 0.0f, 300.0f);
-	save_float(&(obj->kr), cj_obj(cj_current, "kr"), 0.0f, 1.0f);
-	save_float(&(obj->ior), cj_obj(cj_current, "ior"), 0.0f, 1.0f);
+	save_float(&(obj->kr), cj_obj(cj_current, "kr"), 0.0f, 1.1f);
+	save_float(&(obj->ior), cj_obj(cj_current, "ior"), 0.0f, 3.0f);
 }
 
 static int		count_inner_objects(cJSON *cj_objects, int count_objects)
