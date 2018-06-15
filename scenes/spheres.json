@@ -29,7 +29,7 @@
 			"color": [0.5, 0.5, 0.5],
 			"capped": true,
 			"hidden": false,
-			"specular_exp": 50.0,
+			"specular_exp": 0.0,
 			"kr": 0.0
 		},
 		{
@@ -41,7 +41,7 @@
 			"hidden": false,
 			"specular_exp": 20.0,
 			"kr": 1.0,
-			"transparency": 0.5
+			"transparency": 0.0
 		},
 		{
 			"type": "BOX",
@@ -63,7 +63,7 @@
 			"hidden": false,
 			"specular_exp": 20.0,
 			"kr": 0.4,
-			"transparency": 0.3
+			"transparency": 0.4
 		},
 		{
 			"type": "BOX",

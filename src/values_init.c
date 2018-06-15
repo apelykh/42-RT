@@ -6,7 +6,7 @@
 /*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/09 22:01:39 by efedoryc          #+#    #+#             */
-/*   Updated: 2018/06/14 23:15:36 by apelykh          ###   ########.fr       */
+/*   Updated: 2018/06/15 16:15:11 by apelykh          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,9 +49,7 @@ void	object_init_empty(t_object *obj)
 	obj->rotation = init_vec3(0.0f, 0.0f, 0.0f);
 	obj->scale = init_vec3(1.0f, 1.0f, 1.0f);
 	obj->color = init_vec3(0.5f, 0.5f, 0.5f);
-	// obj->diffuse = 1.0f;
-	// obj->specular = 0.0f;
-	obj->transparency = 1.0f;
+	obj->transparency = 0.0f;
 	obj->spec_exp = 1.0f;
 	obj->kr = 0.0f;
 	obj->ior = 1.0f;

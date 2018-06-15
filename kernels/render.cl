@@ -128,8 +128,8 @@ t_ray create_cam_ray(__constant t_camera *camera, const int x_coord, const int y
 float3 add_sepia(float3 color);
 float3 get_direct_light(__constant t_object *spheres, const t_ray *camray, const int object_count, __constant t_light *lights, const int num_lights);
 
-float3 get_reflection(t_point hit, t_ray ray, float fresnel, __constant t_object *objects, const int num_objects,
-						__constant t_light *lights, const int num_lights);
+// float3 get_reflection(t_point hit, t_ray ray, float fresnel, __constant t_object *objects, const int num_objects,
+// 						__constant t_light *lights, const int num_lights);
 
 float3	shade(float3 incident_dir, t_point *hit, __constant t_object *objects, const int num_objects,
 										__constant t_light *lights, const int num_lights);
@@ -379,8 +379,8 @@ float	fresnel_reflect_amount(float n1, float n2, float3 normal, float3 incident,
     return (ret);
 }
 
-float3 get_reflection(t_point hit, t_ray ray, float fresnel, __constant t_object *objects, const int num_objects,
-						__constant t_light *lights, const int num_lights)
+static float3 get_reflection(t_point hit, t_ray ray, float fresnel,
+	__constant t_object *objects, const int num_objects, __constant t_light *lights, const int num_lights)
 {
 	t_ray	refl_ray;
 	float3	refl_color = (float3)(0.0f, 0.0f, 0.0f);
@@ -417,6 +417,25 @@ float3 get_reflection(t_point hit, t_ray ray, float fresnel, __constant t_object
 }	
 
 
+static float3 get_refraction(t_ray incident, t_point first_hit, t_point next_hit,
+	__constant t_object *objects, const int num_objects, __constant t_light *lights, const int num_lights)
+{
+	t_ray	refr_ray = incident;
+	float3	refr_color = (float3)(0.0f, 0.0f, 0.0f);
+
+	refr_ray.origin = first_hit.pos + first_hit.normal * EPSILON;
+
+	float fresnel = fresnel_reflect_amount(1.0f, 1.0f, refr_ray.dir, next_hit.normal, objects[next_hit.obj_id].kr);
+
+	refr_color = (1 - fresnel) * shade(incident.dir, &next_hit, objects, num_objects, lights, num_lights);
+
+	float3 refl_color = get_reflection(next_hit, refr_ray, fresnel, objects, num_objects, lights, num_lights);
+	refr_color += fresnel * refl_color;
+
+	return (refr_color);
+}
+
+
 float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const int num_objects,
 						__constant t_light *lights, const int num_lights)
 {
@@ -432,26 +451,31 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 
 	float fresnel = fresnel_reflect_amount(1.0f, 1.0f, ray.dir, hit.normal, objects[hit.obj_id].kr);
 
-	float3 diffuse_color = (1 - fresnel) * shade(ray.dir, &hit, objects, num_objects, lights, num_lights);
+	float3 diffuse_color =
+		(1 - objects[hit.obj_id].transparency) * (1 - fresnel) *
+		shade(ray.dir, &hit, objects, num_objects, lights, num_lights);
 
 	float3 refl_color = (float3)(0.0f, 0.0f, 0.0f);
-
 	// REFLECTION
 	if (objects[first_hit.obj_id].kr > 0.0f)
 		refl_color = fresnel * get_reflection(hit, ray, fresnel, objects, num_objects, lights, num_lights);
 
 	// t_ray	refr_ray = *camray;
+	float3 refr_color = (float3)(0.0f, 0.0f, 0.0f);
 	// refr_ray.origin = first_hit.pos + first_hit.normal * EPSILON;
-	// // TRANSPARENCY
-	// if (objects[first_hit.obj_id].kr < 1.0f && objects[first_hit.obj_id].transparency > 0.0f)
-	// {
+	// TRANSPARENCY
+	if (objects[first_hit.obj_id].kr < 1.0f && objects[first_hit.obj_id].transparency > 0.0f)
+	{
+		// refr_color = shade(camray->dir, &next_hit, objects, num_objects, lights, num_lights);
+		refr_color = 
+			objects[first_hit.obj_id].transparency * (1 - fresnel) * 
+			get_refraction(*camray, first_hit, next_hit, objects, num_objects, lights, num_lights);
 
-	// 	hit_color += objects[first_hit.obj_id].transparency *
-	// 		shade(camray->dir, &next_hit, objects, num_objects, lights, num_lights);
-	// 	// hit_color += objects[hit.obj_id].color;
-	// }
+		// refr_color *= objects[first_hit.obj_id].transparency;
+		// refr_color *= (1 - fresnel);
+	}
 
-	return (diffuse_color + refl_color);
+	return (diffuse_color + refl_color + refr_color);
 }
 
 float3 add_sepia(float3 color)
