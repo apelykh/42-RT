@@ -1,12 +1,24 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   sdl_utils.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2018/06/15 22:19:29 by apelykh           #+#    #+#             */
+/*   Updated: 2018/06/15 22:29:12 by apelykh          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "rt.h"
 
-void	init_sdl(t_sdl_context *sdl_context)
+void	sdl_init(t_sdl_context *sdl_context)
 {
 	Uint32 render_flags;
 
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
 	{
-		printf("SDL Init error: %s\n", SDL_GetError());
+		printf("[-] SDL Init error: %s\n", SDL_GetError());
 		exit(-1);
 	}
 
@@ -28,6 +40,21 @@ void	init_sdl(t_sdl_context *sdl_context)
 		exit(-1);
 	}
 	sdl_context->pixels = (cl_uchar4*)malloc(WIN_WIDTH * WIN_HEIGHT * sizeof(cl_uchar4));
+}
+
+void	sdl_render(t_sdl_context *sdl_context, t_scene *scene)
+{
+	sdl_context->surf = SDL_CreateRGBSurfaceFrom(sdl_context->pixels,
+		scene->im_width, scene->im_height, 32,
+		scene->im_width * 4, 0, 0, 0, 0);
+	sdl_context->tex = SDL_CreateTextureFromSurface(sdl_context->rend,
+		sdl_context->surf);
+
+	SDL_RenderClear(sdl_context->rend);
+	SDL_RenderCopy(sdl_context->rend, sdl_context->tex, NULL, NULL);
+	SDL_RenderPresent(sdl_context->rend);
+	SDL_FreeSurface(sdl_context->surf);
+	SDL_DestroyTexture(sdl_context->tex);
 }
 
 void	sdl_cleanup(t_sdl_context *sdl_context)

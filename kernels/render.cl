@@ -1,11 +1,9 @@
 /* required to compensate for limited float precision */
-// __constant float EPSILON = 0.00003f;
-__constant float EPSILON = 0.005;
-__constant float PI = 3.14159265359f;
-// __constant int SAMPLES = 500;
-__constant int NUM_BOUNCES = 4;
+__constant float	EPSILON = 0.005;
+__constant float	PI = 3.14159265359f;
+__constant int		NUM_BOUNCES = 4;
 // __constant float3 bg_color = (float3)(0.55f, 0.1f, 0.61f);
-__constant float3 bg_color = (float3)(0.1f, 0.1f, 0.1f);
+__constant float3	bg_color = (float3)(0.1f, 0.1f, 0.1f);
 
 
 # define MAX_POINTS		32
@@ -127,9 +125,6 @@ t_ray create_cam_ray(__constant t_camera *camera, const int x_coord, const int y
 // float3 trace_path(__constant t_object *spheres, const t_ray *camray, const int object_count, const int *seed0, const int *seed1);
 float3 add_sepia(float3 color);
 float3 get_direct_light(__constant t_object *spheres, const t_ray *camray, const int object_count, __constant t_light *lights, const int num_lights);
-
-// float3 get_reflection(t_point hit, t_ray ray, float fresnel, __constant t_object *objects, const int num_objects,
-// 						__constant t_light *lights, const int num_lights);
 
 float3	shade(float3 incident_dir, t_point *hit, __constant t_object *objects, const int num_objects,
 										__constant t_light *lights, const int num_lights);
@@ -363,40 +358,61 @@ float	fresnel_reflect_amount(float n1, float n2, float3 normal, float3 incident,
     if (n1 > n2)
     {
         float n = n1 / n2;
-        float sinT2 = n * n * (1.0 - cosX * cosX);
+        float sinT2 = n * n * (1.0f - cosX * cosX);
         // Total internal reflection
-        if (sinT2 > 1.0)
+        if (sinT2 > 1.0f)
             return (1.0f);
 
         cosX = sqrt(1.0 - sinT2);
     }
-    float x = 1.0 - cosX;
-    float ret = r0 + (1.0 - r0) * x * x * x * x * x;
+    float x = 1.0f - cosX;
+    float ret = r0 + (1.0f - r0) * x * x * x * x * x;
 
     // adjust reflect multiplier for object reflectivity
-    ret = (obj_kr + (1.0 - obj_kr) * ret);
+    ret = (obj_kr + (1.0f - obj_kr) * ret);
 
     return (ret);
 }
 
-static float3 get_reflection(t_point hit, t_ray ray, float fresnel,
+static float3 refract(float n1, float n2, float3 normal, float3 incident)
+{
+	float3 refr_dir = (float3)(0.0f, 0.0f, 0.0f);
+
+	float eta = n1 / n2;
+
+	float dotprod = dot(incident, normal);
+	float3 a = eta * (incident - normal * dotprod);
+	float sinT2 = eta * eta * (1 - dotprod * dotprod);
+
+	// Case of total internal reflection, no refracted ray!
+	// returned direction is (float3)(0.0f, 0.0f, 0.0f)
+	if (n1 > n2 && sinT2 > 1.0f)
+		return (refr_dir);
+
+	float3 b = normal * sqrt(1 - sinT2);
+	refr_dir = a - b;
+
+	return (refr_dir);
+}
+
+static float3 get_reflected_color(t_point hit, t_ray ray, float fresnel,
 	__constant t_object *objects, const int num_objects, __constant t_light *lights, const int num_lights)
 {
 	t_ray	refl_ray;
+	t_point	next_hit;
 	float3	refl_color = (float3)(0.0f, 0.0f, 0.0f);
 
-	// float decay_rate = 1.0f;
 	float decay_rate = fresnel;
 
 	for (int bounces = 0; bounces < NUM_BOUNCES; bounces++)
 	{
-		if (fresnel > 0.0f)
+		if (fresnel > EPSILON)
 		{
 			float c1 = (-1.0f) * dot(hit.normal, ray.dir);
 			refl_ray.origin = hit.pos + hit.normal * EPSILON;
 			refl_ray.dir = fast_normalize(ray.dir + 2 * hit.normal * c1);
 
-			if (!intersect_scene(objects, num_objects, &refl_ray, &hit, 0))
+			if (!intersect_scene(objects, num_objects, &refl_ray, &hit, &next_hit))
 			{
 				refl_color += decay_rate * bg_color;
 				break;
@@ -404,7 +420,18 @@ static float3 get_reflection(t_point hit, t_ray ray, float fresnel,
 			fresnel = fresnel_reflect_amount(1.0f, 1.0f, refl_ray.dir, hit.normal, objects[hit.obj_id].kr);
 
 			if (objects[hit.obj_id].kr < 1.0f)
-				refl_color += decay_rate * shade(refl_ray.dir, &hit, objects, num_objects, lights, num_lights);
+			{
+				refl_color += decay_rate * (1 - objects[hit.obj_id].transparency) *
+					shade(refl_ray.dir, &hit, objects, num_objects, lights, num_lights);
+
+				// refl_color += objects[hit.obj_id].transparency *
+				// 	get_transparency(refl_ray, hit, next_hit, objects, num_objects, lights, num_lights);
+
+				// refl_color += objects[next_hit.obj_id].transparency *
+				// 	shade(refl_ray.dir, &next_hit, objects, num_objects, lights, num_lights);
+			}
+			// if (objects[next_hit.obj_id].transparency > EPSILON)
+			// 	refl_color += decay_rate * (1 - fresnel) * objects[next_hit.obj_id].color;
 
 			decay_rate *= fresnel;
 			ray = refl_ray;
@@ -414,10 +441,10 @@ static float3 get_reflection(t_point hit, t_ray ray, float fresnel,
 	}
 
 	return (refl_color);
-}	
+}
 
 
-static float3 get_refraction(t_ray incident, t_point first_hit, t_point next_hit,
+static float3 get_transparency(t_ray incident, t_point first_hit, t_point next_hit,
 	__constant t_object *objects, const int num_objects, __constant t_light *lights, const int num_lights)
 {
 	t_ray	refr_ray = incident;
@@ -428,9 +455,7 @@ static float3 get_refraction(t_ray incident, t_point first_hit, t_point next_hit
 	float fresnel = fresnel_reflect_amount(1.0f, 1.0f, refr_ray.dir, next_hit.normal, objects[next_hit.obj_id].kr);
 
 	refr_color = (1 - fresnel) * shade(incident.dir, &next_hit, objects, num_objects, lights, num_lights);
-
-	float3 refl_color = get_reflection(next_hit, refr_ray, fresnel, objects, num_objects, lights, num_lights);
-	refr_color += fresnel * refl_color;
+	refr_color += fresnel * get_reflected_color(next_hit, refr_ray, fresnel, objects, num_objects, lights, num_lights);
 
 	return (refr_color);
 }
@@ -455,25 +480,19 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 		(1 - objects[hit.obj_id].transparency) * (1 - fresnel) *
 		shade(ray.dir, &hit, objects, num_objects, lights, num_lights);
 
-	float3 refl_color = (float3)(0.0f, 0.0f, 0.0f);
-	// REFLECTION
-	if (objects[first_hit.obj_id].kr > 0.0f)
-		refl_color = fresnel * get_reflection(hit, ray, fresnel, objects, num_objects, lights, num_lights);
-
-	// t_ray	refr_ray = *camray;
-	float3 refr_color = (float3)(0.0f, 0.0f, 0.0f);
-	// refr_ray.origin = first_hit.pos + first_hit.normal * EPSILON;
 	// TRANSPARENCY
-	if (objects[first_hit.obj_id].kr < 1.0f && objects[first_hit.obj_id].transparency > 0.0f)
+	float3 refr_color = (float3)(0.0f, 0.0f, 0.0f);
+	if (fresnel < (1.0f - EPSILON) && objects[first_hit.obj_id].transparency > 0.0f)
 	{
-		// refr_color = shade(camray->dir, &next_hit, objects, num_objects, lights, num_lights);
 		refr_color = 
 			objects[first_hit.obj_id].transparency * (1 - fresnel) * 
-			get_refraction(*camray, first_hit, next_hit, objects, num_objects, lights, num_lights);
-
-		// refr_color *= objects[first_hit.obj_id].transparency;
-		// refr_color *= (1 - fresnel);
+			get_transparency(*camray, first_hit, next_hit, objects, num_objects, lights, num_lights);
 	}
+
+	// REFLECTION
+	float3 refl_color = (float3)(0.0f, 0.0f, 0.0f);
+	if (fresnel > EPSILON)
+		refl_color = fresnel * get_reflected_color(hit, ray, fresnel, objects, num_objects, lights, num_lights);
 
 	return (diffuse_color + refl_color + refr_color);
 }

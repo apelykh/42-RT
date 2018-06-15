@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   rt.h                                               :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2018/06/15 22:30:16 by apelykh           #+#    #+#             */
+/*   Updated: 2018/06/15 23:06:32 by apelykh          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef RT_H
 # define RT_H
 
@@ -59,10 +71,8 @@ typedef struct			s_cl_context
 	cl_mem				cam_buf;
 }						t_cl_context;
 
-typedef cl_float16 mat4;
+typedef cl_float16		mat4;
 
-// dummy variables are required for memory alignment
-// float3 is considered as float4 by OpenCL
 typedef struct			s_object
 {
 	cl_int				id;
@@ -74,17 +84,12 @@ typedef struct			s_object
 	cl_float3			rotation;
 	cl_float3			scale;
 	cl_float3			color;
-	// cl_float3		emi;
-	// cl_float			diffuse;
-	// cl_float			specular;
 	cl_float			transparency;
 	cl_float			spec_exp;
 	cl_float			ior;
 	cl_float			kr;
 	mat4 				from_local;
 	mat4 				to_local;
-	// cl_float			dummy1;
-	// cl_float			dummy2;
 }						t_object;
 
 typedef struct			s_light
@@ -141,6 +146,10 @@ cl_int		cj_get_obj_type(char *string_type);
 cl_int		cj_get_light_type(char *string_type);
 int			is_complex_obj(cl_int object_type);
 
+
+/*
+ *	--------------- PARSING ---------------
+ */
 void		open_scene(char *scene_path, t_scene *scene);
 void		parse_camera(cJSON *cj_root, t_scene *scene);
 void		parse_lights(cJSON *cj_root, t_scene *scene);
@@ -160,18 +169,21 @@ void        object_init_empty(t_object *obj);
 /*
  *	--------------- controls.c ---------------
  */
+// void		handle_keys(t_scene *scene, SDL_Event *event);
 void		move_z(t_scene *scene, int dir);
 void		move_x(t_scene *scene, int dir);
 void		move_y(t_scene *scene, int dir);
 void		rotate_y(t_scene *scene, int dir);
 void		rotate_x(t_scene *scene, int dir);
-void		toggle_sepia(t_scene *scene);
 
-void		actions(t_scene *scene);
 void		key_press(t_scene *scene, SDL_Event event);
 void		key_release(t_scene *scene, SDL_Event event);
 
-void	init_sdl(t_sdl_context *sdl_context);
+/*
+ *	--------------- sdl_utils.c ---------------
+ */
+void	sdl_init(t_sdl_context *sdl_context);
+void	sdl_render(t_sdl_context *sdl_context, t_scene *scene);
 void	sdl_cleanup(t_sdl_context *sdl_context);
 
 void	init_cl(t_cl_context *cl_context);
@@ -179,10 +191,8 @@ void	alloc_cl_buffers(t_cl_context *cl_context, t_scene *scene);
 void	set_kernel_args(t_cl_context *cl_context, t_scene *scene);
 void	cl_cleanup(t_cl_context *cl_context);
 
-// void	save_image(cl_float3 *pixels);
-int		to_uchar(float x);
-float	clamp_float_minmax(float x, float min, float max);
-cl_float3	clamp_float3_minmax(cl_float3 x, float min, float max);
+// float	clamp_float_minmax(float x, float min, float max);
+// cl_float3	clamp_float3_minmax(cl_float3 x, float min, float max);
 
 float		minmax_float(float x, float min, float max);
 cl_float3	minmax_float3(cl_float3 x, float min, float max);

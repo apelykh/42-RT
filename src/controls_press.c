@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   controls_press.c                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2018/06/15 21:04:18 by apelykh           #+#    #+#             */
+/*   Updated: 2018/06/15 22:33:19 by apelykh          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "rt.h"
 
 static void	key_press_rotation(t_scene *scene, SDL_Event event)
@@ -28,6 +40,14 @@ static void	key_press_movement(t_scene *scene, SDL_Event event)
 		scene->controls.move_y = 1;
 	else
 		key_press_rotation(scene, event);
+}
+
+static void	toggle_sepia(t_scene *scene)
+{
+	if (scene->sepia == 1)
+		scene->sepia = 0;
+	else
+		scene->sepia = 1;
 }
 
 void		key_press(t_scene *scene, SDL_Event event)
