@@ -6,7 +6,7 @@
 #    By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/06/15 21:58:26 by apelykh           #+#    #+#              #
-#    Updated: 2018/06/16 17:55:44 by apelykh          ###   ########.fr        #
+#    Updated: 2018/06/16 21:44:25 by apelykh          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,9 +27,13 @@ FRAMEWORKS += -framework SDL2
 
 SRC_DIR = ./src/
 SRC_FILES = main.c \
-			vec_utils.c \
-			matrix.c \
+			vector_init.c \
+			vector_utils.c \
+			matrix_transform.c \
+			matrix_ops.c \
+			matrix_ops2.c \
 			cl_utils.c \
+			cl_utils2.c \
 			sdl_utils.c \
 			utils.c \
 			controls.c \
@@ -40,9 +44,10 @@ SRC_FILES = main.c \
 			parsing_lights.c \
 			parsing_objects.c \
 			values_init.c \
-			parsing_utils_1.c \
-			parsing_utils_2.c \
+			parsing_utils.c \
+			parsing_utils2.c \
 			bocal_components.c \
+			save_image.c \
 			debug_scene.c \
 
 SRC = $(addprefix $(SRC_DIR), $(SRC_FILES))

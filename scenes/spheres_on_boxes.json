@@ -1,0 +1,98 @@
+{
+	"camera": {
+		"location": [3.0, 3.0, 10.0],
+		"rotation": [0, 20, 0],
+		"fov": 60.0
+	},
+	"lights": [
+		{   
+			"type": "AMBIENT",
+			"emission": [0.25, 0.25, 0.25]
+		},
+		{
+			"type": "POINT",
+			"location": [3.0, 6.0, 5.0],
+			"emission": [0.8, 0.8, 0.8]
+		},
+		{
+			"type": "POINT",
+			"location": [-3.0, 6.0, 5.0],
+			"emission": [0.4, 0.4, 0.4]
+		}
+	],
+	"objects": [
+		{
+			"type": "BOX",
+			"scale": [2.0, 2.0, 2.0],
+			"location": [0.0, 0.0, 0.0],
+			"rotation": [0.0, 0.0, 0.0],
+			"color": [0.5, 0.5, 0.5],
+			"spec_pow": 50.0,
+			"kr": 0.4
+		},
+		{
+			"type": "SPHERE",
+			"scale": [3.0, 3.0, 3.0],
+			"location": [0.0, 2.5, 0.0],
+			"rotation": [0.0, 0.0, 0.0],
+			"color": [1.0, 0.22, 0.77],
+			"spec_pow": 20.0,
+			"kr": 0.0
+		},
+		{
+			"type": "PLANE",
+			"scale": [1.0, 1.0, 1.0],
+			"location": [0.0, -1.0, 0.0],
+			"color": [0.9, 0.8, 0.7],
+			"spec_pow": 20.0,
+			"kr": 0.2
+		},
+		{
+			"type": "BOX",
+			"scale": [2.0, 2.0, 2.0],
+			"location": [4.0, 0.0, -1.5],
+			"rotation": [0.0, 0.0, 0.0],
+			"color": [0.5, 0.5, 0.5],
+			"spec_pow": 50.0,
+			"kr": 0.4
+		},
+		{
+			"type": "SPHERE",
+			"scale": [1.0, 1.0, 1.0],
+			"location": [4.0, 1.5, -1.5],
+			"rotation": [0.0, 0.0, 0.0],
+			"color": [1.0, 0.22, 0.77],
+			"spec_pow": 20.0,
+			"kr": 0.8
+		},
+		{
+			"type": "BOX",
+			"scale": [2.0, 2.0, 2.0],
+			"location": [-4.5, 0.0, 1.5],
+			"rotation": [0.0, 0.0, 0.0],
+			"color": [0.5, 0.5, 0.5],
+			"spec_pow": 50.0,
+			"kr": 0.4
+		},
+		{
+			"type": "SPHERE",
+			"scale": [2.0, 2.0, 2.0],
+			"location": [-4.5, 2.0, 1.5],
+			"rotation": [0.0, 0.0, 0.0],
+			"color": [1.0, 0.22, 0.77],
+			"spec_pow": 20.0,
+			"kr": 0.5
+		},
+		{
+			"type": "PLANE",
+			"scale": [1.0, 1.0, 1.0],
+			"rotation": [90.0, 0.0, 0.0],
+			"location": [0.0, 0.0, -7.0],
+			"color": [0.9, 0.8, 0.7],
+			"spec_pow": 20.0,
+			"transparency": 1.0,
+			"kr": 0.0
+		}
+
+    ]
+}

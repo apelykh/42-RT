@@ -6,7 +6,7 @@
 /*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/15 22:30:16 by apelykh           #+#    #+#             */
-/*   Updated: 2018/06/16 17:43:00 by apelykh          ###   ########.fr       */
+/*   Updated: 2018/06/16 21:48:31 by apelykh          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,12 @@
 # define POINT			1
 # define PARALLEL		2
 # define SPOT			3
+
+# define BYTES_PER_PIXEL		3
+# define FILE_HEADER_SIZE		14
+# define INFO_HEADER_SIZE		40
+# define PADDING_SIZE		(4 - (WIN_WIDTH * BYTES_PER_PIXEL) % 4) % 4
+# define FILE_SIZE		FILE_HEADER_SIZE + INFO_HEADER_SIZE + BYTES_PER_PIXEL * WIN_WIDTH * WIN_HEIGHT;
 
 typedef struct			s_sdl_context
 {
@@ -130,6 +136,7 @@ typedef struct			s_scene
 	cl_int				im_height;
 	t_control_flags		controls;
 	cl_int				sepia;
+	cl_int				to_save_image;
 }						t_scene;
 
 cl_int2		init_int2(cl_int x, cl_int y);
@@ -168,7 +175,6 @@ void        object_init_empty(t_object *obj);
 /*
  *	--------------- controls.c ---------------
  */
-// void		handle_keys(t_scene *scene, SDL_Event *event);
 void		move_z(t_scene *scene, int dir);
 void		move_x(t_scene *scene, int dir);
 void		move_y(t_scene *scene, int dir);
@@ -185,9 +191,11 @@ void	sdl_init(t_sdl_context *sdl_context);
 void	sdl_render(t_sdl_context *sdl_context, t_scene *scene);
 void	sdl_cleanup(t_sdl_context *sdl_context);
 
-void	init_cl(t_cl_context *cl_context);
-void	alloc_cl_buffers(t_cl_context *cl_context, t_scene *scene);
-void	set_kernel_args(t_cl_context *cl_context, t_scene *scene);
+void	cl_init(t_cl_context *cl_context);
+void	cl_alloc_buffers(t_cl_context *cl_context, t_scene *scene);
+void	cl_set_kernel_args(t_cl_context *cl_context, t_scene *scene);
+void	cl_update_pixels(t_scene *scene, t_sdl_context	*sdl_context,
+	t_cl_context *cl_context);
 void	cl_cleanup(t_cl_context *cl_context);
 
 // float	clamp_float_minmax(float x, float min, float max);
@@ -199,6 +207,9 @@ cl_float3	minmax_float3(cl_float3 x, float min, float max);
 void		ft_error(char *text1, char *text2);
 void        ft_putstr(char const *s);
 
+cl_float3		vec_norm(cl_float3 a);
+void			save_image(cl_uchar4 *pixels);
+
 //matrix funcs
 void		obj_transform_mats(t_object *obj);
 mat4		mat_translate(cl_float3 v);
@@ -207,15 +218,13 @@ mat4		mat_rotatex(cl_float angle);
 mat4		mat_rotatey(cl_float angle);
 mat4		mat_rotatez(cl_float angle);
 mat4		mat_invert(mat4 m);
-mat4		mat_invert_(mat4 m, cl_float det);
 mat4		mat_transpose(mat4 m);
 mat4		mat_mult_mat(mat4 a, mat4 b);
 cl_float4	mat_mult_vec(mat4 m, cl_float4 v);
 void		set_cam_translate_matrix(t_camera *cam);
 void		set_cam_rotate_matrix(t_camera *cam);
 
-void		print_camera(t_scene *scene);
-void		print_lights(t_scene *scene);
-void		print_objects(t_scene *scene);
+void		array_nuller(unsigned char **array, int size);
+void		array_free(unsigned char **array, int size);
 
 #endif

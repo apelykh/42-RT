@@ -493,7 +493,7 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 	float3 refr_color = (float3)(0.0f, 0.0f, 0.0f);
 	if (fresnel < (1.0f - EPSILON) && objects[first_hit.obj_id].transparency > 0.0f)
 	{
-		refr_color = 
+		refr_color = 0.5f * 
 			objects[first_hit.obj_id].transparency * (1 - fresnel) * 
 			get_transparency(*camray, first_hit, fresnel, next_hit, objects, num_objects, lights, num_lights);
 	}

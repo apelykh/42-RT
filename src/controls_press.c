@@ -6,7 +6,7 @@
 /*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/15 21:04:18 by apelykh           #+#    #+#             */
-/*   Updated: 2018/06/15 22:33:19 by apelykh          ###   ########.fr       */
+/*   Updated: 2018/06/16 21:31:11 by apelykh          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,8 @@ void		key_press(t_scene *scene, SDL_Event event)
 		scene->controls.quit = 1;
 	else if (event.key.keysym.scancode == SDL_SCANCODE_C)
 		toggle_sepia(scene);
+	else if (event.key.keysym.scancode == SDL_SCANCODE_SPACE)
+		scene->to_save_image = 1;
 	else
 		key_press_movement(scene, event);
 }

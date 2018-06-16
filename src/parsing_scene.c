@@ -6,7 +6,7 @@
 /*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/07 20:32:36 by efedoryc          #+#    #+#             */
-/*   Updated: 2018/06/15 22:58:18 by apelykh          ###   ########.fr       */
+/*   Updated: 2018/06/16 21:26:27 by apelykh          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ static void	scene_init(char *str_json, t_scene *scene)
 	scene->im_width = WIN_WIDTH;
 	scene->im_height = WIN_HEIGHT;
 	scene->sepia = 0;
+	scene->to_save_image = 0;
 	controls_init_empty(&scene->controls);
 	parse_camera(cj_root, scene);
 	parse_lights(cj_root, scene);
