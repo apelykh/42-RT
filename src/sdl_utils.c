@@ -6,7 +6,7 @@
 /*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/15 22:19:29 by apelykh           #+#    #+#             */
-/*   Updated: 2018/06/15 22:29:12 by apelykh          ###   ########.fr       */
+/*   Updated: 2018/06/16 17:59:31 by apelykh          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,6 @@ void	sdl_init(t_sdl_context *sdl_context)
 		printf("[-] SDL Init error: %s\n", SDL_GetError());
 		exit(-1);
 	}
-
 	sdl_context->win = SDL_CreateWindow("RT", SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED, WIN_WIDTH, WIN_HEIGHT, 0);
 	if (!sdl_context->win)
@@ -30,7 +29,6 @@ void	sdl_init(t_sdl_context *sdl_context)
 		sdl_cleanup(sdl_context);
 		exit(-1);
 	}
-
 	render_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
 	sdl_context->rend = SDL_CreateRenderer(sdl_context->win, -1, render_flags);
 	if (!sdl_context->rend)
@@ -39,7 +37,8 @@ void	sdl_init(t_sdl_context *sdl_context)
 		sdl_cleanup(sdl_context);
 		exit(-1);
 	}
-	sdl_context->pixels = (cl_uchar4*)malloc(WIN_WIDTH * WIN_HEIGHT * sizeof(cl_uchar4));
+	sdl_context->pixels = (cl_uchar4*)malloc(
+		WIN_WIDTH * WIN_HEIGHT * sizeof(cl_uchar4));
 }
 
 void	sdl_render(t_sdl_context *sdl_context, t_scene *scene)
@@ -49,7 +48,6 @@ void	sdl_render(t_sdl_context *sdl_context, t_scene *scene)
 		scene->im_width * 4, 0, 0, 0, 0);
 	sdl_context->tex = SDL_CreateTextureFromSurface(sdl_context->rend,
 		sdl_context->surf);
-
 	SDL_RenderClear(sdl_context->rend);
 	SDL_RenderCopy(sdl_context->rend, sdl_context->tex, NULL, NULL);
 	SDL_RenderPresent(sdl_context->rend);
@@ -61,10 +59,8 @@ void	sdl_cleanup(t_sdl_context *sdl_context)
 {
 	if (sdl_context->win)
 		SDL_DestroyWindow(sdl_context->win);
-
 	if (sdl_context->rend)
 		SDL_DestroyRenderer(sdl_context->rend);
-
 	free(sdl_context->pixels);
 	sdl_context->pixels = NULL;
 	SDL_Quit();

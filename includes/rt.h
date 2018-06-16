@@ -6,7 +6,7 @@
 /*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/15 22:30:16 by apelykh           #+#    #+#             */
-/*   Updated: 2018/06/16 13:43:15 by apelykh          ###   ########.fr       */
+/*   Updated: 2018/06/16 17:43:00 by apelykh          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,8 @@
 
 # define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 
-// # include <SDL2/SDL.h>
+# include "SDL.h"
 # include "cJSON.h"
-# include "/Users/apelykh/.brew/Cellar/sdl2/2.0.8/include/SDL2/SDL.h"
 
 # ifdef __APPLE__
 # include <OpenCL/opencl.h>

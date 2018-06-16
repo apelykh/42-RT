@@ -6,7 +6,7 @@
 #    By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/06/15 21:58:26 by apelykh           #+#    #+#              #
-#    Updated: 2018/06/15 22:31:04 by apelykh          ###   ########.fr        #
+#    Updated: 2018/06/16 17:55:44 by apelykh          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,13 +16,14 @@ NAME = RT
 
 LIB_DIR = ./lib/
 LIB = ./lib/cJSON/cJSON.a
-# LIB_NAMES = cJSON \
 
-# LIB_PATHS = $(addprefix $(LIB_DIR), $(LIB_NAMES))
-# LIB_NAMES_A = $(addsuffix .a, $(LIB_NAMES))
-# LIB_FULL_NAMES = $(addprefix $(LIB_PATHS), $(LIB_NAMES_A))
+INCLUDES = -I ./includes/
+INCLUDES +=	-I ./lib/cJSON
+INCLUDES += -I frameworks/SDL2.framework/Headers/
 
-INCLUDE_DIR = ./includes
+FRAMEWORKS = -framework OpenCL
+FRAMEWORKS += -F frameworks
+FRAMEWORKS += -framework SDL2
 
 SRC_DIR = ./src/
 SRC_FILES = main.c \
@@ -53,14 +54,11 @@ OBJ = $(SRC:.c=.o)
 all: $(NAME)
 
 .c.o: $(SRC)
-	@ $(CC) -I $(INCLUDE_DIR) -I ./lib/cJSON -c $^ -o $@
+	@ $(CC) $(INCLUDES) -c $^ -o $@
 
 $(NAME): $(OBJ)
 	@ make -C $(LIB_DIR)/cJSON
-
-	# @ $(CC) $(OBJ) -lOpenCL -lSDL2 -lm -o $@ ./lib/cJSON/cJSON.c
-	@ $(CC) $(OBJ) $(LIB) -framework opencl -L/Users/apelykh/.brew/Cellar/sdl2/2.0.8/lib -lSDL2 -lm -o $@
-	# @ $(CC) $(OBJ) -framework opencl -framework SDL2 -lm -o $@
+	@ $(CC) $(OBJ) $(LIB) $(FRAMEWORKS) -lm -o $@
 	@ echo "[+] [$(NAME)] compiled"
 
 clean:
