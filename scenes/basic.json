@@ -1,0 +1,38 @@
+{
+    "camera": {
+        "location": [0.0, 2.0, 10.0],
+        "rotation": [0, 0, 0],
+        "fov": 45.0
+    },
+    "lights": [
+        {   
+            "type": "AMBIENT",
+            "emission": [1.0, 1.0, 1.0]
+        },
+        {   
+            "type": "POINT",
+            "location": [3.0, 3.0, 3.0],
+            "emission": [0.6, 0.6, 0.6]
+        }
+    ],
+    "objects": [
+        {
+            "type": "PLANE",
+            "scale": [1.0, 1.0, 1.0],
+            "rotation": [0.0, 0.0, 0.0],
+            "location": [0.0, -1.0, 0.0],
+            "color": [0.7, 0.3, 0.3],
+            "kr": 0.2,
+            "specular_exp": 20.0
+        },
+        {
+            "type": "SPHERE",
+            "scale": [2.0, 2.0, 2.0],
+            "rotation": [0.0, 0.0, 0.0],
+            "location": [0.0, 1.0, 0.0],
+            "color": [0.7, 0.3, 0.3],
+            "kr": 0.2,
+            "specular_exp": 20.0
+        }
+    ]
+}

@@ -63,6 +63,7 @@
       "diffuse": 1.0,
       "specular": 0.0,
       "specular_exp": 20.0,
+      "transparency": 0.5,
       "inner_objects": [
         {
           "type": "BOX",
@@ -119,6 +120,8 @@
       "diffuse": 1.0,
       "specular": 0.0,
       "specular_exp": 20.0,
+      "kr": 0.3,
+      "transparency": 0.3,
       "inner_objects": [
         {
           "type": "SPHERE",
@@ -154,6 +157,7 @@
       "diffuse": 1.0,
       "specular": 0.0,
       "specular_exp": 20.0,
+      "kr": 0.5,
       "inner_objects": [
         {
           "type": "BOX",

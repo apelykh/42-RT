@@ -6,7 +6,7 @@
 /*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/07 20:32:12 by efedoryc          #+#    #+#             */
-/*   Updated: 2018/06/15 22:58:51 by apelykh          ###   ########.fr       */
+/*   Updated: 2018/06/16 14:58:15 by apelykh          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,11 +18,11 @@ static void	light_init(t_light *light, cJSON *cj_current)
 	save_float3(&(light->location),
 				cj_obj(cj_current, "location"), -100.0f, 100.0f);
 	save_float3(&(light->emission),
-				cj_obj(cj_current, "emission"), -180.0f, 180.0f);
+				cj_obj(cj_current, "emission"), 0.0f, 1.0f);
 	save_float(&(light->angle),
-				cj_obj(cj_current, "angle"), 0.0f, 90.0f);
+				cj_obj(cj_current, "angle"), 0.0f, 180.0f);
 	save_float3(&(light->dir),
-				cj_obj(cj_current, "direction"), -180.0f, 180.0f);
+				cj_obj(cj_current, "direction"), -10.0f, 10.0f);
 }
 
 void		parse_lights(cJSON *cj_root, t_scene *scene)

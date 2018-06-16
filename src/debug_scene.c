@@ -80,7 +80,7 @@ void		print_objects(t_scene *scene)
         printf("color: %.2f %.2f %.2f\n", obj->color.x, obj->color.y, obj->color.z);
         // printf("diffuse: %.2f\n", obj->diffuse);
         // printf("specular: %.2f\n", obj->specular);
-        printf("specular exp: %.2f\n", obj->spec_exp);
+        printf("specular power: %.2f\n", obj->spec_pow);
         printf("kr: %.2f\n", obj->kr);
         printf("ior exp: %.2f\n", obj->ior);
         printf("----------------------------------\n");

@@ -60,10 +60,8 @@ typedef struct	s_object
 	float3		rotation;			// object is rotated by .x degrees along X axis, .y degrees along Y axis, .z degrees along Z axis when transformed into world coords
 	float3		scale;				// object is scaled x times along X axis ... when transfored into world coords
 	float3		color;				// .x - R, .y - G, .z - B pigments of object's color
-	// float		diffuse;
-	// float		specular;
 	float		transparency;
-	float		specular_exp;
+	float		spec_pow;
 	float		ior;
 	float		kr;
 	mat4		from_local;			// 4x4 homogenous matrix of transformation from object's local space to world space
@@ -338,12 +336,12 @@ float3	shade(float3 incident_dir, t_point *hit, __constant t_object *objects, co
 		float intensity = zero_clamp(dot(normal, sec_ray.dir));
 		diffuse += intensity * lights[i].emission * hitobject.color * (1 - hitobject.kr);
 
-		if (hitobject.specular_exp > 0.0)
+		if (hitobject.spec_pow > 0.0)
 		{
 			float3 refl_dir = fast_normalize((2 * intensity * normal) - sec_ray.dir);
 			// float phong_term = zero_clamp(dot(refl_dir, (-1.0f) * ray->dir));
 			float phong_term = zero_clamp(dot(refl_dir, (-1.0f) * incident_dir));
-			specular += lights[i].emission * pow(phong_term, hitobject.specular_exp);
+			specular += lights[i].emission * pow(phong_term, hitobject.spec_pow);
 		}
 	}
  	return (diffuse + specular);
@@ -406,7 +404,8 @@ static float3 get_reflected_color(t_point hit, t_ray ray, float fresnel,
 
 	for (int bounces = 0; bounces < NUM_BOUNCES; bounces++)
 	{
-		if (fresnel > EPSILON)
+		// if (fresnel > EPSILON)
+		if (objects[hit.obj_id].kr > 0.0f)
 		{
 			float c1 = (-1.0f) * dot(hit.normal, ray.dir);
 			refl_ray.origin = hit.pos + hit.normal * EPSILON;
@@ -444,7 +443,7 @@ static float3 get_reflected_color(t_point hit, t_ray ray, float fresnel,
 }
 
 
-static float3 get_transparency(t_ray incident, t_point first_hit, t_point next_hit,
+static float3 get_transparency(t_ray incident, t_point first_hit, float fresnel, t_point next_hit,
 	__constant t_object *objects, const int num_objects, __constant t_light *lights, const int num_lights)
 {
 	t_ray	refr_ray = incident;
@@ -452,10 +451,20 @@ static float3 get_transparency(t_ray incident, t_point first_hit, t_point next_h
 
 	refr_ray.origin = first_hit.pos + first_hit.normal * EPSILON;
 
-	float fresnel = fresnel_reflect_amount(1.0f, 1.0f, refr_ray.dir, next_hit.normal, objects[next_hit.obj_id].kr);
+	// if there is a hit with the next object after primary
+	if (next_hit.obj_id != -1)
+	{
+		refr_color += (1 - fresnel) * shade(incident.dir, &next_hit, objects, num_objects, lights, num_lights);
 
-	refr_color = (1 - fresnel) * shade(incident.dir, &next_hit, objects, num_objects, lights, num_lights);
-	refr_color += fresnel * get_reflected_color(next_hit, refr_ray, fresnel, objects, num_objects, lights, num_lights);
+		float next_fresnel = fresnel_reflect_amount(1.0f, 1.0f, refr_ray.dir,
+			next_hit.normal, objects[next_hit.obj_id].kr);
+
+		refr_color += next_fresnel *
+			get_reflected_color(next_hit, refr_ray, next_fresnel, objects, num_objects, lights, num_lights);
+	}
+	// ray hits background after primary object
+	else
+		refr_color += (1 - fresnel) * bg_color;
 
 	return (refr_color);
 }
@@ -486,7 +495,7 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 	{
 		refr_color = 
 			objects[first_hit.obj_id].transparency * (1 - fresnel) * 
-			get_transparency(*camray, first_hit, next_hit, objects, num_objects, lights, num_lights);
+			get_transparency(*camray, first_hit, fresnel, next_hit, objects, num_objects, lights, num_lights);
 	}
 
 	// REFLECTION

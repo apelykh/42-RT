@@ -6,7 +6,7 @@
 /*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/15 22:30:16 by apelykh           #+#    #+#             */
-/*   Updated: 2018/06/15 23:06:32 by apelykh          ###   ########.fr       */
+/*   Updated: 2018/06/16 13:43:15 by apelykh          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,7 +85,7 @@ typedef struct			s_object
 	cl_float3			scale;
 	cl_float3			color;
 	cl_float			transparency;
-	cl_float			spec_exp;
+	cl_float			spec_pow;
 	cl_float			ior;
 	cl_float			kr;
 	mat4 				from_local;

@@ -6,7 +6,7 @@
 /*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/15 22:24:35 by apelykh           #+#    #+#             */
-/*   Updated: 2018/06/15 22:51:28 by apelykh          ###   ########.fr       */
+/*   Updated: 2018/06/16 14:13:01 by apelykh          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,7 @@ int			main(int argc, char **argv)
 
 	if (argc != 2)
 		ft_error("[-] Arguments: Invalid number of arguments",
-			"Usage: ./RT scene.json");
+			"Usage: ./RT [scene_path]");
 
 	global_init(argv[1], &scene, &sdl_context, &cl_context);
 	main_loop(&scene, &sdl_context, &cl_context);

@@ -22,17 +22,6 @@
 	],
 	"objects": [
 		{
-			"type": "BOX",
-			"scale": [70.0, 70.0, 70.0],
-			"location": [0.0, 0.0, 0.0],
-			"rotation": [0.0, 0.0, 0.0],
-			"color": [0.5, 0.5, 0.5],
-			"capped": true,
-			"hidden": false,
-			"specular_exp": 0.0,
-			"kr": 0.0
-		},
-		{
 			"type": "SPHERE",
 			"scale": [2.0, 2.0, 2.0],
 			"location": [0.0, 2.0, 0.0],
