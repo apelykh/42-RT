@@ -6,7 +6,7 @@
 /*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/16 17:33:42 by efedoryc          #+#    #+#             */
-/*   Updated: 2018/06/17 17:35:25 by apelykh          ###   ########.fr       */
+/*   Updated: 2018/06/17 19:18:46 by apelykh          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,11 @@ static unsigned char	*create_bitmap_file_header(int height, int width)
 	unsigned char	*file_header;
 
 	file_header = (unsigned char *)malloc(sizeof(unsigned char) * 14);
+	if (!file_header)
+	{
+		perror("[-] Bitmap file header malloc error");
+		exit(EXIT_FAILURE);
+	}
 	array_nuller(&file_header, 14);
 	file_size = FILE_HEADER_SIZE + INFO_HEADER_SIZE
 				+ BYTES_PER_PIXEL * height * width;
@@ -36,6 +41,11 @@ static unsigned char	*create_bitmap_info_header(int height, int width)
 	unsigned char *info_header;
 
 	info_header = (unsigned char *)malloc(sizeof(unsigned char) * 40);
+	if (!info_header)
+	{
+		perror("[-] Bitmap info header malloc error");
+		exit(EXIT_FAILURE);
+	}
 	array_nuller(&info_header, 40);
 	info_header[0] = (unsigned char)(INFO_HEADER_SIZE);
 	info_header[4] = (unsigned char)(width);

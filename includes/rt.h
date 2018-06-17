@@ -6,7 +6,7 @@
 /*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/15 22:30:16 by apelykh           #+#    #+#             */
-/*   Updated: 2018/06/17 17:31:21 by apelykh          ###   ########.fr       */
+/*   Updated: 2018/06/17 19:14:28 by apelykh          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,6 +160,8 @@ void						cj_get_bool(cl_bool *target, cJSON *object,
 char						*cj_get_str(cJSON *object, char *item_name);
 cl_int						cj_get_obj_type(char *string_type);
 cl_int						cj_get_light_type(char *string_type);
+int							count_inner_objects(cJSON *cj_objects,
+								int count_objects);
 
 /*
 **	--------------- vector operations ---------------

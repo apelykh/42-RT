@@ -6,11 +6,10 @@
 /*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/15 22:24:35 by apelykh           #+#    #+#             */
-/*   Updated: 2018/06/16 21:46:58 by apelykh          ###   ########.fr       */
+/*   Updated: 2018/06/17 18:01:39 by apelykh          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdlib.h>
 #include "rt.h"
 
 static void	global_init(char *scene_path, t_scene *scene,

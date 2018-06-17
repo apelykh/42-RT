@@ -6,7 +6,7 @@
 /*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/14 23:28:58 by apelykh           #+#    #+#             */
-/*   Updated: 2018/06/17 17:05:15 by apelykh          ###   ########.fr       */
+/*   Updated: 2018/06/17 19:14:01 by apelykh          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 static float	minmax_float(float x, float min, float max)
 {
 	if (x < min || x > max)
-		ft_error("-] Float value outside the limit.", NULL);
+		ft_error("[-] Float value outside the limit.", NULL);
 	return (x);
 }
 
@@ -64,4 +64,29 @@ void			save_float(cl_float *target, cJSON *float_obj,
 	}
 	else
 		*target = (cl_float)minmax_float(*target, min, max);
+}
+
+int				count_inner_objects(cJSON *cj_objects, int count_objects)
+{
+	cJSON	*cj_inner_objects;
+	cJSON	*cj_current_obj;
+	int		type;
+	int		count_inner;
+	int		i;
+
+	i = 0;
+	count_inner = 0;
+	while (i < count_objects)
+	{
+		cj_current_obj = cJSON_GetArrayItem(cj_objects, i);
+		type = cj_get_obj_type(cj_get_str(cj_current_obj, "type"));
+		if (type >= UNION && type <= CLIPPING)
+		{
+			cj_inner_objects = cJSON_GetObjectItem(
+					cj_current_obj, "inner_objects");
+			count_inner += cJSON_GetArraySize(cj_inner_objects);
+		}
+		i++;
+	}
+	return (count_inner);
 }

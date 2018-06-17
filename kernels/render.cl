@@ -4,7 +4,6 @@ __constant float	PI = 3.14159265359f;
 __constant int		NUM_BOUNCES = 4;
 __constant float3	BG_COLOR = (float3)(0.1f, 0.1f, 0.1f);
 
-
 # define MAX_POINTS		32
 
 # define PLANE			0
@@ -45,7 +44,6 @@ typedef struct	s_hitpoints
 	t_point		pt[MAX_POINTS];		// MAX_POINTS is defined, maximum amount of points of intersection per 1 ray
 	int			num_elements;			// counter for tracking number of points stored in array. when sorting we don't check all points, but only valid ones (id != -1, dist > 0.0)
 }				t_hitpoints;
-
 
 // all objects (primitive or compound) are defined in their local space, they rotate and scale around origin point
 typedef struct	s_object

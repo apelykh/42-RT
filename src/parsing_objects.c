@@ -6,7 +6,7 @@
 /*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/07 20:32:22 by efedoryc          #+#    #+#             */
-/*   Updated: 2018/06/17 16:14:40 by apelykh          ###   ########.fr       */
+/*   Updated: 2018/06/17 19:15:31 by apelykh          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,39 +25,14 @@ static void		object_init(t_object *obj, int obj_id, cJSON *cj_current)
 				cj_obj(cj_current, "location"), -100.0f, 100.0f);
 	save_float3(&(obj->rotation),
 				cj_obj(cj_current, "rotation"), -180.0f, 180.0f);
-	save_float3(&(obj->scale), cj_obj(cj_current, "scale"), 0.01f, 100.0f);
+	save_float3(&(obj->scale), cj_obj(cj_current, "scale"), 0.1f, 100.0f);
 	save_float3(&(obj->color), cj_obj(cj_current, "color"), 0.0f, 1.0f);
 	save_float(&(obj->transparency), cj_obj(cj_current, "transparency"),
 		0.0f, 1.0f);
 	save_float(&(obj->spec_pow),
 				cj_obj(cj_current, "spec_pow"), 0.0f, 300.0f);
-	save_float(&(obj->kr), cj_obj(cj_current, "kr"), 0.0f, 1.1f);
+	save_float(&(obj->kr), cj_obj(cj_current, "kr"), 0.0f, 1.0f);
 	save_float(&(obj->ior), cj_obj(cj_current, "ior"), 0.0f, 3.0f);
-}
-
-static int		count_inner_objects(cJSON *cj_objects, int count_objects)
-{
-	cJSON	*cj_inner_objects;
-	cJSON	*cj_current_obj;
-	int		type;
-	int		count_inner;
-	int		i;
-
-	i = 0;
-	count_inner = 0;
-	while (i < count_objects)
-	{
-		cj_current_obj = cJSON_GetArrayItem(cj_objects, i);
-		type = cj_get_obj_type(cj_get_str(cj_current_obj, "type"));
-		if (type >= UNION && type <= CLIPPING)
-		{
-			cj_inner_objects = cJSON_GetObjectItem(
-					cj_current_obj, "inner_objects");
-			count_inner += cJSON_GetArraySize(cj_inner_objects);
-		}
-		i++;
-	}
-	return (count_inner);
 }
 
 static cJSON	*parse_object(t_object *obj, int obj_id, cJSON *cj_objects,
@@ -99,24 +74,16 @@ static void		parse_inner_objects(t_scene *scene, int *obj_parent_id,
 	(*obj_parent_id) += 2;
 }
 
-void			parse_objects(cJSON *cj_root, t_scene *scene)
+static void		objects_loop(t_scene *scene, cJSON *cj_objects,
+							int parent_objects_num)
 {
-	cJSON	*cj_objects;
 	cJSON	*cj_obj_current;
-	int		count_parent_objects;
 	int		obj_id;
 	int		cj_i;
 
-	if (!(cj_objects = cJSON_GetObjectItem(cj_root, "objects")))
-		ft_error("[-] Parsing: No objects field in scene document", NULL);
-	count_parent_objects = cJSON_GetArraySize(cj_objects);
-	scene->num_objects = (cl_int)(6 + count_parent_objects
-			+ count_inner_objects(cj_objects, count_parent_objects));
-	scene->objects = (t_object *)malloc(sizeof(t_object) * scene->num_objects);
-	bocal_init(scene);
 	cj_i = 0;
 	obj_id = 6;
-	while (cj_i < count_parent_objects)
+	while (cj_i < parent_objects_num)
 	{
 		cj_obj_current = parse_object(&scene->objects[obj_id], obj_id,
 				cj_objects, cj_i);
@@ -126,4 +93,21 @@ void			parse_objects(cJSON *cj_root, t_scene *scene)
 		obj_id++;
 		cj_i++;
 	}
+}
+
+void			parse_objects(cJSON *cj_root, t_scene *scene)
+{
+	cJSON	*cj_objects;
+	int		count_parent_objects;
+
+	if (!(cj_objects = cJSON_GetObjectItem(cj_root, "objects")))
+		ft_error("[-] Parsing: No objects field in scene document", NULL);
+	count_parent_objects = cJSON_GetArraySize(cj_objects);
+	if (count_parent_objects == 0)
+		ft_error("[-] Parsing: Objects array is empty.", NULL);
+	scene->num_objects = (cl_int)(6 + count_parent_objects
+			+ count_inner_objects(cj_objects, count_parent_objects));
+	scene->objects = (t_object *)malloc(sizeof(t_object) * scene->num_objects);
+	bocal_init(scene);
+	objects_loop(scene, cj_objects, count_parent_objects);
 }

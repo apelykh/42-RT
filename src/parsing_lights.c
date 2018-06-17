@@ -6,7 +6,7 @@
 /*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/07 20:32:12 by efedoryc          #+#    #+#             */
-/*   Updated: 2018/06/16 14:58:15 by apelykh          ###   ########.fr       */
+/*   Updated: 2018/06/17 18:53:39 by apelykh          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,9 +20,9 @@ static void	light_init(t_light *light, cJSON *cj_current)
 	save_float3(&(light->emission),
 				cj_obj(cj_current, "emission"), 0.0f, 1.0f);
 	save_float(&(light->angle),
-				cj_obj(cj_current, "angle"), 0.0f, 180.0f);
+				cj_obj(cj_current, "angle"), 1.0f, 90.0f);
 	save_float3(&(light->dir),
-				cj_obj(cj_current, "direction"), -10.0f, 10.0f);
+				cj_obj(cj_current, "direction"), -1.0f, 1.0f);
 }
 
 void		parse_lights(cJSON *cj_root, t_scene *scene)
@@ -37,6 +37,8 @@ void		parse_lights(cJSON *cj_root, t_scene *scene)
 	count_ambient = 0;
 	i = 0;
 	scene->num_lights = (cl_int)cJSON_GetArraySize(cj_lights);
+	if (scene->num_lights <= 0)
+		ft_error("[-] Parsing: Lights array is empty.", NULL);
 	scene->lights = (t_light *)malloc(sizeof(t_light) * scene->num_lights);
 	while (i < scene->num_lights)
 	{

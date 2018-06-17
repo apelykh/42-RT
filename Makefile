@@ -6,7 +6,7 @@
 #    By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/06/15 21:58:26 by apelykh           #+#    #+#              #
-#    Updated: 2018/06/17 16:21:28 by apelykh          ###   ########.fr        #
+#    Updated: 2018/06/17 18:12:47 by apelykh          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -62,7 +62,7 @@ all: $(NAME)
 
 $(NAME): $(OBJ)
 	@ make -C $(LIB_DIR)/cJSON
-	@ $(CC) $(OBJ) $(LIB) $(FRAMEWORKS) -lm -o $@
+	@ $(CC) $(OBJ) $(LIB) $(FRAMEWORKS) -rpath frameworks/ -lm -o $@
 	@ echo "[+] [$(NAME)] compiled"
 
 clean:

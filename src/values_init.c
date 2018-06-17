@@ -6,7 +6,7 @@
 /*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/09 22:01:39 by efedoryc          #+#    #+#             */
-/*   Updated: 2018/06/16 13:46:43 by apelykh          ###   ########.fr       */
+/*   Updated: 2018/06/17 19:29:32 by apelykh          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ void	controls_init_empty(t_control_flags *controls)
 
 void	camera_init_empty(t_camera *camera)
 {
-	camera->location = init_vec3(0.0f, 0.0f, -10.0f);
+	camera->location = init_vec3(0.0f, 4.0f, 10.0f);
 	camera->rotation = init_vec3(0.0f, 0.0f, 0.0f);
 	camera->fov = 45.0f;
 }
@@ -33,9 +33,9 @@ void	light_init_empty(t_light *light)
 {
 	light->type = 0;
 	light->location = init_vec3(0.0f, 0.0f, 0.0f);
-	light->emission = init_vec3(0.0f, 0.0f, 0.0f);
+	light->emission = init_vec3(0.1f, 0.1f, 0.1f);
 	light->dir = init_vec3(1.0f, 1.0f, 1.0f);
-	light->angle = 0.0f;
+	light->angle = 1.0f;
 }
 
 void	object_init_empty(t_object *obj)
