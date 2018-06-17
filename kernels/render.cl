@@ -97,38 +97,16 @@ bool 	intersect_difference(__constant t_object *objects, int id, const t_ray *ra
 bool	intersect_clipping(__constant t_object *objects, int id, const t_ray *ray, t_hitpoints *hit);
 bool 	intersect_bocal(__constant t_object *objects, int id, const t_ray *ray, t_hitpoints *hit);
 
-// bool	intersect_scene(__constant t_object *objects, const int num_objects, const t_ray *ray, t_point *hitpoint);
 bool	intersect_scene(__constant t_object *objects, const int num_objects, const t_ray *ray,
 					t_point *hit, t_point *next_hit);
 
+void	hitpoints_sort(t_hitpoints* hit);
+t_ray	ray2local(const t_ray *r, __constant t_object *o);
+
 /* ----- matrix_utils.cl ----- */
-t_mat4	mat_translate(float3 v);
-t_mat4	mat_scale(float3 s);
-t_mat4	mat_rotatex(float angle);
-t_mat4	mat_rotatey(float angle);
-t_mat4	mat_rotatez(float angle);
-t_mat4	mat_rotatea(float angle, float3 axis);
-t_mat4	mat_invert(t_mat4 m);
 float4	mat_mult_vec(t_mat4 m, float4 v);
 t_mat4	mat_transpose(t_mat4 m);
 t_mat4	mat_mult_mat(t_mat4 a, t_mat4 b);
-t_mat4	mat_transform(const t_object *obj);
-
-// static float get_random(unsigned int *seed0, unsigned int *seed1);
-static float zero_clamp(float x);
-t_ray create_cam_ray(__constant t_camera *camera, const int x_coord, const int y_coord, const int width, const int height);
-// float3 trace_path(__constant t_object *spheres, const t_ray *camray, const int object_count, const int *seed0, const int *seed1);
-float3 add_sepia(float3 color);
-float3 get_direct_light(__constant t_object *spheres, const t_ray *camray, const int object_count, __constant t_light *lights, const int num_lights);
-
-float3	shade(float3 incident_dir, t_point *hit, __constant t_object *objects, const int num_objects,
-										__constant t_light *lights, const int num_lights);
-
-float	fresnel_reflect_amount(float n1, float n2, float3 normal, float3 incident, float obj_kr);
-
-void	hitpoints_init(t_hitpoints* hit);
-void	hitpoints_sort(t_hitpoints* hit);
-t_ray	ray2local(const t_ray *r, __constant t_object *o);
 
 
 #include "kernels/primitive_intersections.cl"
@@ -149,7 +127,7 @@ t_ray ray2local(const t_ray *r, __constant t_object *o)
 	return ray;
 }
 
-void hitpoints_init(t_hitpoints* hit)
+static void hitpoints_init(t_hitpoints* hit)
 {
 	hit->num_elements = 0;
 	for (int i = 0; i < MAX_POINTS; i++)
@@ -188,7 +166,7 @@ void hitpoints_sort(t_hitpoints* hit)
 	hit->num_elements = max(hit->num_elements, 0);
 }
 
-t_ray create_cam_ray(__constant t_camera *camera, const int x, const int y,
+static t_ray create_cam_ray(__constant t_camera *camera, const int x, const int y,
 						const int width, const int height)
 {
 	float aspect_ratio = (float)(width) / (float)(height);
@@ -289,7 +267,7 @@ bool intersect_scene(__constant t_object *objects, const int num_objects, const 
 	return true;
 }
 
-float3	shade(float3 incident_dir, t_point *hit, __constant t_object *objects, const int num_objects,
+static float3	shade(float3 incident_dir, t_point *hit, __constant t_object *objects, const int num_objects,
 										__constant t_light *lights, const int num_lights)
 {
 	float3	diffuse = (float3)(0.0f, 0.0f, 0.0f);
@@ -344,7 +322,7 @@ float3	shade(float3 incident_dir, t_point *hit, __constant t_object *objects, co
  	return (diffuse + specular);
 }
 
-float	fresnel_reflect_amount(float n1, float n2, float3 normal, float3 incident, float obj_kr)
+static float	fresnel_reflect_amount(float n1, float n2, float3 normal, float3 incident, float obj_kr)
 {
     // Schlick aproximation
     float r0 = (n1 - n2) / (n1 + n2);
@@ -467,7 +445,7 @@ static float3 get_transparency(t_ray incident, t_point first_hit, float fresnel,
 }
 
 
-float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const int num_objects,
+static float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const int num_objects,
 						__constant t_light *lights, const int num_lights)
 {
 	t_ray	ray = *camray;
@@ -503,7 +481,7 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 	return (diffuse_color + refl_color + refr_color);
 }
 
-float3 add_sepia(float3 color)
+static float3 add_sepia(float3 color)
 {
 	float3 sepia;
 
