@@ -210,7 +210,6 @@ bool intersect_difference(__constant t_object *objects, int id, const t_ray *ray
 			}
 			else
 				hit->pt[i].obj_id = -1;
-
 		}
 		else if (hit->pt[i].obj_id == objects[id].operand.y)
 		{

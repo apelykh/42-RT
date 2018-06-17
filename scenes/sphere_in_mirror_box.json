@@ -12,12 +12,12 @@
 		{
 			"type": "POINT",
 			"location": [3.0, 6.0, 5.0],
-			"emission": [0.4, 0.4, 0.4]
+			"emission": [0.6, 0.6, 0.6]
 		},
 		{
 			"type": "POINT",
 			"location": [-3.0, 6.0, 5.0],
-			"emission": [0.4, 0.4, 0.4]
+			"emission": [0.6, 0.6, 0.6]
 		}
 	],
 	"objects": [

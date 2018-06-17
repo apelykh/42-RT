@@ -1,73 +1,77 @@
 {
-    "camera": {
-        "location": [0.0, 2.0, 10.0],
-        "rotation": [0, 0, 0],
-        "fov": 45.0
-    },
-    "lights": [
-        {   
-            "type": "AMBIENT",
-            "emission": [1.0, 1.0, 1.0]
-        },
-        {   
-            "type": "POINT",
-            "location": [3.0, 3.0, 3.0],
-            "emission": [0.6, 0.6, 0.6]
-        }
-    ],
-    "objects": [
-        {
-            "type": "PLANE",
-            "scale": [1.0, 1.0, 1.0],
-            "rotation": [0.0, 0.0, 0.0],
-            "location": [0.0, -1.0, 0.0],
-            "color": [0.37, 0.26, 0.49],
-            "kr": 0.2,
-            "spec_pow": 20.0
-        },
-        {
-            "type": "SPHERE",
-            "scale": [2.0, 2.0, 2.0],
-            "rotation": [0.0, 0.0, 0.0],
-            "location": [2.1, 2.0, 3.0],
-            "color": [0.7, 0.3, 0.3],
-            "kr": 0.9,
-            "spec_pow": 31.0
-        },
-        {
-            "type": "SPHERE",
-            "scale": [3.0, 3.0, 3.0],
-            "rotation": [0.0, 0.0, 0.0],
-            "location": [2.1, 1.5, -5.0],
-            "color": [0.62, 0.83, 0.97],
-            "kr": 0.0,
-            "spec_pow": 20.0
-        },
-        {
-            "type": "CONE",
-            "scale": [1.0, 1.0, 1.0],
-            "location": [0.0, 0.0, 0.0],
-            "rotation": [1.0, 0.0, 0.0],
-            "color": [0.1, 0.3, 0.3],
-            "spec_pow": 20.0
-        },
-        {
-            "type": "CYLINDER",
-            "scale": [1.0, 1.0, 1.0],
-            "rotation": [0.0, 0.0, 0.0],
-            "location": [3.0, 2.0, -2.1],
-            "color": [1.0, 0.7, 0.4],
-            "spec_pow": 20.0,
-            "kr": 0.3
-        },
-        {
-            "type": "CYLINDER",
-            "scale": [1.0, 1.0, 1.0],
-            "rotation": [0.0, 0.0, 0.0],
-            "location": [-2.1, 2.0, 3.0],
-            "color": [1.0, 0.7, 0.4],
-            "spec_pow": 20.0,
-            "kr": 0.3
-        }
-    ]
+	"camera": {
+		"location": [0.0, 2.0, 10.0],
+		"rotation": [0, 0, 0],
+		"fov": 45.0
+	},
+	"lights": [
+		{   
+			"type": "AMBIENT",
+			"emission": [0.2, 0.2, 0.2]
+		},
+		{   
+			"type": "POINT",
+			"location": [6.0, 4.0, -8.0],
+			"emission": [0.6, 0.6, 0.6]
+		},
+		{   
+			"type": "POINT",
+			"location": [-5.0, 5.0, 6.0],
+			"emission": [0.6, 0.6, 0.6]
+		}
+	],
+	"objects": [
+		{
+			"type": "PLANE",
+			"scale": [1.0, 1.0, 1.0],
+			"rotation": [0.0, 0.0, 0.0],
+			"location": [0.0, -1.0, 0.0],
+			"color": [0.37, 0.26, 0.49],
+			"kr": 0.2,
+			"spec_pow": 20.0
+		},
+		{
+			"type": "SPHERE",
+			"scale": [2.0, 2.0, 2.0],
+			"rotation": [0.0, 0.0, 0.0],
+			"location": [1.0, 2.0, 3.0],
+			"color": [0.7, 0.3, 0.3],
+			"kr": 0.7,
+			"spec_pow": 31.0
+		},
+		{
+			"type": "SPHERE",
+			"scale": [3.0, 3.0, 3.0],
+			"rotation": [0.0, 0.0, 0.0],
+			"location": [5.0, 1.5, -4.0],
+			"color": [0.62, 0.83, 0.97],
+			"spec_pow": 20.0
+		},
+		{
+			"type": "CONE",
+			"scale": [1.0, 1.0, 1.0],
+			"location": [0.0, 2.0, 0.0],
+			"rotation": [30.0, 0.0, 0.0],
+			"color": [0.1, 0.3, 0.3],
+			"spec_pow": 20.0
+		},
+		{
+			"type": "CYLINDER",
+			"scale": [0.5, 0.5, 0.5],
+			"rotation": [0.0, 0.0, 0.0],
+			"location": [2.0, 2.0, 2.0],
+			"color": [1.0, 0.7, 0.4],
+			"spec_pow": 20.0,
+			"kr": 0.5
+		},
+		{
+			"type": "CYLINDER",
+			"scale": [2.0, 2.0, 2.0],
+			"rotation": [0.0, 0.0, 0.0],
+			"location": [-3.0, 2.0, 3.0],
+			"color": [1.0, 0.7, 0.4],
+			"spec_pow": 20.0,
+			"kr": 0.0
+		}
+	]
 }

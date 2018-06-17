@@ -1,33 +1,21 @@
 {
 	"camera": {
-		"location": [0.0, 1.0, 10.0],
-		"rotation": [0, 0, 0],
+		"location": [5.0, 4.0, 10.0],
+		"rotation": [-20.0, 30.0, 0.0],
 		"fov": 45.0
 	},
 	"lights": [
-		{
+		{   
 			"type": "AMBIENT",
-			"emission": [0.1, 0.1, 0.1]
+			"location": [2.0, 3.0, -0.5],
+			"direction": [-1.0, 0.0, 0.0],
+			"angle": 60.0,
+			"emission": [0.35, 0.35, 0.35]
 		},
-		{
-			"type": "POINT",
-			"location": [3.0, 3.0, 3.0],
-			"emission": [0.6, 0.1, 0.1]
-		},
-		{
-			"type": "POINT",
-			"location": [-3.0, 3.0, 3.0],
-			"emission": [0.1, 0.1, 0.6]
-		},
-		{
-			"type": "POINT",
-			"location": [-3.0, 3.0, -3.0],
-			"emission": [0.1, 0.6, 0.1]
-		},
-		{
-			"type": "POINT",
-			"location": [3.0, 3.0, -3.0],
-			"emission": [0.2, 0.2, 0.2]
+		{   
+			"type": "PARALLEL",
+			"direction": [-1.0, -1.0, 1.0],
+			"emission": [0.7, 0.7, 0.7]
 		}
 	],
 	"objects": [
@@ -35,10 +23,13 @@
 			"type": "CONE",
 			"scale": [2.0, 2.0, 1.0],
 			"rotation": [0.0, 3.0, 0.0],
-			"location": [4.0, 4.0, 0.0],
+			"location": [4.0, 2.0, -3.0],
 			"color": [0.3, 0.3, 0.3],
 			"capped": true,
 			"hidden": false,
+			"diffuse": 0.8,
+			"specular": 0.7,
+			"kr": 0.0,
 			"spec_pow": 40.0
 		},
 		{
@@ -47,7 +38,10 @@
 			"location": [-3.0, 0.0, 0.0],
 			"rotation": [0.0, 0.0, 0.0],
 			"color": [0.75, 0.12, 0.0],
+			"diffuse": 1.0,
+			"specular": 0.0,
 			"spec_pow": 20.0,
+			"kr": 0.4,
 			"inner_objects": [
 				{
 					"type": "BOX",
@@ -57,6 +51,8 @@
 					"color": [0.3, 0.3, 0.3],
 					"capped": true,
 					"hidden": true,
+					"diffuse": 0.7,
+					"specular": 0.9,
 					"spec_pow": 20.0
 				},
 				{
@@ -67,6 +63,8 @@
 					"color": [0.3, 0.3, 0.3],
 					"capped": true,
 					"hidden": true,
+					"diffuse": 0.7,
+					"specular": 0.9,
 					"spec_pow": 20.0
 				}
 			]
@@ -78,25 +76,31 @@
 			"location": [-3.0, 2.0, -2.1],
 			"color": [0.3, 0.3, 0.3],
 			"capped": true,
-			"spec_pow": 20.0
+			"diffuse": 0.7,
+			"specular": 0.9,
+			"spec_pow": 20.0,
+			"kr": 0.0
 		},
 		{
 			"type": "PLANE",
 			"scale": [1.0, 1.0, 1.0],
 			"location": [0.0, -1.0, 0.0],
 			"color": [0.9, 0.8, 0.7],
+			"diffuse": 1.0,
+			"specular": 0.0,
 			"spec_pow": 20.0,
-			"kr": 0.2
+			"kr": 0.3
 		},
 		{
 			"type": "DIFFERENCE",
 			"scale": [1.0, 1.0, 1.0],
 			"location": [0.0, -0.5, 0.0],
 			"rotation": [0.0, 0.0, 0.0],
-			"color": [0.75, 0.75, 0.75],
+			"color": [0.75, 0.12, 0.0],
+			"diffuse": 1.0,
+			"specular": 0.0,
 			"spec_pow": 20.0,
-			"kr": 0.3,
-			"transparency": 0.75,
+			"kr": 0.6,
 			"inner_objects": [
 				{
 					"type": "SPHERE",
@@ -106,6 +110,8 @@
 					"color": [0.3, 0.3, 0.3],
 					"capped": true,
 					"hidden": true,
+					"diffuse": 0.7,
+					"specular": 0.9,
 					"spec_pow": 20.0
 				},
 				{
@@ -116,9 +122,21 @@
 					"color": [0.3, 0.3, 0.3],
 					"capped": true,
 					"hidden": true,
+					"diffuse": 0.7,
+					"specular": 0.9,
 					"spec_pow": 20.0
 				}
 			]
+		},
+		{
+			"type": "BOCAL",
+			"scale": [1.0, 1.0, 1.0],
+			"rotation": [0.0, 0.0, 0.0],
+			"location": [2.0, -0.4, 2.0],
+			"color": [0.99, 0.66, 0.33],
+			"spec_pow": 20.0,
+			"kr": 0.4,
+			"transparency": 0.8
 		},
 		{
 			"type": "DIFFERENCE",
@@ -126,8 +144,10 @@
 			"location": [3.0, 0.0, 0.0],
 			"rotation": [0.0, 0.0, 0.0],
 			"color": [0.9, 0.8, 0.7],
+			"diffuse": 1.0,
+			"specular": 0.0,
 			"spec_pow": 20.0,
-			"kr": 0.8,
+			"kr": 0.1,
 			"inner_objects": [
 				{
 					"type": "BOX",
@@ -137,6 +157,8 @@
 					"color": [0.3, 0.3, 0.3],
 					"capped": true,
 					"hidden": true,
+					"diffuse": 0.7,
+					"specular": 0.9,
 					"spec_pow": 20.0
 				},
 				{
@@ -146,6 +168,8 @@
 					"location": [-0.5, 0.0, 0.0],
 					"color": [0.3, 0.3, 0.3],
 					"hidden": true,
+					"diffuse": 0.7,
+					"specular": 0.9,
 					"spec_pow": 20.0
 				}
 			]

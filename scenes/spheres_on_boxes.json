@@ -31,11 +31,12 @@
 			"kr": 0.4
 		},
 		{
-			"type": "SPHERE",
+			"type": "CONE",
 			"scale": [3.0, 3.0, 3.0],
-			"location": [0.0, 2.5, 0.0],
+			"location": [0.0, 4.0, 0.0],
 			"rotation": [0.0, 0.0, 0.0],
 			"color": [1.0, 0.22, 0.77],
+			"capped": true,
 			"spec_pow": 20.0,
 			"kr": 0.0
 		},
@@ -81,18 +82,7 @@
 			"rotation": [0.0, 0.0, 0.0],
 			"color": [1.0, 0.22, 0.77],
 			"spec_pow": 20.0,
-			"kr": 0.5
-		},
-		{
-			"type": "PLANE",
-			"scale": [1.0, 1.0, 1.0],
-			"rotation": [90.0, 0.0, 0.0],
-			"location": [0.0, 0.0, -7.0],
-			"color": [0.9, 0.8, 0.7],
-			"spec_pow": 20.0,
-			"transparency": 1.0,
-			"kr": 0.0
+			"transparency": 0.8
 		}
-
     ]
 }
