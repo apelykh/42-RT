@@ -6,7 +6,7 @@
 /*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/16 19:56:58 by apelykh           #+#    #+#             */
-/*   Updated: 2018/06/16 19:57:20 by apelykh          ###   ########.fr       */
+/*   Updated: 2018/06/17 16:39:22 by apelykh          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ void	set_cam_translate_matrix(t_camera *cam)
 
 void	set_cam_rotate_matrix(t_camera *cam)
 {
-	mat4	rotation_matrix;
+	t_mat4	rotation_matrix;
 
 	rotation_matrix = mat_rotatex(cam->rotation.x);
 	rotation_matrix = mat_mult_mat(mat_rotatey(cam->rotation.y),
@@ -30,9 +30,9 @@ void	set_cam_rotate_matrix(t_camera *cam)
 
 void	obj_transform_mats(t_object *obj)
 {
-	mat4 translate;
-	mat4 rotate;
-	mat4 scale;
+	t_mat4 translate;
+	t_mat4 rotate;
+	t_mat4 scale;
 
 	translate = mat_translate(obj->location);
 	rotate = mat_rotatex(obj->rotation.x);

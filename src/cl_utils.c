@@ -6,7 +6,7 @@
 /*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/15 15:58:37 by apelykh           #+#    #+#             */
-/*   Updated: 2018/06/16 21:44:17 by apelykh          ###   ########.fr       */
+/*   Updated: 2018/06/17 16:23:44 by apelykh          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,8 @@ static void	load_kernel(t_cl_context *cl_context)
 		close(fd);
 		ft_error("[-] Failed to load kernel from file.", "");
 	}
-	cl_context->kernel_src = (char*)malloc(MAX_SOURCE_SIZE);
-	cl_context->src_size = read(fd, cl_context->kernel_src, MAX_SOURCE_SIZE);
+	cl_context->kernel_src = (char*)malloc(MAX_SRC_SIZE);
+	cl_context->src_size = read(fd, cl_context->kernel_src, MAX_SRC_SIZE);
 	close(fd);
 }
 

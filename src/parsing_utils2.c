@@ -6,11 +6,18 @@
 /*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/14 23:28:58 by apelykh           #+#    #+#             */
-/*   Updated: 2018/06/16 20:29:26 by apelykh          ###   ########.fr       */
+/*   Updated: 2018/06/17 17:05:15 by apelykh          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "rt.h"
+
+static float	minmax_float(float x, float min, float max)
+{
+	if (x < min || x > max)
+		ft_error("-] Float value outside the limit.", NULL);
+	return (x);
+}
 
 static cl_float	cj_get_arr_float(cJSON *array, cl_int index)
 {
@@ -57,9 +64,4 @@ void			save_float(cl_float *target, cJSON *float_obj,
 	}
 	else
 		*target = (cl_float)minmax_float(*target, min, max);
-}
-
-int				is_complex_obj(cl_int object_type)
-{
-	return (object_type >= UNION && object_type <= CLIPPING);
 }

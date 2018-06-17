@@ -6,13 +6,13 @@
 /*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/16 19:55:01 by apelykh           #+#    #+#             */
-/*   Updated: 2018/06/16 20:02:22 by apelykh          ###   ########.fr       */
+/*   Updated: 2018/06/17 16:38:01 by apelykh          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "rt.h"
 
-cl_float4	mat_mult_vec(mat4 m, cl_float4 v)
+cl_float4		mat_mult_vec(t_mat4 m, cl_float4 v)
 {
 	cl_float4 r;
 
@@ -23,9 +23,9 @@ cl_float4	mat_mult_vec(mat4 m, cl_float4 v)
 	return (r);
 }
 
-mat4		mat_mult_mat(mat4 a, mat4 b)
+t_mat4			mat_mult_mat(t_mat4 a, t_mat4 b)
 {
-	mat4 c;
+	t_mat4 c;
 
 	c.s0 = a.s0 * b.s0 + a.s4 * b.s1 + a.s8 * b.s2 + a.sC * b.s3;
 	c.s1 = a.s1 * b.s0 + a.s5 * b.s1 + a.s9 * b.s2 + a.sD * b.s3;
@@ -46,9 +46,9 @@ mat4		mat_mult_mat(mat4 a, mat4 b)
 	return (c);
 }
 
-static mat4	mat_invert_(mat4 m, cl_float det)
+static t_mat4	mat_invert_(t_mat4 m, cl_float det)
 {
-	mat4		r;
+	t_mat4		r;
 	cl_float4	b;
 
 	r.s0 = (m.s5 * m.sA - m.s9 * m.s6) * det;
@@ -74,9 +74,9 @@ static mat4	mat_invert_(mat4 m, cl_float det)
 	return (r);
 }
 
-mat4		mat_invert(mat4 m)
+t_mat4			mat_invert(t_mat4 m)
 {
-	mat4		r;
+	t_mat4		r;
 	cl_float	det;
 
 	det = m.s0 * m.s5 * m.sA + m.s1 * m.s6 * m.s8 + m.s2 * m.s4 * m.s9 - m.s0 *
@@ -91,9 +91,9 @@ mat4		mat_invert(mat4 m)
 	return (r);
 }
 
-mat4		mat_transpose(mat4 m)
+t_mat4			mat_transpose(t_mat4 m)
 {
-	mat4 r;
+	t_mat4 r;
 
 	r.s0 = m.s0;
 	r.s1 = m.s4;

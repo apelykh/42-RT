@@ -6,7 +6,7 @@
 /*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/16 17:33:42 by efedoryc          #+#    #+#             */
-/*   Updated: 2018/06/16 21:48:03 by apelykh          ###   ########.fr       */
+/*   Updated: 2018/06/17 17:35:25 by apelykh          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,5 +100,5 @@ void					save_image(cl_uchar4 *pixels)
 		i++;
 	}
 	generate_bitmap_image((unsigned char *)image,
-				WIN_HEIGHT, WIN_WIDTH, "bitmapImage.bmp");
+				WIN_HEIGHT, WIN_WIDTH, "screenshot.bmp");
 }

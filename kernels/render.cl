@@ -2,8 +2,7 @@
 __constant float	EPSILON = 0.005;
 __constant float	PI = 3.14159265359f;
 __constant int		NUM_BOUNCES = 4;
-// __constant float3 bg_color = (float3)(0.55f, 0.1f, 0.61f);
-__constant float3	bg_color = (float3)(0.1f, 0.1f, 0.1f);
+__constant float3	BG_COLOR = (float3)(0.1f, 0.1f, 0.1f);
 
 
 # define MAX_POINTS		32
@@ -30,7 +29,7 @@ typedef struct	s_ray
 	float3		dir;
 }				t_ray;
 
-typedef float16 mat4;
+typedef float16 t_mat4;
 
 typedef struct	s_point
 {
@@ -64,8 +63,8 @@ typedef struct	s_object
 	float		spec_pow;
 	float		ior;
 	float		kr;
-	mat4		from_local;			// 4x4 homogenous matrix of transformation from object's local space to world space
-	mat4		to_local;			// 4x4 homogenous matrix of transformation to object's local space from world space
+	t_mat4		from_local;			// 4x4 homogenous matrix of transformation from object's local space to world space
+	t_mat4		to_local;			// 4x4 homogenous matrix of transformation to object's local space from world space
 }				t_object;
 
 typedef struct	s_light
@@ -82,8 +81,8 @@ typedef struct	s_camera
 	float3		location;
 	float3		rotation;
 	float		fov;
-	mat4		translate_matrix;
-	mat4		rotation_matrix;
+	t_mat4		translate_matrix;
+	t_mat4		rotation_matrix;
 }				t_camera;
 
 /* ----- primitive_intersections.cl ----- */
@@ -105,17 +104,17 @@ bool	intersect_scene(__constant t_object *objects, const int num_objects, const 
 					t_point *hit, t_point *next_hit);
 
 /* ----- matrix_utils.cl ----- */
-mat4	mat_translate(float3 v);
-mat4	mat_scale(float3 s);
-mat4	mat_rotatex(float angle);
-mat4	mat_rotatey(float angle);
-mat4	mat_rotatez(float angle);
-mat4	mat_rotatea(float angle, float3 axis);
-mat4	mat_invert(mat4 m);
-float4	mat_mult_vec(mat4 m, float4 v);
-mat4	mat_transpose(mat4 m);
-mat4	mat_mult_mat(mat4 a, mat4 b);
-mat4	mat_transform(const t_object *obj);
+t_mat4	mat_translate(float3 v);
+t_mat4	mat_scale(float3 s);
+t_mat4	mat_rotatex(float angle);
+t_mat4	mat_rotatey(float angle);
+t_mat4	mat_rotatez(float angle);
+t_mat4	mat_rotatea(float angle, float3 axis);
+t_mat4	mat_invert(t_mat4 m);
+float4	mat_mult_vec(t_mat4 m, float4 v);
+t_mat4	mat_transpose(t_mat4 m);
+t_mat4	mat_mult_mat(t_mat4 a, t_mat4 b);
+t_mat4	mat_transform(const t_object *obj);
 
 // static float get_random(unsigned int *seed0, unsigned int *seed1);
 static float zero_clamp(float x);
@@ -205,7 +204,7 @@ t_ray create_cam_ray(__constant t_camera *camera, const int x, const int y,
 	t_ray ray;
 	ray.origin = (float3)(0.f, 0.f, 0.f);
 	ray.dir = normalize(pixel);
-	mat4 transform_to_world = mat_mult_mat(camera->translate_matrix, camera->rotation_matrix);
+	t_mat4 transform_to_world = mat_mult_mat(camera->translate_matrix, camera->rotation_matrix);
 	
 	ray.origin = mat_mult_vec(transform_to_world, (float4)(ray.origin, 1.0f)).xyz;
 	ray.dir = fast_normalize(mat_mult_vec(transform_to_world, (float4)(ray.dir, 0.0f)).xyz);
@@ -413,7 +412,7 @@ static float3 get_reflected_color(t_point hit, t_ray ray, float fresnel,
 
 			if (!intersect_scene(objects, num_objects, &refl_ray, &hit, &next_hit))
 			{
-				refl_color += decay_rate * bg_color;
+				refl_color += decay_rate * BG_COLOR;
 				break;
 			}
 			fresnel = fresnel_reflect_amount(1.0f, 1.0f, refl_ray.dir, hit.normal, objects[hit.obj_id].kr);
@@ -464,7 +463,7 @@ static float3 get_transparency(t_ray incident, t_point first_hit, float fresnel,
 	}
 	// ray hits background after primary object
 	else
-		refr_color += (1 - fresnel) * bg_color;
+		refr_color += (1 - fresnel) * BG_COLOR;
 
 	return (refr_color);
 }
@@ -479,7 +478,7 @@ float3 get_direct_light(__constant t_object *objects, const t_ray *camray, const
 	t_point next_hit;
 
 	if (!intersect_scene(objects, num_objects, &ray, &first_hit, &next_hit))
-		return bg_color;
+		return BG_COLOR;
 
 	hit = first_hit;
 

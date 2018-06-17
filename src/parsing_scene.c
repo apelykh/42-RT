@@ -6,7 +6,7 @@
 /*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/07 20:32:36 by efedoryc          #+#    #+#             */
-/*   Updated: 2018/06/16 21:26:27 by apelykh          ###   ########.fr       */
+/*   Updated: 2018/06/17 16:24:05 by apelykh          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,8 +54,8 @@ void		open_scene(char *scene_path, t_scene *scene)
 		perror("[-] Read Scene Error");
 		exit(EXIT_FAILURE);
 	}
-	scene_str = (char *)malloc(MAX_SOURCE_SIZE);
-	read(fd, scene_str, MAX_SOURCE_SIZE);
+	scene_str = (char *)malloc(MAX_SRC_SIZE);
+	read(fd, scene_str, MAX_SRC_SIZE);
 	close(fd);
 	parse_scene(scene_str, scene);
 }

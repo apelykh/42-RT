@@ -9,11 +9,11 @@ OBJ		= $(SRC:.c=.o)
 all: $(NAME)
 
 %.o:%.c
-	$(CC) -c $^ -o $@
+	@ $(CC) -c $^ -o $@
 
 $(NAME): $(OBJ)
-	ar rc $(NAME) $(OBJ)
-	ranlib $(NAME)
+	@ ar rc $(NAME) $(OBJ)
+	@ ranlib $(NAME)
 
 clean:
 	@ /bin/rm -f $(OBJ)

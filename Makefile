@@ -6,7 +6,7 @@
 #    By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/06/15 21:58:26 by apelykh           #+#    #+#              #
-#    Updated: 2018/06/16 21:44:25 by apelykh          ###   ########.fr        #
+#    Updated: 2018/06/17 16:21:28 by apelykh          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -48,7 +48,6 @@ SRC_FILES = main.c \
 			parsing_utils2.c \
 			bocal_components.c \
 			save_image.c \
-			debug_scene.c \
 
 SRC = $(addprefix $(SRC_DIR), $(SRC_FILES))
 OBJ = $(SRC:.c=.o)

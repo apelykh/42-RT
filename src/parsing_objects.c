@@ -6,7 +6,7 @@
 /*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/07 20:32:22 by efedoryc          #+#    #+#             */
-/*   Updated: 2018/06/16 13:44:05 by apelykh          ###   ########.fr       */
+/*   Updated: 2018/06/17 16:14:40 by apelykh          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ static int		count_inner_objects(cJSON *cj_objects, int count_objects)
 	{
 		cj_current_obj = cJSON_GetArrayItem(cj_objects, i);
 		type = cj_get_obj_type(cj_get_str(cj_current_obj, "type"));
-		if (is_complex_obj(type))
+		if (type >= UNION && type <= CLIPPING)
 		{
 			cj_inner_objects = cJSON_GetObjectItem(
 					cj_current_obj, "inner_objects");
@@ -110,8 +110,7 @@ void			parse_objects(cJSON *cj_root, t_scene *scene)
 	if (!(cj_objects = cJSON_GetObjectItem(cj_root, "objects")))
 		ft_error("[-] Parsing: No objects field in scene document", NULL);
 	count_parent_objects = cJSON_GetArraySize(cj_objects);
-	scene->num_objects = (cl_int)(6
-			+ count_parent_objects
+	scene->num_objects = (cl_int)(6 + count_parent_objects
 			+ count_inner_objects(cj_objects, count_parent_objects));
 	scene->objects = (t_object *)malloc(sizeof(t_object) * scene->num_objects);
 	bocal_init(scene);
@@ -121,7 +120,8 @@ void			parse_objects(cJSON *cj_root, t_scene *scene)
 	{
 		cj_obj_current = parse_object(&scene->objects[obj_id], obj_id,
 				cj_objects, cj_i);
-		if (is_complex_obj(scene->objects[obj_id].type))
+		if (scene->objects[obj_id].type >= UNION &&
+			scene->objects[obj_id].type <= CLIPPING)
 			parse_inner_objects(scene, &obj_id, cj_obj_current);
 		obj_id++;
 		cj_i++;

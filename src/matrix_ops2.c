@@ -6,15 +6,15 @@
 /*   By: apelykh <apelykh@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/16 20:01:46 by apelykh           #+#    #+#             */
-/*   Updated: 2018/06/16 20:03:05 by apelykh          ###   ########.fr       */
+/*   Updated: 2018/06/17 16:38:33 by apelykh          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "rt.h"
 
-mat4	mat_translate(cl_float3 v)
+t_mat4	mat_translate(cl_float3 v)
 {
-	mat4 r;
+	t_mat4 r;
 
 	r.s0 = 1.0f;
 	r.s1 = 0.0f;
@@ -35,9 +35,9 @@ mat4	mat_translate(cl_float3 v)
 	return (r);
 }
 
-mat4	mat_scale(cl_float3 s)
+t_mat4	mat_scale(cl_float3 s)
 {
-	mat4 r;
+	t_mat4 r;
 
 	r.s0 = s.x;
 	r.s1 = 0.0f;
@@ -58,9 +58,9 @@ mat4	mat_scale(cl_float3 s)
 	return (r);
 }
 
-mat4	mat_rotatex(cl_float angle)
+t_mat4	mat_rotatex(cl_float angle)
 {
-	mat4		r;
+	t_mat4		r;
 	cl_float	sint;
 	cl_float	cost;
 
@@ -85,9 +85,9 @@ mat4	mat_rotatex(cl_float angle)
 	return (r);
 }
 
-mat4	mat_rotatey(cl_float angle)
+t_mat4	mat_rotatey(cl_float angle)
 {
-	mat4		r;
+	t_mat4		r;
 	cl_float	sint;
 	cl_float	cost;
 
@@ -112,9 +112,9 @@ mat4	mat_rotatey(cl_float angle)
 	return (r);
 }
 
-mat4	mat_rotatez(cl_float angle)
+t_mat4	mat_rotatez(cl_float angle)
 {
-	mat4		r;
+	t_mat4		r;
 	cl_float	sint;
 	cl_float	cost;
 
