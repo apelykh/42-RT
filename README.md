@@ -1,5 +1,7 @@
 # 42-RT: Ray Tracing engine from scratch
 
+![RT screenshot](./pictures/1.png)
+
 ## 1. Overview
 The project implements a Ray Tracing engine from scratch in C and OpenCL for rendering volumetric figures.
 The engine supports the following features:
