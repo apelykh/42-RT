@@ -1,5 +1,8 @@
 # 42-RT: Ray Tracing engine from scratch
 
+![RT screenshot](./pictures/1.png)
+
+
 ## 1. Overview
 The project implements a Ray Tracing engine from scratch in C and OpenCL for rendering volumetric figures.
 The engine supports the following features:
@@ -8,10 +11,11 @@ The engine supports the following features:
 - **4 light source types**: `ambient`, `point`, `parallel`, `spot`;
 - Reflective and transparent materials;
 - Camera movement in 3 dimensions with variable FOV;
-
+<p>&nbsp;</p>
 
 ## 2. Installation
 Requires SDL2, OpenCL
+<p>&nbsp;</p>
 
 ## 3. Usage
 `./RT scene_file`
@@ -27,3 +31,9 @@ Pre-defined scenes are located in `./scenes`
 `up`, `down` - pitch angle change;
 
 `left`, `right` - yaw angle change;
+<p>&nbsp;</p>
+
+## 4. Screenshots
+![RT screenshot](./pictures/2.png)
+![RT screenshot](./pictures/3.png)
+![RT screenshot](./pictures/4.png)
