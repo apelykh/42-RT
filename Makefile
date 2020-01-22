@@ -10,30 +10,22 @@
 #                                                                              #
 # **************************************************************************** #
 
+NAME = RT
 FLAGS = -Wall -Wextra -Werror
 CC = gcc $(FLAGS)
-NAME = RT
-
 LIB_DIR = ./lib/
 LIB = ./lib/cJSON/cJSON.a
-
+INCLUDES = -I ./includes/ -I ./lib/cJSON
 
 OS = $(shell uname)
 ifeq ($(OS), Linux)
+	INCLUDES += -I /usr/include/SDL2
 	FRAMEWORKS = -lOpenCL -lSDL2
+else ifeq ($(OS), Darwin)
+	FRAMEWORKS = -framework OpenCL -F frameworks -rpath frameworks/ -framework SDL2
 else
-	FRAMEWORKS = -framework OpenCL -F frameworks -framework SDL2
+	@ echo "[-] Only Linux and MacOS are supported"
 endif
-
-INCLUDES = -I ./includes/
-INCLUDES +=	-I ./lib/cJSON
-INCLUDES += -I /usr/include/SDL2
-
-# FRAMEWORKS = -framework OpenCL
-# FRAMEWORKS += -F frameworks
-# FRAMEWORKS += -framework SDL2
-
-# FRAMEWORKS = -lOpenCL -lSDL2
 
 
 SRC_DIR = ./src/
@@ -73,7 +65,6 @@ all: $(NAME)
 
 $(NAME): $(OBJ)
 	@ make -C $(LIB_DIR)/cJSON
-# 	@ $(CC) $(OBJ) $(LIB) $(FRAMEWORKS) -rpath frameworks/ -lm -o $@
 	@ $(CC) $(OBJ) $(LIB) $(FRAMEWORKS) -lm -o $@
 	@ echo "[+] [$(NAME)] compiled"
 
